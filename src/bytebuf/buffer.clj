@@ -6,10 +6,10 @@
 
 
 (defprotocol IBuffer
-  (read-integer* [_] "Read an integer (32 bits) from buffer.")
-  (read-long* [_] "Read an long (64 bits) from buffer.")
-  (tell* [_] "Get the current position index of buffer.")
-  (seek* [_ val] "Set the current position index on buffer."))
+  (read-int [_ pos] "Read an integer (32 bits) from buffer.")
+  (write-int [_ pos value] "Write an integer to the buffer.")
+  (read-long [_ pos] "Read an long (64 bits) from buffer.")
+  (write-long [_ pos value] "Write an long to the buffer."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NIO ByteBuffer implementation
