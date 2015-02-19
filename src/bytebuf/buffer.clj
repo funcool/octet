@@ -12,19 +12,29 @@
   (write-long [_ pos value] "Write an long to the buffer."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; NIO ByteBuffer implementation
+;; NIO & Netty Buffer implementations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(extend-type ByteBuffer
-  IBuffer
-  (read-integer* [buff]
-    (.getInt buff))
-  (read-long* [buff]
-    (.getLong buff))
-  (tell* [buff]
-    (.position buff))
-  (seek* [buff val]
-    (.position buff val)))
+(extend-protocol IBuffer
+  ByteBuffer
+  (read-int [buff pos]
+    (.getInt buff pos))
+  (read-long [buff pos]
+    (.getLong buff pos))
+  (write-int [buff pos value]
+    (.putInt buff pos value))
+  (write-long [buff pos value]
+    (.putLong buff pos value))
+
+  ByteBuf
+  (read-int [buff pos]
+    (.getInt buff pos))
+  (read-long [buff pos]
+    (.getLong buff pos))
+  (write-int [buff pos value]
+    (.setInt buff pos value))
+  (write-long [buff pos value]
+    (.setLong buff pos value)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public Api
