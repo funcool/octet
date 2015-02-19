@@ -43,18 +43,22 @@
 (def ^{:private true}
   allocator (ByteBufAllocator/DEFAULT))
 
-(defn allocate
-  ([size] (allocate size {}))
-  ([size {:keys [type impl] :or {type :heap impl :nio}}]
-   (case impl
-     :nio (case type
-            :heap (ByteBuffer/allocate size)
-            :direct (ByteBuffer/allocateDirect size))
-     :netty (case type
-              :heap (.heapBuffer allocator size)
-              :direct (.directBuffer allocator size)))))
+(defmulti allocate
+  (fn [size & [{:keys [type impl] :or {type :heap impl :nio}}]]
+    [type impl]))
 
-(defn seek!
-  "Set the position index on the buffer."
-  [buff ^long pos]
-  (seek! buff pos))
+(defmethod allocate [:heap :nio]
+  [size & _]
+  (ByteBuffer/allocate size))
+
+(defmethod allocate [:direct :nio]
+  [size & _]
+  (ByteBuffer/allocateDirect size))
+
+(defmethod allocate [:heap :netty]
+  [size & _]
+  (.heapBuffer allocator size))
+
+(defmethod allocate [:direct :netty]
+  [size & _]
+  (.directBuffer allocator size))
