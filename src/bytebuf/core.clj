@@ -10,6 +10,7 @@
  [bytebuf.spec
   spec]
  [bytebuf.types
+  string
   int32
   int64]
  [bytebuf.buffer

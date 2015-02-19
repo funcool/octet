@@ -78,9 +78,7 @@
   (let [data (mapv vec (partition 2 params))
         dict (into {} data)
         types (map second data)]
-    (if (every? #(satisfies? types/IStaticType %) types)
-      (associative-static-spec data dict types)
-      (associative-dynamic-spec data dict types))))
+    (associative-static-spec data dict types)))
 
 (defn spec
   "Create a new spec instance."

@@ -18,7 +18,6 @@
   (:import java.nio.ByteBuffer
            io.netty.buffer.ByteBuf))
 
-
 (deftest allocate
   (testing "Allocate heap nio buffer"
     (let [buffer (buf/allocate 16)]
@@ -90,4 +89,17 @@
       (let [[readed data] (buf/read* buffer spec {:offset 8})]
         (is (= readed 4))
         (is (= data {:field1 1000})))))
+)
+
+
+(deftest experiments
+  (testing "Experiment with string."
+    (let [spec (buf/spec :f1 (buf/string 10))
+          buffer (buf/allocate 20)]
+      (buf/write! buffer {:f1 "kaka"} spec)
+      (let [[readed data] (buf/read* buffer spec)]
+        (println 111 readed)
+        (println 111 data))))
+
+
 )

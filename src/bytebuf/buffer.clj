@@ -9,7 +9,10 @@
   (read-int [_ pos] "Read an integer (32 bits) from buffer.")
   (write-int [_ pos value] "Write an integer to the buffer.")
   (read-long [_ pos] "Read an long (64 bits) from buffer.")
-  (write-long [_ pos value] "Write an long to the buffer."))
+  (write-long [_ pos value] "Write an long to the buffer.")
+  (read-bytes [_ pos size] "Read a byte array.")
+  (write-bytes [_ pos size data] "Write byte array."))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NIO & Netty Buffer implementations
@@ -25,6 +28,14 @@
     (.putInt buff pos value))
   (write-long [buff pos value]
     (.putLong buff pos value))
+  (read-bytes [buff pos size]
+    (let [tmpbuf (byte-array size)
+          oldpos (.position buff)]
+      (.get buff tmpbuf)
+      (.position buff oldpos)
+      tmpbuf))
+  (write-bytes [buff pos size data]
+
 
   ByteBuf
   (read-int [buff pos]
