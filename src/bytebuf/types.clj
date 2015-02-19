@@ -13,10 +13,10 @@
   "Static spec type mark.")
 
 (defprotocol IReadableType
-  (read [_ buff] "Read self corresponding data from the specified buffer."))
+  (read [_ buff pos] "Read self corresponding data from the specified buffer."))
 
 (defprotocol IWritableType
-  (write [_ buff value] "Write value to the specified buffer."))
+  (write [_ buff pos value] "Write value to the specified buffer and return the written bytes."))
 
 (defprotocol ITypeSize
   (size [_] [_ data] "Read the size of the type. In static type data is optional."))
@@ -32,13 +32,15 @@
    (reify
      IStaticType
      IReadableType
-     (read [_ buff]
-       (buffer/read-integer buff))
+     (read [_ buff pos]
+       [(buffer/read-int buff pos)
+        (Integer/BYTES)])
 
      IWritableType
-     (write [_ buff value]
+     (write [_ buff pos value]
        (let [value (or value default)]
-         (.putInt buff value)))
+         (buffer/write-int buff pos value)
+         (Integer/BYTES)))
 
     ITypeSize
     (size [_]
@@ -53,13 +55,15 @@
    (reify
      IStaticType
      IReadableType
-     (read [_ buff]
-       (buffer/read-long buff))
+     (read [_ buff pos]
+       [(buffer/read-long buff pos)
+        (Long/BYTES)])
 
      IWritableType
-     (write [_ buff value]
+     (write [_ buff pos value]
        (let [value (or value default)]
-         (.putLong buff value)))
+         (buffer/write-long buff pos value)
+         (Long/BYTES)))
 
      ITypeSize
      (size [_]
