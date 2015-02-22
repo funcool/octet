@@ -92,10 +92,10 @@
     (.setByte buff pos value))
   (read-bytes [buff pos size]
     (let [tmpbuf (byte-array size)]
-      (.getBytes buff tmpbuf)
+      (.getBytes buff pos tmpbuf)
       tmpbuf))
   (write-bytes [buff pos size data]
-    (.setBytes buff pos 0 size)))
+    (.setBytes buff pos data 0 size)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public Api
