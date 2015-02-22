@@ -1,5 +1,5 @@
 (ns bytebuf.spec
-  (:refer-clojure :exclude [type read])
+  (:refer-clojure :exclude [type read float double long short byte])
   (:require [bytebuf.proto :as proto :refer [IStaticSize]]
             [bytebuf.buffer :as buffer]
             [bytebuf.bytes :as bytes]))
