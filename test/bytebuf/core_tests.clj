@@ -133,7 +133,7 @@
   )
 
 (deftest spec-data-types
-  (testing "Read/Write static string"
+  (testing "read/write static string"
     (let [spec (buf/spec (buf/string 5))
           buffer (buf/allocate 20)]
       (buf/write! buffer ["1234567890"] spec)
