@@ -329,3 +329,22 @@
         (buffer/write-int buff pos length)
         (buffer/write-bytes buff (+ pos 4) length input)
         (+ length 4)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Types Alias
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def ^{:doc "Alias for real32"}
+  float real32)
+
+(def ^{:doc "Alias for real64"}
+  double real64)
+
+(def ^{:doc "Alias for int32"}
+  integer int32)
+
+(def ^{:doc "Alias for int64"}
+  long int64)
+
+(def ^{:doc "Alias for int16"}
+  short int16)
