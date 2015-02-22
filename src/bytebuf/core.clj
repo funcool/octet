@@ -1,15 +1,14 @@
 (ns bytebuf.core
   (:refer-clojure :exclude [read])
-  (:require [bytebuf.types :as types]
-            [bytebuf.spec :as spec]
+  (:require [bytebuf.spec :as spec]
             [bytebuf.buffer :as buffer]
             [bytebuf.proto :as proto]
             [potemkin.namespaces :refer [import-vars]]))
 
 (import-vars
  [bytebuf.spec
-  spec]
- [bytebuf.types
+  spec
+  string
   int32
   int64]
  [bytebuf.buffer

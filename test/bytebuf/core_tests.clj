@@ -18,7 +18,6 @@
   (:import java.nio.ByteBuffer
            io.netty.buffer.ByteBuf))
 
-
 (deftest allocate
   (testing "Allocate heap nio buffer"
     (let [buffer (buf/allocate 16)]
