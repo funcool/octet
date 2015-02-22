@@ -83,25 +83,25 @@
     (size [_]
       (reduce #(+ %1 (proto/size %2)) 0 types))
 
-      IReadableSpec
-      (read [_ buff pos]
-        (loop [index pos result [] types types]
-          (if-let [type (first types)]
-            (let [[readeddata readedbytes] (read type buff index)]
-              (recur (+ index readedbytes)
-                     (conj result readeddata)
-                     (rest types)))
-            [(- index pos) result])))
+    IReadableSpec
+    (read [_ buff pos]
+      (loop [index pos result [] types types]
+        (if-let [type (first types)]
+          (let [[readeddata readedbytes] (read type buff index)]
+            (recur (+ index readedbytes)
+                   (conj result readeddata)
+                   (rest types)))
+          [(- index pos) result])))
 
-      IWritableSpec
-      (write [_ buff pos data']
-        (let [indexedtypes (map-indexed vector types)
-              written (reduce (fn [pos [index type]]
-                                (let [value (nth data' index nil)
-                                      written (write type buff pos value)]
-                                  (+ pos written)))
-                              pos indexedtypes)]
-          (- written pos)))))
+    IWritableSpec
+    (write [_ buff pos data']
+      (let [indexedtypes (map-indexed vector types)
+            written (reduce (fn [pos [index type]]
+                              (let [value (nth data' index nil)
+                                    written (write type buff pos value)]
+                                (+ pos written)))
+                            pos indexedtypes)]
+        (- written pos)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Types implementation
@@ -126,9 +126,9 @@
          (buffer/write-int buff pos value)
          (Integer/BYTES)))
 
-    IStaticSize
-    (size [_]
-      (Integer/BYTES)))))
+     IStaticSize
+     (size [_]
+       (Integer/BYTES)))))
 
 (defn int64
   "Create a int64 indexed data type."
