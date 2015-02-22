@@ -48,7 +48,7 @@
       (is (= (buf/size spec) 12))))
 )
 
-(deftest associative-static-specs
+(deftest associative-specs
   (testing "write data"
     (let [spec (buf/spec :field1 (buf/int32)
                          :field2 (buf/int64))
@@ -89,4 +89,59 @@
       (let [[readed data] (buf/read* buffer spec {:offset 8})]
         (is (= readed 4))
         (is (= data {:field1 1000})))))
+  )
+
+(deftest indexed-specs
+  (testing "write data"
+    (let [spec (buf/spec (buf/int32) (buf/int64))
+          buffer (buf/allocate 12)
+          data [1 4]]
+      (is (= (buf/write! buffer data spec) 12))
+      (is (= (.getInt buffer 0) 1))
+      (is (= (.getLong buffer 4) 4))))
+
+  (testing "write data with offset"
+    (let [spec (buf/spec (buf/int32))
+          buffer (buf/allocate 12)
+          data [500]]
+      (is (= (buf/write! buffer data spec {:offset 3}) 4))
+      (is (= (.getInt buffer 3) 500))))
+
+  (testing "write data to wrong buffer (less space)"
+    (let [spec (buf/spec (buf/int32))
+          buffer (buf/allocate 2)
+          data [1]]
+      (is (thrown? java.lang.IndexOutOfBoundsException
+                   (buf/write! buffer data spec) 12))))
+
+  (testing "read data"
+    (let [spec (buf/spec (buf/int32) (buf/int64))
+          buffer (buf/allocate 12)]
+      (.putInt buffer 0 10)
+      (.putLong buffer 4 100)
+      (let [[readed data] (buf/read* buffer spec)]
+        (is (= readed 12))
+        (is (= data [10 100])))))
+
+  (testing "read data with offset"
+    (let [spec (buf/spec (buf/int32))
+          buffer (buf/allocate 12)]
+      (.putInt buffer 8 1000)
+      (let [[readed data] (buf/read* buffer spec {:offset 8})]
+        (is (= readed 4))
+        (is (= data [1000])))))
+  )
+
+(deftest spec-data-types
+  (testing "Read/Write static string"
+    (let [spec (buf/spec (buf/string 5))
+          buffer (buf/allocate 20)]
+      (buf/write! buffer ["1234567890"] spec)
+      (let [[readed data] (buf/read* buffer spec)]
+        (is (= readed 5))
+        (is (= data ["12345"])))))
 )
+
+;; (deftest experiments
+
+;; )
