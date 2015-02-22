@@ -1,15 +1,15 @@
 (ns bytebuf.spec
   (:refer-clojure :exclude [type read])
-  (:require [bytebuf.types :as types]
-            [bytebuf.proto :as proto :refer [IStaticSize]]
-            [bytebuf.buffer :as buffer]))
+  (:require [bytebuf.proto :as proto :refer [IStaticSize]]
+            [bytebuf.buffer :as buffer])
+  (:import java.util.Arrays))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Abstraction definition
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (defprotocol ISpec
-;;   (type [_] "Get the type of spec."))
+(defprotocol ISpecType
+  (tag [_] "Get the type tag."))
 
 (defprotocol IReadableSpec
   (read [_ buff start] "Read all data from buffer."))
@@ -17,72 +17,164 @@
 (defprotocol IWritableSpec
   (write [_ buff start data] "Read all data from buffer."))
 
-;; (defprotocol IAssocReadableSpec
-;;   (read-field [_ buff field] "Read one concrete field from buffer."))
-
-;; (defprotocol IAssocWritableSpec
-;;   (write-field [_ buff field data] "Read one concrete field from buffer."))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Types implementation
+;; Spec Constructors
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn associative-static-spec
-  [data dict types]
+(defmulti spec
+  (fn [& params]
+    (let [numparams (count params)]
+      (cond
+        (and (even? numparams)
+             (keyword? (first params))
+             (satisfies? ISpecType (second params)))
+        :associative
+
+        (every? #(satisfies? ISpecType %) params)
+        :indexed))))
+
+(defmethod spec :associative
+  [& params]
+  (let [data (mapv vec (partition 2 params))
+        dict (into {} data)
+        types (map second data)]
+    (reify
+      clojure.lang.Counted
+      (count [_]
+        (count types))
+
+      ISpecType
+      (tag [_] :static)
+
+      IStaticSize
+      (size [_]
+        (reduce #(+ %1 (proto/size %2)) 0 types))
+
+      IReadableSpec
+      (read [_ buff pos]
+        (loop [index pos result {} pairs data]
+          (if-let [[fieldname type] (first pairs)]
+            (let [[readeddata readedbytes] (read type buff index)]
+              (recur (+ index readedbytes)
+                     (assoc result fieldname readeddata)
+                     (rest pairs)))
+            [(- index pos) result])))
+
+      IWritableSpec
+      (write [_ buff pos data']
+        (let [written (reduce (fn [index [fieldname type]]
+                                (let [value (get data' fieldname nil)
+                                      written (write type buff index value)]
+                                  (+ index written)))
+                              pos data)]
+          (- written pos))))))
+
+(defmethod spec :indexed
+  [& types]
   (reify
     clojure.lang.Counted
     (count [_]
       (count types))
 
+    ISpecType
+    (tag [_] :static)
+
     IStaticSize
     (size [_]
-      (reduce #(+ %1 (types/size %2)) 0 types))
+      (reduce #(+ %1 (proto/size %2)) 0 types))
 
-    IReadableSpec
-    (read [_ buff offset]
-      (loop [index offset result {} pairs data]
-        (if-let [[fieldname type] (first pairs)]
-          (let [[readeddata readedbytes] (types/read type buff index)]
-            (recur (+ index readedbytes)
-                   (assoc result fieldname readeddata)
-                   (rest pairs)))
-          [(- index offset) result])))
+      IReadableSpec
+      (read [_ buff pos]
+        (loop [index pos result [] types types]
+          (if-let [type (first types)]
+            (let [[readeddata readedbytes] (read type buff index)]
+              (recur (+ index readedbytes)
+                     (conj result readeddata)
+                     (rest types)))
+            [(- index pos) result])))
 
-    IWritableSpec
-    (write [_ buff offset data']
-      (let [written (reduce (fn [index [fieldname type]]
-                              (let [value (get data' fieldname nil)
-                                    written (types/write type buff index value)]
-                                (+ index written)))
-                            offset data)]
-        (- written offset)))))
+      IWritableSpec
+      (write [_ buff pos data']
+        (let [indexedtypes (map-indexed vector types)
+              written (reduce (fn [pos [index type]]
+                                (let [value (nth data' index nil)
+                                      written (write type buff pos value)]
+                                  (+ pos written)))
+                              pos indexedtypes)]
+          (- written pos)))))
 
-    ;; IAssocReadableSpec
-    ;; (read-field [_ buff field]
-    ;;   (let [ftype (get dict field)
-    ;;         startpos (reduce (fn [acc [key val]]
-    ;;                            (if (= key field)
-    ;;                              (reduced acc)
-    ;;                              (+ acc (types/size val))))
-    ;;                          0 data)]
-    ;;     ;; Set the buffer position
-    ;;     (buffer/seek buff startpos)
-    ;;     (types/read ftype buff)))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Types implementation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn associative-dynamic-spec
-  [])
+(defn int32
+  "Create a int32 indexed data type."
+  ([] (int32 0))
+  ([default]
+   (reify
+     ISpecType
+     (tag [_] :static)
 
-(defn associative-spec
-  [params]
-  {:pre [(even? (count params))]}
-  (let [data (mapv vec (partition 2 params))
-        dict (into {} data)
-        types (map second data)]
-    (if (every? #(satisfies? types/IStaticType %) types)
-      (associative-static-spec data dict types)
-      (associative-dynamic-spec data dict types))))
+     IReadableSpec
+     (read [_ buff pos]
+       [(buffer/read-int buff pos)
+        (Integer/BYTES)])
 
-(defn spec
-  "Create a new spec instance."
-  [& params]
-  (associative-spec params))
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [value (or value default)]
+         (buffer/write-int buff pos value)
+         (Integer/BYTES)))
+
+    IStaticSize
+    (size [_]
+      (Integer/BYTES)))))
+
+(defn int64
+  "Create a int64 indexed data type."
+  ([] (int64 0))
+  ([default]
+   (reify
+     ISpecType
+     (tag [_] :static)
+
+     IReadableSpec
+     (read [_ buff pos]
+       [(buffer/read-long buff pos)
+        (Long/BYTES)])
+
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [value (or value default)]
+         (buffer/write-long buff pos value)
+         (Long/BYTES)))
+
+     IStaticSize
+     (size [_]
+       (Long/BYTES)))))
+
+(defn string
+  ([^long size]
+   (reify
+     ISpecType
+     (tag [_] :static)
+
+     IReadableSpec
+     (read [_ buff pos]
+       (let [data (buffer/read-bytes buff pos size)]
+         [(String. data "UTF-8") size]))
+
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [input (.getBytes value "UTF-8")
+             length (count input)
+             tmpbuf (byte-array size)]
+         (System/arraycopy input 0 tmpbuf 0 size)
+         (when (< length size)
+           (Arrays/fill tmpbuf length size (byte 0)))
+
+         (buffer/write-bytes buff pos size tmpbuf)
+         size))
+
+     IStaticSize
+     (size [_] size))))
