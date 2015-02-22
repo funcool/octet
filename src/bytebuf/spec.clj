@@ -122,16 +122,39 @@
      (read [_ buff pos]
        (let [readed (buffer/read-byte buff pos)]
          [1 (condp = readed
-              (byte 0) false
-              (byte 1) true
+              (clojure.core/byte 0) false
+              (clojure.core/byte 1) true
               nil)]))
 
      IWritableSpec
      (write [_ buff pos value]
        (let [value (condp = value
-                     true (byte 1)
-                     false (byte 0)
-                     (byte -1))]
+                     true (clojure.core/byte 1)
+                     false (clojure.core/byte 0)
+                     (clojure.core/byte -1))]
+         (buffer/write-byte buff pos value)
+         1))
+
+     IStaticSize
+     (size [_] 1))))
+
+
+(defn byte
+  "Create a boolean data type."
+  ([] (byte (clojure.core/byte 0)))
+  ([default]
+   (reify
+     ISpecType
+     (tag [_] :static)
+
+     IReadableSpec
+     (read [_ buff pos]
+       (let [readed (buffer/read-byte buff pos)]
+         [1 readed]))
+
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [value (clojure.core/byte (or value default))]
          (buffer/write-byte buff pos value)
          1))
 
@@ -206,6 +229,52 @@
      IStaticSize
      (size [_]
        (Long/BYTES)))))
+
+(defn real32
+  "Create a real of 32bits type spec."
+  ([] (real32 0))
+  ([default]
+   (reify
+     ISpecType
+     (tag [_] :static)
+
+     IReadableSpec
+     (read [_ buff pos]
+       [(Float/BYTES)
+        (buffer/read-float buff pos)])
+
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [value (or value default)]
+         (buffer/write-float buff pos value)
+         (Float/BYTES)))
+
+     IStaticSize
+     (size [_]
+       (Float/BYTES)))))
+
+(defn real64
+  "Create a real of 32bits type spec."
+  ([] (real64 0))
+  ([default]
+   (reify
+     ISpecType
+     (tag [_] :static)
+
+     IReadableSpec
+     (read [_ buff pos]
+       [(Double/BYTES)
+        (buffer/read-double buff pos)])
+
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [value (or value default)]
+         (buffer/write-double buff pos value)
+         (Double/BYTES)))
+
+     IStaticSize
+     (size [_]
+       (Double/BYTES)))))
 
 (defn string
   "Fixed size string spec constructor."
