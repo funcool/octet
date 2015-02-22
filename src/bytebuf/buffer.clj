@@ -36,7 +36,8 @@
       tmpbuf))
   (write-bytes [buff pos size data]
     (let [oldpos (.position buff)]
-      (.put buff data, 0, size)
+      (.position buff pos)
+      (.put buff data 0 size)
       (.position buff oldpos)))
 
   ByteBuf
