@@ -10,6 +10,7 @@
   compose-type
   spec
   string
+  string*
   int32
   int64]
  [bytebuf.buffer

@@ -187,3 +187,25 @@
 
     IStaticSize
     (size [_] size)))
+
+(defn string*
+  "Arbitrary size string spec constructor."
+  []
+  (reify
+    ISpecType
+    (tag [_] :dynamic)
+
+    IReadableSpec
+    (read [_ buff pos]
+      (let [datasize (buffer/read-int buff pos)
+            data (buffer/read-bytes buff (+ pos 4) datasize)
+            data (String. data 0 datasize "UTF-8")]
+        [(+ datasize 4) data]))
+
+    IWritableSpec
+    (write [_ buff pos value]
+      (let [input (.getBytes value "UTF-8")
+            length (count input)]
+        (buffer/write-int buff pos length)
+        (buffer/write-bytes buff (+ pos 4) length input)
+        (+ length 4)))))

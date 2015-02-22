@@ -142,8 +142,23 @@
         (is (= data ["12345"])))))
   )
 
-;; (deftest experiments
+(deftest spec-data-with-dynamic-types
+  (testing "read/write dynamic string"
+    (let [spec (buf/spec (buf/string*))
+          buffer (buf/allocate 20)]
+      (buf/write! buffer ["1234567890"] spec)
+      (let [[readed data] (buf/read* buffer spec)]
+        (is (= readed 14))
+        (is (= data ["1234567890"])))))
 
+  (testing "read/write dynamic string combined with other types"
+    (let [spec (buf/spec (buf/string*) (buf/int64))
+          buffer (buf/allocate 40)]
+      (buf/write! buffer ["1234567890" 1000] spec)
+      (let [[readed data] (buf/read* buffer spec)]
+        (is (= readed 22))
+        (is (= data ["1234567890" 1000])))))
+  )
 
 (deftest spec-composition
   (testing "read/write a indexed spec composed with two indexed specs"
