@@ -92,14 +92,12 @@
 )
 
 
-(deftest experiments
-  (testing "Experiment with string."
-    (let [spec (buf/spec :f1 (buf/string 10))
-          buffer (buf/allocate 20)]
-      (buf/write! buffer {:f1 "kaka"} spec)
-      (let [[readed data] (buf/read* buffer spec)]
-        (println 111 readed)
-        (println 111 data))))
-
-
-)
+;; (deftest experiments
+;;   (testing "Experiment with string."
+;;     (let [spec (buf/spec :f1 (buf/string 10))
+;;           buffer (buf/allocate 20)]
+;;       (buf/write! buffer {:f1 "kaka"} spec)
+;;       (let [[readed data] (buf/read* buffer spec)]
+;;         (println 111 readed)
+;;         (println 111 data))))
+;; )
