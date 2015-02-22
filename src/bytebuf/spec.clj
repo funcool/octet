@@ -164,18 +164,20 @@
 
      IReadableSpec
      (read [_ buff pos]
-       (let [data (buffer/read-bytes buff pos size)]
-         [(String. data "UTF-8") size]))
+       (let [data (buffer/read-bytes buff pos size)
+             data (String. data "UTF-8")]
+         [size data]))
 
      IWritableSpec
      (write [_ buff pos value]
        (let [input (.getBytes value "UTF-8")
              length (count input)
              tmpbuf (byte-array size)]
-         (System/arraycopy input 0 tmpbuf 0 size)
+         (if (< length size)
+           (System/arraycopy input 0 tmpbuf 0 length)
+           (System/arraycopy input 0 tmpbuf 0 size))
          (when (< length size)
            (Arrays/fill tmpbuf length size (byte 0)))
-
          (buffer/write-bytes buff pos size tmpbuf)
          size))
 
