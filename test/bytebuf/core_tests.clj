@@ -140,6 +140,24 @@
       (let [[readed data] (buf/read* buffer spec)]
         (is (= readed 5))
         (is (= data ["12345"])))))
+
+  (testing "read/write float and double"
+    (let [spec (buf/spec (buf/float) (buf/double))
+          buffer (buf/allocate (buf/size spec))
+          data [(float 1.2) (double 3.55)]]
+      (buf/write! buffer data spec)
+      (let [[readed data'] (buf/read* buffer spec)]
+        (is (= readed (buf/size spec)))
+        (is (= data data')))))
+
+  (testing "read/write boolean and byte"
+    (let [spec (buf/spec (buf/bool) (buf/byte))
+          buffer (buf/allocate (buf/size spec))
+          data [true (byte 22)]]
+      (buf/write! buffer data spec)
+      (let [[readed data'] (buf/read* buffer spec)]
+        (is (= readed (buf/size spec)))
+        (is (= data data')))))
   )
 
 (deftest spec-data-with-dynamic-types
