@@ -22,6 +22,32 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti spec
+  "Spec instance polymorphic constructor.
+
+  Spec is a some kind of composition of arbitrary
+  number of types in associative or indexed data
+  structure.
+
+  Little example on how to create associative
+  composition:
+
+    (spec :field1 (long)
+          :field2 (string 20))
+
+  An other example on how to create indexed
+  composition that represents the same bytes
+  representation that previous one:
+
+    (spec (long) (string 20))
+
+  The main difference between the two reprensentation
+  is that if you read a buffer using an associative
+  spec, the result will be clojure hash-map, and if
+  indexed spec is used, the result will be clojure
+  vector containing the values.
+
+  The same rules applies for writing data into a
+  buffer."
   (fn [& params]
     (let [numparams (count params)]
       (cond
