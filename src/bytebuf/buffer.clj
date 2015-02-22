@@ -12,6 +12,10 @@
   (write-int [_ pos value] "Write an integer to the buffer.")
   (read-long [_ pos] "Read an long (64 bits) from buffer.")
   (write-long [_ pos value] "Write a long to the buffer.")
+  (read-float [_ pos] "Read an float (32 bits) from buffer.")
+  (write-float [_ pos value] "Write a float to the buffer.")
+  (read-double [_ pos] "Read an double (64 bits) from buffer.")
+  (write-double [_ pos value] "Write a double to the buffer.")
   (read-byte [_ pos] "Read one byte from buffer.")
   (write-byte [_ pos value] "Write one byte to the buffer.")
   (read-bytes [_ pos size] "Read a byte array.")
@@ -36,6 +40,14 @@
     (.getLong buff pos))
   (write-long [buff pos value]
     (.putLong buff pos value))
+  (read-float [buff pos]
+    (.getFloat buff pos))
+  (write-float [buff pos value]
+    (.putFloat buff pos value))
+  (read-double [buff pos]
+    (.getDouble buff pos))
+  (write-double [buff pos value]
+    (.putDouble buff pos value))
   (read-byte [buff pos]
     (.get buff pos))
   (write-byte [buff pos value]
@@ -66,6 +78,14 @@
     (.getLong buff pos))
   (write-long [buff pos value]
     (.setLong buff pos value))
+  (read-float [buff pos]
+    (.getFloat buff pos))
+  (write-float [buff pos value]
+    (.setFloat buff pos value))
+  (read-double [buff pos]
+    (.getDouble buff pos))
+  (write-double [buff pos value]
+    (.setDouble buff pos value))
   (read-byte [buff pos]
     (.getByte buff pos))
   (write-byte [buff pos value]
