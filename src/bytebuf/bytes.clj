@@ -17,11 +17,11 @@
   "Given a byte array, returns a number of bytes
   allocated with zero padding (zero byte)."
   [^bytes input]
-  (let [mark (byte 0)
-        pos (reduce (fn [previndex index]
-                      (let [value (aget input index)]
-                        (if (= value mark)
-                          index
-                          (reduced previndex))))
-                    (reverse (range (count input))))]
-    (- (count input) pos)))
+  (let [mark (byte 0)]
+    (reduce (fn [sum index]
+              (let [value (aget input index)]
+                (if (= value mark)
+                  (inc sum)
+                  (reduced sum))))
+            0
+            (reverse (range (count input))))))
