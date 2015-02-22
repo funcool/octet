@@ -7,6 +7,7 @@
 
 (import-vars
  [bytebuf.spec
+  compose-type
   spec
   string
   int32
