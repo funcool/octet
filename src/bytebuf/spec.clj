@@ -110,8 +110,59 @@
 ;; Types implementation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn bool
+  "Create a boolean data type."
+  ([] (bool nil))
+  ([default]
+   (reify
+     ISpecType
+     (tag [_] :static)
+
+     IReadableSpec
+     (read [_ buff pos]
+       (let [readed (buffer/read-byte buff pos)]
+         [1 (condp = readed
+              (byte 0) false
+              (byte 1) true
+              nil)]))
+
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [value (condp = value
+                     true (byte 1)
+                     false (byte 0)
+                     (byte -1))]
+         (buffer/write-byte buff pos value)
+         1))
+
+     IStaticSize
+     (size [_] 1))))
+
+(defn int16
+  "Create a int16 data type."
+  ([] (int16 0))
+  ([default]
+   (reify
+     ISpecType
+     (tag [_] :static)
+
+     IReadableSpec
+     (read [_ buff pos]
+       [(Short/BYTES)
+        (buffer/read-short buff pos)])
+
+     IWritableSpec
+     (write [_ buff pos value]
+       (let [value (or value default)]
+         (buffer/write-short buff pos value)
+         (Short/BYTES)))
+
+     IStaticSize
+     (size [_]
+       (Short/BYTES)))))
+
 (defn int32
-  "Create a int32 indexed data type."
+  "Create a int32 data type."
   ([] (int32 0))
   ([default]
    (reify
@@ -134,7 +185,7 @@
        (Integer/BYTES)))))
 
 (defn int64
-  "Create a int64 indexed data type."
+  "Create a int64 data type."
   ([] (int64 0))
   ([default]
    (reify
