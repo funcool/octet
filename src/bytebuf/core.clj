@@ -28,6 +28,8 @@
   size])
 
 (defn write!
+  "Write data into buffer following the specified
+  spec instance."
   ([buff data spec]
    (write! buff data spec {}))
   ([buff data spec {:keys [offset] :or {offset 0}}]
@@ -35,6 +37,10 @@
      (spec/write spec buff offset data))))
 
 (defn read*
+  "Read data from buffer following the specified spec
+  instance. This method returns a vector of readed data
+  and the data itself.
+  If you need only data, use `read` function."
   ([buff spec]
    (read* buff spec {}))
   ([buff spec {:keys [offset] :or {offset 0}}]
@@ -42,5 +48,8 @@
      (spec/read spec buff offset))))
 
 (defn read
+  "Read data from buffer following the specified
+  spec instance. This function is a friend of `read*`
+  and it returns only the readed data."
   [& args]
   (second (apply read* args)))
