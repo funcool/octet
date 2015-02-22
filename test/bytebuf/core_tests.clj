@@ -133,31 +133,26 @@
   )
 
 (deftest spec-data-types
-  (testing "read/write static string"
-    (let [spec (buf/spec (buf/string 5))
-          buffer (buf/allocate 20)]
-      (buf/write! buffer ["1234567890"] spec)
-      (let [[readed data] (buf/read* buffer spec)]
-        (is (= readed 5))
-        (is (= data ["12345"])))))
-
-  (testing "read/write float and double"
-    (let [spec (buf/spec (buf/float) (buf/double))
-          buffer (buf/allocate (buf/size spec))
-          data [(float 1.2) (double 3.55)]]
-      (buf/write! buffer data spec)
-      (let [[readed data'] (buf/read* buffer spec)]
-        (is (= readed (buf/size spec)))
-        (is (= data data')))))
-
-  (testing "read/write boolean and byte"
-    (let [spec (buf/spec (buf/bool) (buf/byte))
-          buffer (buf/allocate (buf/size spec))
-          data [true (byte 22)]]
-      (buf/write! buffer data spec)
-      (let [[readed data'] (buf/read* buffer spec)]
-        (is (= readed (buf/size spec)))
-        (is (= data data')))))
+  (let [data [(buf/string 5) "12345"
+              (buf/short)    100
+              (buf/long)     1002
+              (buf/integer)  1001
+              (buf/bool)     false
+              (buf/double)   (double 4.3)
+              (buf/float)    (float 3.2)
+              (buf/byte)     (byte 32)]]
+    (doseq [[spec data] (partition 2 data)]
+      (let [buffers [(buf/allocate (buf/size spec) {:type :heap :impl :nio})
+                     (buf/allocate (buf/size spec) {:type :direct :impl :nio})
+                     (buf/allocate (buf/size spec) {:type :heap :impl :netty})
+                     (buf/allocate (buf/size spec) {:type :direct :impl :netty})]]
+        (doseq [buffer buffers]
+          ;; (println buffer spec)
+          (let [written (buf/write! buffer data spec)]
+            (is (= written (buf/size spec)))
+            (let [[readed data'] (buf/read* buffer spec)]
+              (is (= readed (buf/size spec)))
+              (is (= data data'))))))))
   )
 
 (deftest spec-data-with-dynamic-types
