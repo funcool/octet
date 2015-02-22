@@ -6,10 +6,14 @@
 
 
 (defprotocol IBuffer
+  (read-short [_ pos] "Read short integer (16 bits) from buffer.")
+  (write-short [_ pos value] "Write a short integer to the buffer.")
   (read-int [_ pos] "Read an integer (32 bits) from buffer.")
   (write-int [_ pos value] "Write an integer to the buffer.")
   (read-long [_ pos] "Read an long (64 bits) from buffer.")
-  (write-long [_ pos value] "Write an long to the buffer.")
+  (write-long [_ pos value] "Write a long to the buffer.")
+  (read-byte [_ pos] "Read one byte from buffer.")
+  (write-byte [_ pos value] "Write one byte to the buffer.")
   (read-bytes [_ pos size] "Read a byte array.")
   (write-bytes [_ pos size data] "Write byte array."))
 
@@ -20,14 +24,22 @@
 
 (extend-protocol IBuffer
   ByteBuffer
+  (read-short [buff pos]
+    (.getShort buff pos))
+  (write-short [buff pos value]
+    (.putShort buff pos value))
   (read-int [buff pos]
     (.getInt buff pos))
-  (read-long [buff pos]
-    (.getLong buff pos))
   (write-int [buff pos value]
     (.putInt buff pos value))
+  (read-long [buff pos]
+    (.getLong buff pos))
   (write-long [buff pos value]
     (.putLong buff pos value))
+  (read-byte [buff pos]
+    (.get buff pos))
+  (write-byte [buff pos value]
+    (.put buff pos value))
   (read-bytes [buff pos size]
     (let [tmpbuf (byte-array size)
           oldpos (.position buff)]
@@ -42,14 +54,22 @@
       (.position buff oldpos)))
 
   ByteBuf
+  (read-short [buff pos]
+    (.getShort buff pos))
+  (write-short [buff pos value]
+    (.setShort buff pos value))
   (read-int [buff pos]
     (.getInt buff pos))
-  (read-long [buff pos]
-    (.getLong buff pos))
   (write-int [buff pos value]
     (.setInt buff pos value))
+  (read-long [buff pos]
+    (.getLong buff pos))
   (write-long [buff pos value]
     (.setLong buff pos value))
+  (read-byte [buff pos]
+    (.getByte buff pos))
+  (write-byte [buff pos value]
+    (.setByte buff pos value))
   (read-bytes [buff pos size]
     (let [tmpbuf (byte-array size)]
       (.getBytes buff tmpbuf)
