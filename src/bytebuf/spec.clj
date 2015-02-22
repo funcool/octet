@@ -8,13 +8,8 @@
 ;; Abstraction definition
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defprotocol ISpecType
-  (tag [_] "Get the type tag."))
-
-(defprotocol IReadableSpec
-  (read [_ buff start] "Read all data from buffer."))
-
-(defprotocol IWritableSpec
+(defprotocol ISpec
+  (read [_ buff start] "Read all data from buffer.")
   (write [_ buff start data] "Read all data from buffer."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -53,10 +48,10 @@
       (cond
         (and (even? numparams)
              (keyword? (first params))
-             (satisfies? ISpecType (second params)))
+             (satisfies? ISpec (second params)))
         :associative
 
-        (every? #(satisfies? ISpecType %) params)
+        (every? #(satisfies? ISpec %) params)
         :indexed))))
 
 (defmethod spec :associative
@@ -69,14 +64,11 @@
       (count [_]
         (count types))
 
-      ISpecType
-      (tag [_] :static)
-
       IStaticSize
       (size [_]
         (reduce #(+ %1 (proto/size %2)) 0 types))
 
-      IReadableSpec
+      ISpec
       (read [_ buff pos]
         (loop [index pos result {} pairs data]
           (if-let [[fieldname type] (first pairs)]
@@ -86,7 +78,6 @@
                      (rest pairs)))
             [(- index pos) result])))
 
-      IWritableSpec
       (write [_ buff pos data']
         (let [written (reduce (fn [index [fieldname type]]
                                 (let [value (get data' fieldname nil)
@@ -102,14 +93,11 @@
     (count [_]
       (count types))
 
-    ISpecType
-    (tag [_] :static)
-
     IStaticSize
     (size [_]
       (reduce #(+ %1 (proto/size %2)) 0 types))
 
-    IReadableSpec
+    ISpec
     (read [_ buff pos]
       (loop [index pos result [] types types]
         (if-let [type (first types)]
@@ -119,7 +107,6 @@
                    (rest types)))
           [(- index pos) result])))
 
-    IWritableSpec
     (write [_ buff pos data']
       (let [indexedtypes (map-indexed vector types)
             written (reduce (fn [pos [index type]]
@@ -137,14 +124,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn bool
-  "Create a boolean data type."
+  "Boolean type spec constructor."
   ([] (bool nil))
   ([default]
    (reify
-     ISpecType
-     (tag [_] :static)
+     IStaticSize
+     (size [_] 1)
 
-     IReadableSpec
+     ISpec
      (read [_ buff pos]
        (let [readed (buffer/read-byte buff pos)]
          [1 (condp = readed
@@ -152,171 +139,137 @@
               (clojure.core/byte 1) true
               nil)]))
 
-     IWritableSpec
      (write [_ buff pos value]
        (let [value (condp = value
                      true (clojure.core/byte 1)
                      false (clojure.core/byte 0)
                      (clojure.core/byte -1))]
          (buffer/write-byte buff pos value)
-         1))
-
-     IStaticSize
-     (size [_] 1))))
-
+         1)))))
 
 (defn byte
-  "Create a boolean data type."
+  "Byte type spec constructor."
   ([] (byte (clojure.core/byte 0)))
   ([default]
    (reify
-     ISpecType
-     (tag [_] :static)
+     IStaticSize
+     (size [_] 1)
 
-     IReadableSpec
+     ISpec
      (read [_ buff pos]
        (let [readed (buffer/read-byte buff pos)]
          [1 readed]))
 
-     IWritableSpec
      (write [_ buff pos value]
        (let [value (clojure.core/byte (or value default))]
          (buffer/write-byte buff pos value)
-         1))
-
-     IStaticSize
-     (size [_] 1))))
+         1)))))
 
 (defn int16
-  "Create a int16 data type."
+  "Short type spec constructor."
   ([] (int16 0))
   ([default]
    (reify
-     ISpecType
-     (tag [_] :static)
+     IStaticSize
+     (size [_] (Short/BYTES))
 
-     IReadableSpec
+     ISpec
      (read [_ buff pos]
        [(Short/BYTES)
         (buffer/read-short buff pos)])
 
-     IWritableSpec
      (write [_ buff pos value]
        (let [value (or value default)]
          (buffer/write-short buff pos value)
-         (Short/BYTES)))
+         (Short/BYTES))))))
 
-     IStaticSize
-     (size [_]
-       (Short/BYTES)))))
 
 (defn int32
-  "Create a int32 data type."
+  "Integer type spec constructor."
   ([] (int32 0))
   ([default]
    (reify
-     ISpecType
-     (tag [_] :static)
+     IStaticSize
+     (size [_] (Integer/BYTES))
 
-     IReadableSpec
+     ISpec
      (read [_ buff pos]
        [(Integer/BYTES)
         (buffer/read-int buff pos)])
 
-     IWritableSpec
      (write [_ buff pos value]
        (let [value (or value default)]
          (buffer/write-int buff pos value)
-         (Integer/BYTES)))
-
-     IStaticSize
-     (size [_]
-       (Integer/BYTES)))))
+         (Integer/BYTES))))))
 
 (defn int64
-  "Create a int64 data type."
+  "Long type spec constructor."
   ([] (int64 0))
   ([default]
    (reify
-     ISpecType
-     (tag [_] :static)
+     IStaticSize
+     (size [_] (Long/BYTES))
 
-     IReadableSpec
+     ISpec
      (read [_ buff pos]
        [(Long/BYTES)
         (buffer/read-long buff pos)])
 
-     IWritableSpec
      (write [_ buff pos value]
        (let [value (or value default)]
          (buffer/write-long buff pos value)
-         (Long/BYTES)))
-
-     IStaticSize
-     (size [_]
-       (Long/BYTES)))))
+         (Long/BYTES))))))
 
 (defn real32
-  "Create a real of 32bits type spec."
+  "Float type spec constructor."
   ([] (real32 0))
   ([default]
    (reify
-     ISpecType
-     (tag [_] :static)
+     IStaticSize
+     (size [_] (Float/BYTES))
 
-     IReadableSpec
+     ISpec
      (read [_ buff pos]
        [(Float/BYTES)
         (buffer/read-float buff pos)])
 
-     IWritableSpec
      (write [_ buff pos value]
        (let [value (or value default)]
          (buffer/write-float buff pos value)
-         (Float/BYTES)))
-
-     IStaticSize
-     (size [_]
-       (Float/BYTES)))))
+         (Float/BYTES))))))
 
 (defn real64
-  "Create a real of 32bits type spec."
+  "Double type spec constructor."
   ([] (real64 0))
   ([default]
    (reify
-     ISpecType
-     (tag [_] :static)
+     IStaticSize
+     (size [_] (Double/BYTES))
 
-     IReadableSpec
+     ISpec
      (read [_ buff pos]
        [(Double/BYTES)
         (buffer/read-double buff pos)])
 
-     IWritableSpec
      (write [_ buff pos value]
        (let [value (or value default)]
          (buffer/write-double buff pos value)
-         (Double/BYTES)))
-
-     IStaticSize
-     (size [_]
-       (Double/BYTES)))))
+         (Double/BYTES))))))
 
 (defn string
-  "Fixed size string spec constructor."
+  "Fixed size string type spec constructor."
   [^long size]
   (reify
-    ISpecType
-    (tag [_] :static)
+    IStaticSize
+    (size [_] size)
 
-    IReadableSpec
+    ISpec
     (read [_ buff pos]
       (let [rawdata (buffer/read-bytes buff pos size)
             length  (- size (bytes/zeropad-count rawdata))
             data (String. rawdata 0 length "UTF-8")]
         [size data]))
 
-    IWritableSpec
     (write [_ buff pos value]
       (let [input (.getBytes value "UTF-8")
             length (count input)
@@ -329,26 +282,19 @@
           (bytes/zeropad! tmpbuf length))
 
         (buffer/write-bytes buff pos size tmpbuf)
-        size))
-
-    IStaticSize
-    (size [_] size)))
+        size))))
 
 (defn string*
-  "Arbitrary size string spec constructor."
+  "Arbitrary length string type spec constructor."
   []
   (reify
-    ISpecType
-    (tag [_] :dynamic)
-
-    IReadableSpec
+    ISpec
     (read [_ buff pos]
       (let [datasize (buffer/read-int buff pos)
             data (buffer/read-bytes buff (+ pos 4) datasize)
             data (String. data 0 datasize "UTF-8")]
         [(+ datasize 4) data]))
 
-    IWritableSpec
     (write [_ buff pos value]
       (let [input (.getBytes value "UTF-8")
             length (count input)]
