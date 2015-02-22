@@ -31,6 +31,7 @@
   (read-bytes [buff pos size]
     (let [tmpbuf (byte-array size)
           oldpos (.position buff)]
+      (.position buff pos)
       (.get buff tmpbuf)
       (.position buff oldpos)
       tmpbuf))
