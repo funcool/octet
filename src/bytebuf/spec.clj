@@ -54,7 +54,7 @@
       (read [_ buff pos]
         (loop [index pos result {} pairs data]
           (if-let [[fieldname type] (first pairs)]
-            (let [[readeddata readedbytes] (read type buff index)]
+            (let [[readedbytes readeddata] (read type buff index)]
               (recur (+ index readedbytes)
                      (assoc result fieldname readeddata)
                      (rest pairs)))
@@ -87,7 +87,7 @@
     (read [_ buff pos]
       (loop [index pos result [] types types]
         (if-let [type (first types)]
-          (let [[readeddata readedbytes] (read type buff index)]
+          (let [[readedbytes readeddata] (read type buff index)]
             (recur (+ index readedbytes)
                    (conj result readeddata)
                    (rest types)))
@@ -120,8 +120,8 @@
 
      IReadableSpec
      (read [_ buff pos]
-       [(buffer/read-int buff pos)
-        (Integer/BYTES)])
+       [(Integer/BYTES)
+        (buffer/read-int buff pos)])
 
      IWritableSpec
      (write [_ buff pos value]
@@ -143,8 +143,8 @@
 
      IReadableSpec
      (read [_ buff pos]
-       [(buffer/read-long buff pos)
-        (Long/BYTES)])
+       [(Long/BYTES)
+        (buffer/read-long buff pos)])
 
      IWritableSpec
      (write [_ buff pos value]
