@@ -140,8 +140,19 @@
       (let [[readed data] (buf/read* buffer spec)]
         (is (= readed 5))
         (is (= data ["12345"])))))
-)
+  )
 
 ;; (deftest experiments
 
-;; )
+
+(deftest spec-composition
+  (testing "read/write a indexed spec composed with two indexed specs"
+    (let [spec (buf/spec (buf/compose-type (buf/int32) (buf/int32))
+                         (buf/compose-type (buf/string 10) (buf/string 5)))
+          buffer (buf/allocate (buf/size spec))
+          data [[100 200] ["foo" "bar"]]]
+      (buf/write! buffer data spec)
+      (let [[readed data'] (buf/read* buffer spec)]
+        (is (= readed (buf/size spec)))
+        (is (= data' data)))))
+  )

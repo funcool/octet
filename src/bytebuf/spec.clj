@@ -1,8 +1,8 @@
 (ns bytebuf.spec
   (:refer-clojure :exclude [type read])
   (:require [bytebuf.proto :as proto :refer [IStaticSize]]
-            [bytebuf.buffer :as buffer])
-  (:import java.util.Arrays))
+            [bytebuf.buffer :as buffer]
+            [bytebuf.bytes :as bytes]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Abstraction definition
@@ -157,29 +157,33 @@
        (Long/BYTES)))))
 
 (defn string
-  ([^long size]
-   (reify
-     ISpecType
-     (tag [_] :static)
+  "Fixed size string spec constructor."
+  [^long size]
+  (reify
+    ISpecType
+    (tag [_] :static)
 
-     IReadableSpec
-     (read [_ buff pos]
-       (let [data (buffer/read-bytes buff pos size)
-             data (String. data "UTF-8")]
-         [size data]))
+    IReadableSpec
+    (read [_ buff pos]
+      (let [rawdata (buffer/read-bytes buff pos size)
+            length  (- size (bytes/zeropad-count rawdata))
+            data (String. rawdata 0 length "UTF-8")]
+        [size data]))
 
-     IWritableSpec
-     (write [_ buff pos value]
-       (let [input (.getBytes value "UTF-8")
-             length (count input)
-             tmpbuf (byte-array size)]
-         (if (< length size)
-           (System/arraycopy input 0 tmpbuf 0 length)
-           (System/arraycopy input 0 tmpbuf 0 size))
-         (when (< length size)
-           (Arrays/fill tmpbuf length size (byte 0)))
-         (buffer/write-bytes buff pos size tmpbuf)
-         size))
+    IWritableSpec
+    (write [_ buff pos value]
+      (let [input (.getBytes value "UTF-8")
+            length (count input)
+            tmpbuf (byte-array size)]
+        (if (< length size)
+          (System/arraycopy input 0 tmpbuf 0 length)
+          (System/arraycopy input 0 tmpbuf 0 size))
 
-     IStaticSize
-     (size [_] size))))
+        (when (< length size)
+          (bytes/zeropad! tmpbuf length))
+
+        (buffer/write-bytes buff pos size tmpbuf)
+        size))
+
+    IStaticSize
+    (size [_] size)))
