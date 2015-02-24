@@ -14,6 +14,65 @@
   (write [_ buff start data] "Read all data from buffer."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Composed Spec Types
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftype AssociativeSpec [data dict types]
+  clojure.lang.Counted
+  (count [_]
+    (count types))
+
+  IStaticSize
+  (size [_]
+    (reduce #(+ %1 (proto/size %2)) 0 types))
+
+  ISpec
+  (read [_ buff pos]
+    (loop [index pos result {} pairs data]
+      (if-let [[fieldname type] (first pairs)]
+        (let [[readedbytes readeddata] (read type buff index)]
+          (recur (+ index readedbytes)
+                 (assoc result fieldname readeddata)
+                 (rest pairs)))
+        [(- index pos) result])))
+
+  (write [_ buff pos data']
+    (let [written (reduce (fn [index [fieldname type]]
+                            (let [value (get data' fieldname nil)
+                                  written (write type buff index value)]
+                              (+ index written)))
+                          pos data)]
+      (- written pos))))
+
+(deftype IndexedSpec [types]
+  clojure.lang.Counted
+  (count [_]
+    (count types))
+
+  IStaticSize
+  (size [_]
+    (reduce #(+ %1 (proto/size %2)) 0 types))
+
+  ISpec
+  (read [_ buff pos]
+    (loop [index pos result [] types types]
+      (if-let [type (first types)]
+        (let [[readedbytes readeddata] (read type buff index)]
+          (recur (+ index readedbytes)
+                 (conj result readeddata)
+                 (rest types)))
+        [(- index pos) result])))
+
+  (write [_ buff pos data']
+    (let [indexedtypes (map-indexed vector types)
+          written (reduce (fn [pos [index type]]
+                            (let [value (nth data' index nil)
+                                  written (write type buff pos value)]
+                              (+ pos written)))
+                          pos indexedtypes)]
+      (- written pos))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec Constructors
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -47,75 +106,24 @@
   (fn [& params]
     (let [numparams (count params)]
       (cond
+        (every? #(satisfies? ISpec %) params)
+        :indexed
+
         (and (even? numparams)
              (keyword? (first params))
              (satisfies? ISpec (second params)))
-        :associative
-
-        (every? #(satisfies? ISpec %) params)
-        :indexed))))
+        :associative))))
 
 (defmethod spec :associative
   [& params]
   (let [data (mapv vec (partition 2 params))
         dict (into {} data)
         types (map second data)]
-    (reify
-      clojure.lang.Counted
-      (count [_]
-        (count types))
-
-      IStaticSize
-      (size [_]
-        (reduce #(+ %1 (proto/size %2)) 0 types))
-
-      ISpec
-      (read [_ buff pos]
-        (loop [index pos result {} pairs data]
-          (if-let [[fieldname type] (first pairs)]
-            (let [[readedbytes readeddata] (read type buff index)]
-              (recur (+ index readedbytes)
-                     (assoc result fieldname readeddata)
-                     (rest pairs)))
-            [(- index pos) result])))
-
-      (write [_ buff pos data']
-        (let [written (reduce (fn [index [fieldname type]]
-                                (let [value (get data' fieldname nil)
-                                      written (write type buff index value)]
-                                  (+ index written)))
-                              pos data)]
-          (- written pos))))))
+    (AssociativeSpec. data dict types)))
 
 (defmethod spec :indexed
   [& types]
-  (reify
-    clojure.lang.Counted
-    (count [_]
-      (count types))
-
-    IStaticSize
-    (size [_]
-      (reduce #(+ %1 (proto/size %2)) 0 types))
-
-    ISpec
-    (read [_ buff pos]
-      (loop [index pos result [] types types]
-        (if-let [type (first types)]
-          (let [[readedbytes readeddata] (read type buff index)]
-            (recur (+ index readedbytes)
-                   (conj result readeddata)
-                   (rest types)))
-          [(- index pos) result])))
-
-    (write [_ buff pos data']
-      (let [indexedtypes (map-indexed vector types)
-            written (reduce (fn [pos [index type]]
-                              (let [value (nth data' index nil)
-                                    written (write type buff pos value)]
-                                (+ pos written)))
-                            pos indexedtypes)]
-        (- written pos)))))
+  (IndexedSpec. types))
 
 (def ^{:doc "A semantic alias for spec constructor."}
   compose-type spec)
@@ -183,7 +191,6 @@
        (let [value (or value default)]
          (buffer/write-short buff pos value)
          (Short/BYTES))))))
-
 
 (defn int32
   "Integer type spec constructor."
