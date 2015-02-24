@@ -20,6 +20,11 @@
   [^bytes input ^long offset ^long limit]
   (Arrays/copyOfRange input offset limit))
 
+(defn equals?
+  "Check if two byte arrays are equals."
+  [^bytes a ^bytes b]
+  (Arrays/equals a b))
+
 (defn zeropad!
   "Add zero byte padding to the given byte array
   to the remaining bytes after specified data length."
