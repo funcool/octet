@@ -1,5 +1,18 @@
 (ns bytebuf.bytes
-  (:import java.util.Arrays))
+  (:import java.util.Arrays
+           java.security.SecureRandom))
+
+(defn random-bytes
+  "Generate a byte array of scpecified length with random
+  bytes taken from secure random number generator.
+  This method should be used for generate a random
+  iv/salt or arbitrary length."
+  ([^long numbytes]
+   (random-bytes numbytes (SecureRandom.)))
+  ([^long numbytes ^SecureRandom sr]
+   (let [buffer (byte-array numbytes)]
+     (.nextBytes sr buffer)
+     buffer)))
 
 (defn slice
   "Given a byte array, get a copy of it. If offset
