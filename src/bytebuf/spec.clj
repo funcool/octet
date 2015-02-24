@@ -18,7 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti spec
-  "Spec instance polymorphic constructor.
+  "Polymorphic constructor for Spec instances.
 
   Spec is a some kind of composition of arbitrary
   number of types in associative or indexed data
