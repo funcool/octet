@@ -9,6 +9,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defprotocol ISpec
+  "Basic abstraction for something that can be work like a Spec."
   (read [_ buff start] "Read all data from buffer.")
   (write [_ buff start data] "Read all data from buffer."))
 
