@@ -1,5 +1,5 @@
 (ns bytebuf.core
-  (:refer-clojure :exclude [read byte float double short long])
+  (:refer-clojure :exclude [read byte float double short long bytes])
   (:require [bytebuf.spec :as spec]
             [bytebuf.buffer :as buffer]
             [bytebuf.proto :as proto]
@@ -21,6 +21,7 @@
   real32
   real64
   byte
+  bytes
   bool]
  [bytebuf.buffer
   allocate]

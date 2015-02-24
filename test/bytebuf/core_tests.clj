@@ -14,7 +14,8 @@
 
 (ns bytebuf.core-tests
   (:require [clojure.test :refer :all]
-            [bytebuf.core :as buf])
+            [bytebuf.core :as buf]
+            [bytebuf.bytes :as bytes])
   (:import java.nio.ByteBuffer
            io.netty.buffer.ByteBuf))
 
@@ -141,6 +142,7 @@
               (buf/double)   (double 4.3)
               (buf/float)    (float 3.2)
               (buf/byte)     (byte 32)]]
+              ;; (buf/bytes 5)  (bytes/random-bytes 5)]]
     (doseq [[spec data] (partition 2 data)]
       (let [buffers [(buf/allocate (buf/size spec) {:type :heap :impl :nio})
                      (buf/allocate (buf/size spec) {:type :direct :impl :nio})

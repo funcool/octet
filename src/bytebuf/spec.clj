@@ -1,5 +1,5 @@
 (ns bytebuf.spec
-  (:refer-clojure :exclude [type read float double long short byte])
+  (:refer-clojure :exclude [type read float double long short byte bytes])
   (:require [bytebuf.proto :as proto :refer [IStaticSize]]
             [bytebuf.buffer :as buffer]
             [bytebuf.bytes :as bytes]))
@@ -263,6 +263,21 @@
        (let [value (or value default)]
          (buffer/write-double buff pos value)
          (Double/BYTES))))))
+
+(defn bytes
+  "Fixed size byte array type spec constructor."
+  [^long size]
+  (reify
+    IStaticSize
+    (size [_] size)
+
+    ISpec
+    (read [_ buff pos]
+      [size (buffer/read-bytes buff pos size)])
+
+    (write [_ buff pos value]
+      (buffer/write-bytes buff pos size value)
+      size)))
 
 (defn string
   "Fixed size string type spec constructor."
