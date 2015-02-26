@@ -180,17 +180,17 @@
   ([default]
    (reify
      IStaticSize
-     (size [_] (Short/BYTES))
+     (size [_] 2)
 
      ISpec
-     (read [_ buff pos]
-       [(Short/BYTES)
+     (read [s buff pos]
+       [(proto/size s)
         (buffer/read-short buff pos)])
 
-     (write [_ buff pos value]
+     (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-short buff pos value)
-         (Short/BYTES))))))
+         (proto/size s))))))
 
 (defn int32
   "Integer type spec constructor."
@@ -198,17 +198,17 @@
   ([default]
    (reify
      IStaticSize
-     (size [_] (Integer/BYTES))
+     (size [_] 4)
 
      ISpec
-     (read [_ buff pos]
-       [(Integer/BYTES)
+     (read [s buff pos]
+       [(proto/size s)
         (buffer/read-int buff pos)])
 
-     (write [_ buff pos value]
+     (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-int buff pos value)
-         (Integer/BYTES))))))
+         (proto/size s))))))
 
 (defn int64
   "Long type spec constructor."
@@ -216,53 +216,53 @@
   ([default]
    (reify
      IStaticSize
-     (size [_] (Long/BYTES))
+     (size [_] 8)
 
      ISpec
-     (read [_ buff pos]
-       [(Long/BYTES)
+     (read [s buff pos]
+       [(proto/size s)
         (buffer/read-long buff pos)])
 
-     (write [_ buff pos value]
+     (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-long buff pos value)
-         (Long/BYTES))))))
+         (proto/size s))))))
 
-(defn real32
+(defn float
   "Float type spec constructor."
-  ([] (real32 0))
+  ([] (float 0))
   ([default]
    (reify
      IStaticSize
-     (size [_] (Float/BYTES))
+     (size [_] 4)
 
      ISpec
-     (read [_ buff pos]
-       [(Float/BYTES)
+     (read [s buff pos]
+       [(proto/size s)
         (buffer/read-float buff pos)])
 
-     (write [_ buff pos value]
+     (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-float buff pos value)
-         (Float/BYTES))))))
+         (proto/size s))))))
 
-(defn real64
+(defn double
   "Double type spec constructor."
-  ([] (real64 0))
+  ([] (double 0))
   ([default]
    (reify
      IStaticSize
-     (size [_] (Double/BYTES))
+     (size [_] 8)
 
      ISpec
-     (read [_ buff pos]
-       [(Double/BYTES)
+     (read [s buff pos]
+       [(proto/size s)
         (buffer/read-double buff pos)])
 
-     (write [_ buff pos value]
+     (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-double buff pos value)
-         (Double/BYTES))))))
+         (proto/size s))))))
 
 (defn bytes
   "Fixed size byte array type spec constructor."
