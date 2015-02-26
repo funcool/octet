@@ -2,45 +2,29 @@
   (:refer-clojure :exclude [read byte float double short long bytes])
   (:require [bytebuf.spec :as spec]
             [bytebuf.buffer :as buffer]
-            [bytebuf.proto :as proto]))
+            [bytebuf.proto :as proto]
+            [potemkin.namespaces :refer [import-vars]]))
 
-;; (import-vars
-;;  [bytebuf.spec
-;;   compose-type
-;;   spec
-;;   string
-;;   string*
-;;   int32
-;;   int64
-;;   short
-;;   integer
-;;   long
-;;   float
-;;   double
-;;   byte
-;;   bytes
-;;   bool]
-;;  [bytebuf.buffer
-;;   allocate]
-;;  [bytebuf.proto
-;;   size])
-
-(def compose-type spec/compose-type)
-(def spec spec/spec)
-(def string spec/string)
-(def string* spec/string*)
-(def int32 spec/int32)
-(def int64 spec/int64)
-(def short spec/short)
-(def integer spec/integer)
-(def long spec/long)
-(def float spec/float)
-(def double spec/double)
-(def byte spec/byte)
-(def bytes spec/bytes)
-(def bool spec/bool)
-(def allocate buffer/allocate)
-(def size proto/size)
+(import-vars
+ [bytebuf.spec
+  compose-type
+  spec
+  string
+  string*
+  int32
+  int64
+  short
+  integer
+  long
+  float
+  double
+  byte
+  bytes
+  bool]
+ [bytebuf.buffer
+  allocate]
+ [bytebuf.proto
+  size])
 
 (defn write!
   "Write data into buffer following the specified
