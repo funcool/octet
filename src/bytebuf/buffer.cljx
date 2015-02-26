@@ -1,5 +1,6 @@
 (ns bytebuf.buffer
   "Buffer abstractions."
+  #+clj
   (:import java.nio.ByteBuffer
            io.netty.buffer.ByteBuf
            io.netty.buffer.ByteBufAllocator))
@@ -36,6 +37,7 @@
 ;; NIO & Netty Buffer implementations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+#+clj
 (extend-type ByteBuffer
   IBufferShort
   (read-short [buff pos]
@@ -87,6 +89,7 @@
       (.put buff data 0 size)
       (.position buff oldpos))))
 
+#+clj
 (extend-type ByteBuf
   IBufferShort
   (read-short [buff pos]
@@ -136,25 +139,30 @@
 ;; Public Api
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+#+clj
 (def ^{:private true}
   allocator (ByteBufAllocator/DEFAULT))
 
 (defmulti allocate
-  (fn [size & [{:keys [type impl] :or {type :heap impl :nio}}]]
+  (fn [size & [{:keys [type impl] :or {type :heap impl #+clj :nio #+cljs :es6}}]]
     [type impl]))
 
+#+clj
 (defmethod allocate [:heap :nio]
   [size & _]
   (ByteBuffer/allocate size))
 
+#+clj
 (defmethod allocate [:direct :nio]
   [size & _]
   (ByteBuffer/allocateDirect size))
 
+#+clj
 (defmethod allocate [:heap :netty]
   [size & _]
   (.heapBuffer allocator size))
 
+#+clj
 (defmethod allocate [:direct :netty]
   [size & _]
   (.directBuffer allocator size))

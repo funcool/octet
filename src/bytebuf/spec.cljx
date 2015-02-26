@@ -18,8 +18,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (deftype AssociativeSpec [data dict types]
+  #+clj
   clojure.lang.Counted
+  #+clj
   (count [_]
+    (count types))
+
+  #+cljs
+  ICounted
+  #+cljs
+  (-count [_]
     (count types))
 
   IStaticSize
@@ -45,8 +53,16 @@
       (- written pos))))
 
 (deftype IndexedSpec [types]
+  #+clj
   clojure.lang.Counted
+  #+clj
   (count [_]
+    (count types))
+
+  #+cljs
+  ICounted
+  #+cljs
+  (-count [_]
     (count types))
 
   IStaticSize
