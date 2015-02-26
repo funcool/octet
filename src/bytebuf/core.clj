@@ -18,8 +18,6 @@
   long
   float
   double
-  real32
-  real64
   byte
   bytes
   bool]

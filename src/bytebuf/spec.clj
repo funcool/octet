@@ -329,12 +329,6 @@
 ;; Types Alias
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def ^{:doc "Alias for real32"}
-  float real32)
-
-(def ^{:doc "Alias for real64"}
-  double real64)
-
 (def ^{:doc "Alias for int32"}
   integer int32)
 
