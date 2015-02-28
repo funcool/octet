@@ -16,6 +16,7 @@
   (:require #+clj [clojure.test :as t]
             #+cljs [cljs.test :as t]
             [bytebuf.core :as buf]
+            [bytebuf.buffer :as impl]
             [bytebuf.bytes :as bytes])
   #+clj
   (:import java.nio.ByteBuffer
@@ -44,6 +45,18 @@
   (let [buffer (buf/allocate 16 {:type :direct :impl :netty})]
     (t/is (.isDirect buffer))
     (t/is (instance? ByteBuf buffer))))
+
+#+cljs
+(t/deftest allocate-direct-es6-buffer
+  (let [buffer (buf/allocate 16 {:impl :es6})]
+    (t/is (instance? js/DataView buffer))))
+
+;; #+cljs
+;; (t/deftest allocate-direct-node-buffer
+;;   (let [bf (js/require "buffer")
+;;         bf (.-Buffer bf)
+;;         buffer (buf/allocate 16 {:impl :node})]
+;;     (t/is (instance? bf buffer))))
 
 #+clj
 (t/deftest spec-constructor
@@ -161,6 +174,25 @@
                      (buf/allocate (buf/size spec) {:type :direct :impl :netty})]]
         (doseq [buffer buffers]
           ;; (println buffer spec)
+          (let [written (buf/write! buffer data spec)]
+            (t/is (= written (buf/size spec)))
+            (let [[readed data'] (buf/read* buffer spec)]
+              (t/is (= readed (buf/size spec)))
+              (t/is (= data data')))))))))
+
+#+cljs
+(t/deftest spec-data-types
+  (let [data [;; (buf/string 5) "12345"
+              (buf/short)    100
+              (buf/integer)  1001
+              (buf/bool)     false
+              (buf/double)   (double 4.3)
+              (buf/float)    (float 3.5)
+              (buf/byte)     (byte 32)]]
+              ;; (buf/bytes 5)  (bytes/random-bytes 5)]]
+    (doseq [[spec data] (partition 2 data)]
+      (let [buffers [(buf/allocate (buf/size spec) {:impl :es6})]]
+        (doseq [buffer buffers]
           (let [written (buf/write! buffer data spec)]
             (t/is (= written (buf/size spec)))
             (let [[readed data'] (buf/read* buffer spec)]
