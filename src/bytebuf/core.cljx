@@ -8,6 +8,7 @@
 (def spec spec/spec)
 ;; (def string spec/string)
 ;; (def string* spec/string*)
+(def int16 spec/int16)
 (def int32 spec/int32)
 (def int64 spec/int64)
 (def short spec/short)
