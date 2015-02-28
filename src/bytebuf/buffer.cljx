@@ -165,16 +165,16 @@
   (read-byte [buff pos]
     (.getInt8 buff pos))
   (write-byte [buff pos value]
-    (.setInt8 buff pos value)))
+    (.setInt8 buff pos value))
 
-  ;; IBufferBytes
-  ;; (read-bytes [buff pos size]
-  ;;   (let [offset (.-byteOffset buff)
-  ;;         buffer (.-buffer buff)]
-  ;;     (js/Int8Array. buffer (+ offset pos) size)))
-  ;; (write-bytes [buff pos size data]
-  ;;   (doseq [i (range (.-length data))]
-  ;;     (.setInt8 buff (+ pos i) (aget data i)))))
+  IBufferBytes
+  (read-bytes [buff pos size]
+    (let [offset (.-byteOffset buff)
+          buffer (.-buffer buff)]
+      (js/Int8Array. buffer (+ offset pos) size)))
+  (write-bytes [buff pos size data]
+    (doseq [i (range (.-length data))]
+      (.setInt8 buff (+ pos i) (aget data i)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public Api
