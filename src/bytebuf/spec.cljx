@@ -295,51 +295,51 @@
       (buffer/write-bytes buff pos size value)
       size)))
 
-(defn string
-  "Fixed size string type spec constructor."
-  [^long size]
-  (reify
-    IStaticSize
-    (size [_] size)
+;; (defn string
+;;   "Fixed size string type spec constructor."
+;;   [^long size]
+;;   (reify
+;;     IStaticSize
+;;     (size [_] size)
 
-    ISpec
-    (read [_ buff pos]
-      (let [rawdata (buffer/read-bytes buff pos size)
-            length  (- size (bytes/zeropad-count rawdata))
-            data (String. rawdata 0 length "UTF-8")]
-        [size data]))
+;;     ISpec
+;;     (read [_ buff pos]
+;;       (let [rawdata (buffer/read-bytes buff pos size)
+;;             length  (- size (bytes/zeropad-count rawdata))
+;;             data (String. rawdata 0 length "UTF-8")]
+;;         [size data]))
 
-    (write [_ buff pos value]
-      (let [input (.getBytes value "UTF-8")
-            length (count input)
-            tmpbuf (byte-array size)]
-        (if (< length size)
-          (System/arraycopy input 0 tmpbuf 0 length)
-          (System/arraycopy input 0 tmpbuf 0 size))
+;;     (write [_ buff pos value]
+;;       (let [input (.getBytes value "UTF-8")
+;;             length (count input)
+;;             tmpbuf (byte-array size)]
+;;         (if (< length size)
+;;           (System/arraycopy input 0 tmpbuf 0 length)
+;;           (System/arraycopy input 0 tmpbuf 0 size))
 
-        (when (< length size)
-          (bytes/zeropad! tmpbuf length))
+;;         (when (< length size)
+;;           (bytes/zeropad! tmpbuf length))
 
-        (buffer/write-bytes buff pos size tmpbuf)
-        size))))
+;;         (buffer/write-bytes buff pos size tmpbuf)
+;;         size))))
 
-(defn string*
-  "Arbitrary length string type spec constructor."
-  []
-  (reify
-    ISpec
-    (read [_ buff pos]
-      (let [datasize (buffer/read-int buff pos)
-            data (buffer/read-bytes buff (+ pos 4) datasize)
-            data (String. data 0 datasize "UTF-8")]
-        [(+ datasize 4) data]))
+;; (defn string*
+;;   "Arbitrary length string type spec constructor."
+;;   []
+;;   (reify
+;;     ISpec
+;;     (read [_ buff pos]
+;;       (let [datasize (buffer/read-int buff pos)
+;;             data (buffer/read-bytes buff (+ pos 4) datasize)
+;;             data (String. data 0 datasize "UTF-8")]
+;;         [(+ datasize 4) data]))
 
-    (write [_ buff pos value]
-      (let [input (.getBytes value "UTF-8")
-            length (count input)]
-        (buffer/write-int buff pos length)
-        (buffer/write-bytes buff (+ pos 4) length input)
-        (+ length 4)))))
+;;     (write [_ buff pos value]
+;;       (let [input (.getBytes value "UTF-8")
+;;             length (count input)]
+;;         (buffer/write-int buff pos length)
+;;         (buffer/write-bytes buff (+ pos 4) length input)
+;;         (+ length 4)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Types Alias
