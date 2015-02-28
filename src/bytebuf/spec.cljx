@@ -1,8 +1,7 @@
 (ns bytebuf.spec
   (:refer-clojure :exclude [type read float double long short byte bytes])
   (:require [bytebuf.proto :as proto :refer [IStaticSize]]
-            [bytebuf.buffer :as buffer]
-            [bytebuf.bytes :as bytes]))
+            [bytebuf.buffer :as buffer]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Abstraction definition
