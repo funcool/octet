@@ -1,26 +1,32 @@
 (ns bytebuf.core
   (:refer-clojure :exclude [read byte float double short long bytes])
   (:require [bytebuf.spec :as spec]
+            [bytebuf.spec.basic :as basic-spec]
+            [bytebuf.spec.string :as string-spec]
             [bytebuf.buffer :as buffer]
             [bytebuf.proto :as proto]))
 
 (def compose-type spec/compose-type)
 (def spec spec/spec)
-;; (def string spec/string)
-;; (def string* spec/string*)
-(def int16 spec/int16)
-(def int32 spec/int32)
-(def int64 spec/int64)
-(def short spec/short)
-(def integer spec/integer)
-(def long spec/long)
-(def float spec/float)
-(def double spec/double)
-(def byte spec/byte)
-(def bytes spec/bytes)
-(def bool spec/bool)
+
+(def string string-spec/string)
+(def string* string-spec/string*)
+
+(def int16 basic-spec/int16)
+(def int32 basic-spec/int32)
+(def int64 basic-spec/int64)
+(def float basic-spec/float)
+(def double basic-spec/double)
+(def byte basic-spec/byte)
+(def bytes basic-spec/bytes)
+(def bool basic-spec/bool)
+
 (def allocate buffer/allocate)
 (def size proto/size)
+
+(def ^{:doc "Alias for int16"} short int16)
+(def ^{:doc "Alias for int32"} integer int32)
+(def ^{:doc "Alias for int64"} long int64)
 
 (defn write!
   "Write data into buffer following the specified
