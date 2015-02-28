@@ -135,6 +135,47 @@
   (write-bytes [buff pos size data]
     (.setBytes buff pos data 0 size)))
 
+#+cljs
+(extend-type js/DataView
+  IBufferShort
+  (read-short [buff pos]
+    (.getInt16 buff pos))
+  (write-short [buff pos value]
+    (.setInt16 buff pos value))
+
+  IBufferInt
+  (read-int [buff pos]
+    (.getInt32 buff pos))
+  (write-int [buff pos value]
+    (.setInt32 buff pos value))
+
+  IBufferFloat
+  (read-float [buff pos]
+    (.getFloat32 buff pos))
+  (write-float [buff pos value]
+    (.setFloat32 buff pos value))
+
+  IBufferDouble
+  (read-double [buff pos]
+    (.getFloat64 buff pos))
+  (write-double [buff pos value]
+    (.setFloat64 buff pos value))
+
+  IBufferByte
+  (read-byte [buff pos]
+    (.getInt8 buff pos))
+  (write-byte [buff pos value]
+    (.setInt8 buff pos value)))
+
+  ;; IBufferBytes
+  ;; (read-bytes [buff pos size]
+  ;;   (let [offset (.-byteOffset buff)
+  ;;         buffer (.-buffer buff)]
+  ;;     (js/Int8Array. buffer (+ offset pos) size)))
+  ;; (write-bytes [buff pos size data]
+  ;;   (doseq [i (range (.-length data))]
+  ;;     (.setInt8 buff (+ pos i) (aget data i)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public Api
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
