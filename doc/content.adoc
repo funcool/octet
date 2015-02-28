@@ -1,0 +1,224 @@
+= bytebuf - A library for working with ByteBuffer's
+Andrey Antukh, <niwi@niwi.be>
+0.1.0
+:toc: left
+:numbered:
+:source-highlighter: pygments
+:pygments-style: friendly
+:sectlinks:
+
+== Introduction
+
+Working with raw bytes is tedious, and sometimes the language abstractions for working
+with bytes is not very pleasant. 
+
+_bytebuff_ library offers a simple api for working with raw byte arrays and compose binary protocols
+for two most developed clojure implementations: clojure (jvm) and clojurescript (javascript).
+
+
+== Project Maturity
+
+Since _bytebuff_ is a young project there can be some API breakage.
+
+
+== Install
+
+This section covers the _bytebuf_ library installing process and its requirements.
+
+
+=== Requirements
+
+_bytebuf_ is tested with these platforms:
+
+- JDK7
+- JDK8
+- Node 0.12
+- iojs 1.4.1
+
+
+=== Leiningen
+
+The simplest way to use _suricatta_ in a clojure project, is by including it in the dependency
+vector on your *_project.clj_* file:
+
+._on project.clj_
+[source,clojure]
+----
+[funcool/bytebuf "0.1.0"]
+----
+
+=== Get the Code
+
+_bytebuf_ is open source and can be found on link:https://github.com/funcool/bytebuf[github].
+
+You can clone the public repository with this command:
+
+[source,text]
+----
+git clone https://github.com/funcool/bytebuf
+----
+
+
+== Getting started
+
+The main goal of _bytebuf_ is provide, multiplatform abstraction for work with bytebuffer's. For it
+offers a ligweight api for define message types in a declarative way and use them for read or
+write to bytebuffers.
+
+As previously said, _bytebuf_  works with both most used clojure implementations: clojure & clojurescript. Each platform has own bytebuffer like types. _bytebuf_ library offers implementations for link:http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[NIO ByteBuffer] and link:http://netty.io/4.1/api/io/netty/buffer/ByteBuf.html[Netty ByteBuf] in clojure and link:https://developer.mozilla.org/en/docs/Web/JavaScript/Typed_arrays[es6 typed arrays] in clojurescript.
+
+=== Define a spec
+
+A spec in _bytebuf_ glossary represents a type definition or a composition of types. Two most common
+composition types are supported: associative and indexed.
+
+The difference of indexed and associative compositions is the input and output. In associative
+composition the expected input and output is a map like object. And in indexed composition,
+the expected input and input is a vector like objects. Internally them represents the same value in bytes.
+
+Let start defining one:
+
+[source, clojure]
+----
+(require '[bytebuff.core :as buf])
+
+;; Indexed spec
+(def my-spec1 (buf/spec (buf/int32) (buf/bool)))
+
+;; The same spec but using associative composition
+(def my-spec2 (buf/spec :field1 (buf/int32)
+                        :field2 (buf/bool)))
+----
+
+You can check that the spec size (in bytes) and number of types internally is the same
+for both defined specs:
+
+[source, clojure]
+----
+(buf/size my-spec1)
+;; => 5
+
+(count my-spec1)
+;; => 2
+
+(buf/size my-spec2)
+;; => 5
+
+(count my-spec2)
+;; => 2
+----
+
+
+=== Creating buffer
+
+The next piece in the puzzle is a way to create (or allocate) new byte buffers. This operation is
+almost platform independent if the defaults satisfies you.
+
+.Example allocating a 24 bytes size byte buffer with *default* implementation:
+[source, clojure]
+----
+;; Allocate bytebuffer with 24 bytes of size
+(def buffer (buf/allocate 24))
+----
+
+.Example allocating a 24 bytes size byte buffer of *heap* type using *NIO* implementation:
+[source, clojure]
+----
+;; This is a default if you are using clojure
+(def buffer (buf/allocate 24 {:impl :nio :type :heap}))
+----
+
+.Example allocating a 24 bytes size byte buffer of *heap* type using *es6 typed arrays* implementation:
+[source, clojure]
+----
+;; This is a default if you are using clojurescript
+(def buffer (buf/allocate 24 {:impl :es6 :type :heap}))
+----
+
+=== Read and write data
+
+TODO
+
+
+== Advanced usage
+
+[[supported-bytebuffers]]
+=== Supported byte buffers
+
+This is a complete table of supported byte buffer implementations and type of byte buffers:
+
+[cols="1,2,2", options="header"]
+|=========================================
+| Platform | Name | Params
+| Clojure | Heap NIO ByteBuffer | `{:type :heap :impl :nio}`
+| Clojure | Direct NIO ByteBuffer | `{:type :direct :impl :nio}`
+| Clojure | Heap Netty ByteBuf | `{:type :heap :impl :netty}`
+| Clojure | Direct Netty ByteBuf | `{:type :direct :impl :netty}`
+| ClojureScript | Heap ES6 ArrayBuffer/DataView | `{:type :heap :impl :es6}`
+|=========================================
+
+
+
+
+== How to Contribute?
+
+=== Philosophy
+
+Five most important rules:
+
+- Beautiful is better than ugly.
+- Explicit is better than implicit.
+- Simple is better than complex.
+- Complex is better than complicated.
+- Readability counts.
+
+All contributions to _bytebuf_ should keep these important rules in mind.
+
+
+=== Procedure
+
+**bytebuf** unlike Clojure and other Clojure contrib libs, does not have many
+restrictions for contributions. Just follow the following steps depending on the
+situation:
+
+**Bugfix**:
+
+- Fork the GitHub repo.
+- Fix a bug/typo on a new branch.
+- Make a pull-request to master.
+
+**New feature**:
+
+- Open new issue with the new feature proposal.
+- If it is accepted, follow the same steps as "bugfix".
+
+=== License
+
+_bytebuf_ is licensed under BSD (2-Clause) license:
+
+----
+Copyright (c) 2015 Andrey Antukh <niwi@niwi.be>
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+----
