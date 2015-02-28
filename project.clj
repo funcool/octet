@@ -25,17 +25,21 @@
                    :output-path "output/test/cljs"
                    :rules :cljs}]}
 
-  :cljsbuild {:test-commands {"test" ["node" "test/run.js"]}
+  :cljsbuild {:test-commands {"test" ["node" "output/tests.js"]}
               :builds [{:id "dev"
                         :source-paths ["output/test/cljs" "output/src"]
-                        ;; :notify-command ["node" "test/run.js"]
+                        :notify-command ["node" "output/tests.js"]
                         :compiler {:output-to "output/tests.js"
                                    :output-dir "output/out"
+                                   :static-fns true
+                                   :cache-analysis false
+                                   :main bytebuf.tests.main
                                    :source-map true
                                    :optimizations :none
                                    :target :nodejs
                                    :pretty-print true}}]}
-  :profiles {:dev {
-                   :plugins [[org.clojars.cemerick/cljx "0.6.0-SNAPSHOT"
+  :profiles {:dev {:plugins [[org.clojars.cemerick/cljx "0.6.0-SNAPSHOT"
                               :exclude [org.clojure/clojure]]
-                             [lein-cljsbuild "1.0.4"]]}})
+                             [lein-cljsbuild "1.0.4"]]
+                   :dependencies [[funcool/cljs-testrunners "0.1.0-SNAPSHOT"]]}})
+
