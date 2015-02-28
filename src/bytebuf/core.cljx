@@ -28,7 +28,11 @@
   ([buff data spec]
    (write! buff data spec {}))
   ([buff data spec {:keys [offset] :or {offset 0}}]
+   #+clj
    (locking buff
+     (spec/write spec buff offset data))
+   #+cljs
+   (do
      (spec/write spec buff offset data))))
 
 (defn read*
@@ -39,8 +43,11 @@
   ([buff spec]
    (read* buff spec {}))
   ([buff spec {:keys [offset] :or {offset 0}}]
+   #+clj
    (locking buff
-     (spec/read spec buff offset))))
+     (spec/read spec buff offset))
+   #+cljs
+   (spec/read spec buff offset)))
 
 (defn read
   "Read data from buffer following the specified
