@@ -1,8 +1,8 @@
-(defproject bytebuf "0.1.0-SNAPSHOT"
+(defproject funcool/bytebuf "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :url "https://github.com/funcool/bytebuf"
+  :license {:name "BSD (2 Clause)"
+            :url "http://opensource.org/licenses/BSD-2-Clause"}
   :dependencies [[org.clojure/clojure "1.7.0-alpha5"]
                  [io.netty/netty-buffer "4.1.0.Beta3"]
                  [org.clojure/clojurescript "0.0-2913"]
