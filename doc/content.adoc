@@ -10,15 +10,15 @@ Andrey Antukh, <niwi@niwi.be>
 == Introduction
 
 Working with raw bytes is tedious, and sometimes the language abstractions for working
-with bytes is not very pleasant. 
+with bytes is not very pleasant.
 
-_bytebuff_ library offers a simple api for working with raw byte arrays and compose binary protocols
+_bytebuf_ library offers a simple api for working with raw byte arrays and compose binary protocols
 for two most developed clojure implementations: clojure (jvm) and clojurescript (javascript).
 
 
 == Project Maturity
 
-Since _bytebuff_ is a young project there can be some API breakage.
+Since _bytebuf_ is a young project there can be some API breakage.
 
 
 == Install
@@ -67,14 +67,16 @@ write to bytebuffers.
 
 As previously said, _bytebuf_  works with both most used clojure implementations: clojure & clojurescript. Each platform has own bytebuffer like types. _bytebuf_ library offers implementations for link:http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[NIO ByteBuffer] and link:http://netty.io/4.1/api/io/netty/buffer/ByteBuf.html[Netty ByteBuf] in clojure and link:https://developer.mozilla.org/en/docs/Web/JavaScript/Typed_arrays[es6 typed arrays] in clojurescript.
 
+
 === Define a spec
 
 A spec in _bytebuf_ glossary represents a type definition or a composition of types. Two most common
-composition types are supported: associative and indexed.
+composition types are: associative and indexed.
 
 The difference of indexed and associative compositions is the input and output. In associative
 composition the expected input and output is a map like object. And in indexed composition,
-the expected input and input is a vector like objects. Internally them represents the same value in bytes.
+the expected input and input is a vector like objects. Internally them represents the same value in
+bytes.
 
 Let start defining one:
 
@@ -82,7 +84,7 @@ Let start defining one:
 ----
 (require '[bytebuff.core :as buf])
 
-;; Indexed spec
+;; Indexed composition
 (def my-spec1 (buf/spec (buf/int32) (buf/bool)))
 
 ;; The same spec but using associative composition
@@ -107,6 +109,9 @@ for both defined specs:
 (count my-spec2)
 ;; => 2
 ----
+
+The `spec` is a polimorphic constructor for type specs compostion, that dependently of specified
+arguments, creates a indexed composition instance or associatieve.
 
 
 === Creating buffer
@@ -135,12 +140,176 @@ almost platform independent if the defaults satisfies you.
 (def buffer (buf/allocate 24 {:impl :es6 :type :heap}))
 ----
 
+You can see all supported options <<supported-bytebuffers,here>>
+
+The return value of `allocate` depens on implementation used. Is a plain instance without additional
+wrapping. If you want access to its internals, you can do it with native host platform api.
+
+
 === Read and write data
 
-TODO
+It's time to see how we can write data to buffers and read data from them. Specs are simple schema
+on how the data should be read or write to the buffer.
+
+.Example writing data into buffer using indexed composed schema
+[source, clojure]
+----
+;; The indexed composed spec exptects a vector as input
+(buf/write! buffer [22 true] my-spec1)
+;; => 5
+----
+
+The `write!` function  returns a number of bytes are written into buffer.
+
+As, previously mentioned, indexed and associative specs with same fields (in same order) represents
+the identical byte layout. Knowing that, we also can do the same operation but using the associative
+spec defined previously:
+
+.Example writing data into buffer using a map as input
+[source, clojure]
+----
+(buf/write! buffer {:field1 22 :field2 true} my-spec2)
+;; => 5
+----
+
+Secondly, the read operation is mostly similar to write one. It reads from buffer following the
+spec data definition and return corresponding data structure or plain value.
+
+.Example reading data using indexed spec.
+[source, clojure]
+----
+(buf/read buffer my-spec1)
+;; => [22 true]
+----
+
+Also, you can perform the same operation, but using a associative spec:
+
+.Example reading data using associative spec.
+[source, clojure]
+----
+(buf/read buffer my-spec2)
+;; => {:field1 22 :field2 true}
+----
+
+NOTE: This works idependently of implementation used for allocate the buffer. Some implementations
+has little limitations, es6 (cljs) as example, des not support `int64` typespec due to platform
+limitations.
+
+Composed type specs and plain value type specs implements the same abstraction and both can be used
+directly in read and write operations.
+
+.Use *int16* as spec for read from buffer.
+[source, clojure]
+----
+(buf/read buffer (buf/int16))
+;; => 22
+----
 
 
 == Advanced usage
+
+=== Read & Write with offset.
+
+If you know that the data what you want read is located in a specific position in a buffer, you
+can specify it in a read or write operation:
+
+.Example writing data in specific offset
+[source, clojure]
+----
+(buf/write buffer [0 false] my-spec1 {:offset 20})
+;; => [0 false]
+----
+
+.Example read data from specific offset.
+[source, clojure]
+----
+(buf/read buffer my-spec1 {:offset 20})
+;; => [0 false]
+----
+
+=== Show readed bytes.
+
+The default `read` function returns readed data but not returns a amount of readed bytes. For it,
+_bytebuf_ exposes a convenience function `read*` that instead of return only readed data, returns
+a vector with amount of bytes readed and the readed data:
+
+.Example using `read*` function
+[source, clojure]
+----
+(buf/read* buffer my-spec2)
+;; => [5 {:field1 22 :field2 true}]
+----
+
+=== Read & Write repeatedly
+
+At this moment, _bytebuf_ does not incluedes facilities for create repeated compositions, but it can
+be solved using normal clojure primitives for it.
+
+.Example repeatedly write data into buffer using the same spec.
+[source, clojure]
+----
+(def spec (buf/spec (buf/int16) (buf/int16)))
+
+(reduce (fn [offset data]
+          (let [written (buf/write! buffer data spec {:offset offset})]
+            (+ offset written)))
+        0
+        [[1 2] [3 4] [5 6]])
+;; => 12
+----
+
+.Example read three times from buffer using the same spec
+[source, clojure]
+----
+(reduce (fn [acc offset]
+          (conj acc (buf/read buffer spec {:offset offset})))
+        []
+        (range 0 10 4))
+;; => [[1 2] [3 4] [5 6]]
+----
+
+In future versions, this surelly will be improved providing facilities for
+create repeated compositions.
+
+=== Using arbitrary size type specs
+
+Until now, we have seen examples alway using fixed size compositions. Fixed size compositions
+are easy understand, the size of the spec can be know in any time. But in some circumstances
+we want store arbitrary length types.
+
+Arbitrary lenght strings is a clear example, and _bytebuf_ comes with that type spec implemented:
+
+.Example writing arbitrary length string into buffer
+[source, clojure]
+----
+(buf/write! buffer "hello world" (buf/string*))
+;; => 15
+----
+
+.Example reading arbitrary length string from buffer
+[source, clojure]
+----
+(buf/read buffer (buf/string*))
+;; => "hello world"
+----
+
+But, how it works? Type specs like that, is a composition of two typespecs: *int32* and
+fixed length *string*. On write phase, it calculates the size of string, writes firstly the size
+as `int32` following of fixed size string. The read phase is like write but in backward direction.
+
+Also, the size of that type spec depends on data and can not be known outsize of read/write phase:
+
+.Example how obtain a size of specific type spec
+[source, clojure]
+----
+(buf/size (buf/int16))
+;; => 2
+
+(buf/size (buf/string*))
+;; => IllegalArgumentException No implementation of method: :size of protocol: #'bytebuf.proto/IStaticSize found for class: bytebuf.spec.string$string_STAR_$reify__1804  clojure.core/-cache-protocol-fn (core_deftype.clj:555)
+----
+
+== Additional info
 
 [[supported-bytebuffers]]
 === Supported byte buffers
@@ -158,6 +327,35 @@ This is a complete table of supported byte buffer implementations and type of by
 |=========================================
 
 
+=== Supported typespecs
+
+This is a complete list of supported plain value type spec:
+
+[cols="1,1,1,2", options="header"]
+|====================================================================
+| Name    | Function      | Size (in bytes) | Notes
+| Short   | `buf/int16`   | 2               |
+| Integer | `buf/int32`   | 4               |
+| Long    | `buf/int64`   | 8               | Only on jvm
+| Float   | `buf/float`   | 4               |
+| Double  | `buf/double`  | 8               |
+| Boolean | `buf/bool`    | 1               |
+| Byte    | `buf/byte`    | 1               |
+| String  | `buf/string`  | N               | Fixed length string
+| String  | `buf/string*` | 4+N             | Arbitrary length string
+|====================================================================
+
+
+Independently if a spec is a value spec or a composition of value specs, all them
+implements the same abstraction and can be used in read or write operations.
+
+
+=== Coming features
+
+- *memoryviews*: abstraction for random read/write access to buffer without parsing
+  all spec related data.
+- nodejs/iojs buffer support.
+- more function for create compositions like repeated type, or key value pairs.
 
 
 == How to Contribute?
