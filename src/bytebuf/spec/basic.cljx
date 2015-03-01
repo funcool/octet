@@ -7,21 +7,29 @@
 ;; Types implementation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn bool
-  "Boolean type spec constructor."
-  ([] (bool nil))
-  ([default]
-   (reify
-     spec/ISpecSize
-     (size [_] 1)
+(def ^{:doc "Boolean type spec."}
+  bool
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
 
-     spec/ISpec
-     (read [_ buff pos]
-       (let [readed (buffer/read-byte buff pos)]
-         [1 (condp = readed
-              (clojure.core/byte 0) false
-              (clojure.core/byte 1) true
-              nil)]))
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
+
+    spec/ISpecSize
+    (size [_] 1)
+
+    spec/ISpec
+    (read [_ buff pos]
+      (let [readed (buffer/read-byte buff pos)]
+        [1 (condp = readed
+             (clojure.core/byte 0) false
+             (clojure.core/byte 1) true
+             nil)]))
 
      (write [_ buff pos value]
        (let [value (condp = value
@@ -29,115 +37,157 @@
                      false (clojure.core/byte 0)
                      (clojure.core/byte -1))]
          (buffer/write-byte buff pos value)
-         1)))))
+         1))))
 
-(defn byte
-  "Byte type spec constructor."
-  ([] (byte (clojure.core/byte 0)))
-  ([default]
-   (reify
-     spec/ISpecSize
-     (size [_] 1)
+(def ^{:doc "Byte type spec."}
+  byte
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
 
-     spec/ISpec
-     (read [_ buff pos]
-       (let [readed (buffer/read-byte buff pos)]
-         [1 readed]))
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
 
-     (write [_ buff pos value]
-       (let [value (clojure.core/byte (or value default))]
-         (buffer/write-byte buff pos value)
-         1)))))
+    spec/ISpecSize
+    (size [_] 1)
 
-(defn int16
-  "Short type spec constructor."
-  ([] (int16 0))
-  ([default]
-   (reify
-     spec/ISpecSize
-     (size [_] 2)
+    spec/ISpec
+    (read [_ buff pos]
+      (let [readed (buffer/read-byte buff pos)]
+        [1 readed]))
 
-     spec/ISpec
-     (read [s buff pos]
-       [(spec/size s)
-        (buffer/read-short buff pos)])
+    (write [_ buff pos value]
+      (some->> value (buffer/write-byte buff pos))
+      1)))
 
-     (write [s buff pos value]
-       (let [value (or value default)]
-         (buffer/write-short buff pos value)
-         (spec/size s))))))
+(def ^{:doc "Short type spec."}
+  int16
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
 
-(defn int32
-  "Integer type spec constructor."
-  ([] (int32 0))
-  ([default]
-   (reify
-     spec/ISpecSize
-     (size [_] 4)
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
 
-     spec/ISpec
-     (read [s buff pos]
-       [(spec/size s)
-        (buffer/read-int buff pos)])
+    spec/ISpecSize
+    (size [_] 2)
 
-     (write [s buff pos value]
-       (let [value (or value default)]
-         (buffer/write-int buff pos value)
-         (spec/size s))))))
+    spec/ISpec
+    (read [s buff pos]
+      [(spec/size s)
+       (buffer/read-short buff pos)])
 
-(defn int64
-  "Long type spec constructor."
-  ([] (int64 0))
-  ([default]
-   (reify
-     spec/ISpecSize
-     (size [_] 8)
+    (write [s buff pos value]
+      (some->> value (buffer/write-short buff pos))
+      (spec/size s))))
 
-     spec/ISpec
-     (read [s buff pos]
-       [(spec/size s)
-        (buffer/read-long buff pos)])
+(def ^{:doc "Integer type spec."}
+  int32
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
 
-     (write [s buff pos value]
-       (let [value (or value default)]
-         (buffer/write-long buff pos value)
-         (spec/size s))))))
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
 
-(defn float
-  "Float type spec constructor."
-  ([] (float 0))
-  ([default]
-   (reify
-     spec/ISpecSize
-     (size [_] 4)
+    spec/ISpecSize
+    (size [_] 4)
 
-     spec/ISpec
-     (read [s buff pos]
-       [(spec/size s)
-        (buffer/read-float buff pos)])
+    spec/ISpec
+    (read [s buff pos]
+      [(spec/size s)
+       (buffer/read-int buff pos)])
 
-     (write [s buff pos value]
-       (let [value (or value default)]
-         (buffer/write-float buff pos value)
-         (spec/size s))))))
+    (write [s buff pos value]
+      (some->> value (buffer/write-int buff pos))
+      (spec/size s))))
 
-(defn double
-  "Double type spec constructor."
-  ([] (double 0))
-  ([default]
-   (reify
-     spec/ISpecSize
-     (size [_] 8)
+(def ^{:doc "Long type spec."}
+  int64
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
 
-     spec/ISpec
-     (read [s buff pos]
-       [(spec/size s)
-        (buffer/read-double buff pos)])
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
 
-     (write [s buff pos value]
-       (let [value (or value default)]
-         (buffer/write-double buff pos value)
-         (spec/size s))))))
+    spec/ISpecSize
+    (size [_] 8)
+
+    spec/ISpec
+    (read [s buff pos]
+      [(spec/size s)
+       (buffer/read-long buff pos)])
+
+    (write [s buff pos value]
+      (some->> value (buffer/write-long buff pos))
+      (spec/size s))))
+
+(def ^{:doc "Float type spec"}
+  float
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
+
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
+
+    spec/ISpecSize
+    (size [_] 4)
+
+    spec/ISpec
+    (read [s buff pos]
+      [(spec/size s)
+       (buffer/read-float buff pos)])
+
+    (write [s buff pos value]
+      (some->> value (buffer/write-float buff pos))
+      (spec/size s))))
+
+(def ^{:doc "Double type spec."}
+  double
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
+
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
+
+    spec/ISpecSize
+    (size [_] 8)
+
+    spec/ISpec
+    (read [s buff pos]
+      [(spec/size s)
+       (buffer/read-double buff pos)])
+
+    (write [s buff pos value]
+      (some->> value (buffer/write-double buff pos))
+      (spec/size s))))
 
 (defn bytes
   "Fixed size byte array type spec constructor."
