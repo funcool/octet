@@ -517,11 +517,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_coming_features">6.3. Coming features</a></li>
 </ul>
 </li>
-<li><a href="#_how_to_contribute">7. How to Contribute?</a>
+<li><a href="#_faq">7. FAQ</a></li>
+<li><a href="#_how_to_contribute">8. How to Contribute?</a>
 <ul class="sectlevel2">
-<li><a href="#_philosophy">7.1. Philosophy</a></li>
-<li><a href="#_procedure">7.2. Procedure</a></li>
-<li><a href="#_license">7.3. License</a></li>
+<li><a href="#_philosophy">8.1. Philosophy</a></li>
+<li><a href="#_procedure">8.2. Procedure</a></li>
+<li><a href="#_license">8.3. License</a></li>
 </ul>
 </li>
 </ul>
@@ -536,8 +537,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 with bytes is not very pleasant.</p>
 </div>
 <div class="paragraph">
-<p><em>octet</em> library offers a simple api for working with raw byte arrays and compose binary protocols
-for two most used clojure implementations: clojure (jvm) and clojurescript (javascript).</p>
+<p><em>octet</em> library offers a simple api for clojure (jvm) and clojurescript (js) that makes
+working with bytebuffer painless.</p>
+</div>
+<div class="paragraph">
+<p>This is a short list of project goals:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Not to be intrusive (no bytebuffer wrapping).</p>
+</li>
+<li>
+<p>Provide host independent abstraction (in most possible way).</p>
+</li>
+<li>
+<p>Partial deserialization (TODO).</p>
+</li>
+<li>
+<p>Composability.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -1126,10 +1146,34 @@ all spec related data.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_how_to_contribute"><a class="link" href="#_how_to_contribute">7. How to Contribute?</a></h2>
+<h2 id="_faq"><a class="link" href="#_faq">7. FAQ</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>What is the difference with <em>buffy</em>?</strong></p>
+</div>
+<div class="paragraph">
+<p><strong>Buffy</strong> is a excelent library, and I have used it in some circumstances, but is has some things that I personally don&#8217;t like:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It works only with netty bytebuf and I need an abstraction for work with different implementations, including in clojurescript.</p>
+</li>
+<li>
+<p>It has slightly strange and not uniform api when dynamic frames (arbitrary length size types) are used. <em>octet</em> offers unified api for both type of specs.</p>
+</li>
+<li>
+<p>It wraps bytebuf in a self defined type. <em>octet</em> is a lightweight abstraction that works over host implementations, without wrapping them.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_to_contribute"><a class="link" href="#_how_to_contribute">8. How to Contribute?</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_philosophy"><a class="link" href="#_philosophy">7.1. Philosophy</a></h3>
+<h3 id="_philosophy"><a class="link" href="#_philosophy">8.1. Philosophy</a></h3>
 <div class="paragraph">
 <p>Five most important rules:</p>
 </div>
@@ -1157,7 +1201,7 @@ all spec related data.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_procedure"><a class="link" href="#_procedure">7.2. Procedure</a></h3>
+<h3 id="_procedure"><a class="link" href="#_procedure">8.2. Procedure</a></h3>
 <div class="paragraph">
 <p><strong>octet</strong> unlike Clojure and other Clojure contrib libs, does not have many
 restrictions for contributions. Just follow the following steps depending on the
@@ -1194,7 +1238,7 @@ situation:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_license"><a class="link" href="#_license">7.3. License</a></h3>
+<h3 id="_license"><a class="link" href="#_license">8.3. License</a></h3>
 <div class="paragraph">
 <p><em>octet</em> library is licensed under BSD (2-Clause) license:</p>
 </div>
@@ -1232,7 +1276,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-03-01 19:37:53 CET
+Last updated 2015-03-01 19:56:42 CET
 </div>
 </div>
 </body>
