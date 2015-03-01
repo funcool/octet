@@ -142,5 +142,21 @@
   [& types]
   (IndexedSpec. types))
 
-(def ^{:doc "A semantic alias for spec constructor."}
-  compose-type spec)
+(defn compose
+  "Constructor of composed typespecs with specific constructor."
+  [constructor types]
+  {:pre [(fn? constructor)
+         (vector? types)]}
+  (let [spec' (apply spec types)]
+    (reify
+      ISpecSize
+      (size [_] (size spec'))
+
+      ISpec
+      (read [_ buff pos]
+        (let [[readed data] (read spec' buff pos)]
+          [readed (apply constructor data)]))
+
+      (write [_ buff pos data']
+        (let [data' (vec (vals data'))]
+          (write spec' buff pos data'))))))

@@ -254,3 +254,13 @@
     (let [[readed data'] (buf/read* buffer spec)]
       (t/is (= readed (buf/size spec)))
       (t/is (= data' data)))))
+
+
+(defrecord Point [x y])
+
+(t/deftest spec-composition-with-compose
+  (let [pointspec (buf/compose ->Point [buf/int32 buf/int32])
+        point (->Point 1 2)
+        buffer (buf/allocate 8)]
+    (t/is (= 8 (buf/write! buffer point pointspec)))
+    (t/is (= point (buf/read buffer pointspec)))))

@@ -5,6 +5,7 @@
             [bytebuf.spec.string :as string-spec]
             [bytebuf.buffer :as buffer]))
 
+(def compose spec/compose)
 (def spec spec/spec)
 (def size spec/size)
 
