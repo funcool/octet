@@ -85,11 +85,11 @@ Let start defining one:
 (require '[bytebuff.core :as buf])
 
 ;; Indexed composition
-(def my-spec1 (buf/spec (buf/int32) (buf/bool)))
+(def my-spec1 (buf/spec buf/int32 buf/bool))
 
 ;; The same spec but using associative composition
-(def my-spec2 (buf/spec :field1 (buf/int32)
-                        :field2 (buf/bool)))
+(def my-spec2 (buf/spec :field1 buf/int32
+                        :field2 buf/bool))
 ----
 
 You can check that the spec size (in bytes) and number of types internally is the same
@@ -248,7 +248,7 @@ be solved using normal clojure primitives for it.
 .Example repeatedly write data into buffer using the same spec.
 [source, clojure]
 ----
-(def spec (buf/spec (buf/int16) (buf/int16)))
+(def spec (buf/spec buf/int16 buf/int16))
 
 (reduce (fn [offset data]
           (let [written (buf/write! buffer data spec {:offset offset})]
@@ -277,12 +277,12 @@ Until now, we have seen examples alway using fixed size compositions. Fixed size
 are easy understand, the size of the spec can be know in any time. But in some circumstances
 we want store arbitrary length types.
 
-Arbitrary lenght strings is a clear example, and _bytebuf_ comes with that type spec implemented:
+Arbitrary lenght strings is a clear example:
 
 .Example writing arbitrary length string into buffer
 [source, clojure]
 ----
-(buf/write! buffer "hello world" (buf/string*))
+(buf/write! buffer "hello world" buf/string*)
 ;; => 15
 ----
 
@@ -302,11 +302,11 @@ Also, the size of that type spec depends on data and can not be known outsize of
 .Example how obtain a size of specific type spec
 [source, clojure]
 ----
-(buf/size (buf/int16))
+(buf/size buf/int16)
 ;; => 2
 
-(buf/size (buf/string*))
-;; => IllegalArgumentException No implementation of method: :size of protocol: #'bytebuf.proto/IStaticSize found for class: bytebuf.spec.string$string_STAR_$reify__1804  clojure.core/-cache-protocol-fn (core_deftype.clj:555)
+(buf/size buf/string*)
+;; => IllegalArgumentException No implementation of method: :size of protocol: #'bytebuf.spec/ISpecSize found for class: bytebuf.spec.string$string_STAR_$reify__1804  clojure.core/-cache-protocol-fn (core_deftype.clj:555)
 ----
 
 === Define own type spec
