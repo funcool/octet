@@ -1,7 +1,6 @@
 (ns bytebuf.spec
   (:refer-clojure :exclude [type read float double long short byte bytes])
-  (:require [bytebuf.proto :as proto :refer [IStaticSize]]
-            [bytebuf.buffer :as buffer]))
+  (:require [bytebuf.buffer :as buffer]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Abstraction definition
@@ -11,6 +10,9 @@
   "Basic abstraction for something that can be work like a Spec."
   (read [_ buff start] "Read all data from buffer.")
   (write [_ buff start data] "Read all data from buffer."))
+
+(defprotocol ISpecSize
+  (size [_] "Calculate the size in bytes of the object."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Composed Spec Types
@@ -29,9 +31,9 @@
   (-count [_]
     (count types))
 
-  IStaticSize
+  ISpecSize
   (size [_]
-    (reduce #(+ %1 (proto/size %2)) 0 types))
+    (reduce #(+ %1 (size %2)) 0 types))
 
   ISpec
   (read [_ buff pos]
@@ -64,9 +66,9 @@
   (-count [_]
     (count types))
 
-  IStaticSize
+  ISpecSize
   (size [_]
-    (reduce #(+ %1 (proto/size %2)) 0 types))
+    (reduce #(+ %1 (size %2)) 0 types))
 
   ISpec
   (read [_ buff pos]

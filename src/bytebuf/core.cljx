@@ -3,11 +3,11 @@
   (:require [bytebuf.spec :as spec]
             [bytebuf.spec.basic :as basic-spec]
             [bytebuf.spec.string :as string-spec]
-            [bytebuf.buffer :as buffer]
-            [bytebuf.proto :as proto]))
+            [bytebuf.buffer :as buffer]))
 
 (def compose-type spec/compose-type)
 (def spec spec/spec)
+(def size spec/size)
 
 (def string string-spec/string)
 (def string* string-spec/string*)
@@ -22,7 +22,6 @@
 (def bool basic-spec/bool)
 
 (def allocate buffer/allocate)
-(def size proto/size)
 
 (def ^{:doc "Alias for int16"} short int16)
 (def ^{:doc "Alias for int32"} integer int32)

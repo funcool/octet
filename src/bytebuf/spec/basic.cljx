@@ -1,7 +1,6 @@
 (ns bytebuf.spec.basic
   (:refer-clojure :exclude [type read float double long short byte bytes])
-  (:require [bytebuf.proto :as proto]
-            [bytebuf.buffer :as buffer]
+  (:require [bytebuf.buffer :as buffer]
             [bytebuf.spec :as spec]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13,7 +12,7 @@
   ([] (bool nil))
   ([default]
    (reify
-     proto/IStaticSize
+     spec/ISpecSize
      (size [_] 1)
 
      spec/ISpec
@@ -37,7 +36,7 @@
   ([] (byte (clojure.core/byte 0)))
   ([default]
    (reify
-     proto/IStaticSize
+     spec/ISpecSize
      (size [_] 1)
 
      spec/ISpec
@@ -55,96 +54,96 @@
   ([] (int16 0))
   ([default]
    (reify
-     proto/IStaticSize
+     spec/ISpecSize
      (size [_] 2)
 
      spec/ISpec
      (read [s buff pos]
-       [(proto/size s)
+       [(spec/size s)
         (buffer/read-short buff pos)])
 
      (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-short buff pos value)
-         (proto/size s))))))
+         (spec/size s))))))
 
 (defn int32
   "Integer type spec constructor."
   ([] (int32 0))
   ([default]
    (reify
-     proto/IStaticSize
+     spec/ISpecSize
      (size [_] 4)
 
      spec/ISpec
      (read [s buff pos]
-       [(proto/size s)
+       [(spec/size s)
         (buffer/read-int buff pos)])
 
      (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-int buff pos value)
-         (proto/size s))))))
+         (spec/size s))))))
 
 (defn int64
   "Long type spec constructor."
   ([] (int64 0))
   ([default]
    (reify
-     proto/IStaticSize
+     spec/ISpecSize
      (size [_] 8)
 
      spec/ISpec
      (read [s buff pos]
-       [(proto/size s)
+       [(spec/size s)
         (buffer/read-long buff pos)])
 
      (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-long buff pos value)
-         (proto/size s))))))
+         (spec/size s))))))
 
 (defn float
   "Float type spec constructor."
   ([] (float 0))
   ([default]
    (reify
-     proto/IStaticSize
+     spec/ISpecSize
      (size [_] 4)
 
      spec/ISpec
      (read [s buff pos]
-       [(proto/size s)
+       [(spec/size s)
         (buffer/read-float buff pos)])
 
      (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-float buff pos value)
-         (proto/size s))))))
+         (spec/size s))))))
 
 (defn double
   "Double type spec constructor."
   ([] (double 0))
   ([default]
    (reify
-     proto/IStaticSize
+     spec/ISpecSize
      (size [_] 8)
 
      spec/ISpec
      (read [s buff pos]
-       [(proto/size s)
+       [(spec/size s)
         (buffer/read-double buff pos)])
 
      (write [s buff pos value]
        (let [value (or value default)]
          (buffer/write-double buff pos value)
-         (proto/size s))))))
+         (spec/size s))))))
 
 (defn bytes
   "Fixed size byte array type spec constructor."
   [^long size]
   (reify
-    proto/IStaticSize
+    spec/ISpecSize
     (size [_] size)
 
     spec/ISpec

@@ -1,6 +1,5 @@
 (ns bytebuf.spec.string
-  (:require [bytebuf.proto :as proto]
-            [bytebuf.buffer :as buffer]
+  (:require [bytebuf.buffer :as buffer]
             [bytebuf.spec :as spec]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -94,10 +93,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn string
-  "Fixed size string type spec constructor."
+  "Fixed length string type spec constructor."
   [size]
   (reify
-    proto/IStaticSize
+    spec/ISpecSize
     (size [_] size)
 
     spec/ISpec
