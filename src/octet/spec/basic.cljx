@@ -1,7 +1,7 @@
-(ns bytebuf.spec.basic
+(ns octet.spec.basic
   (:refer-clojure :exclude [type read float double long short byte bytes])
-  (:require [bytebuf.buffer :as buffer]
-            [bytebuf.spec :as spec]))
+  (:require [octet.buffer :as buffer]
+            [octet.spec :as spec]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Types implementation

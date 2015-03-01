@@ -1,6 +1,6 @@
-(defproject funcool/bytebuf "0.1.0-SNAPSHOT"
+(defproject funcool/octet "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
-  :url "https://github.com/funcool/bytebuf"
+  :url "https://github.com/funcool/octet"
   :license {:name "BSD (2 Clause)"
             :url "http://opensource.org/licenses/BSD-2-Clause"}
   :dependencies [[org.clojure/clojure "1.7.0-alpha5"]
@@ -33,7 +33,7 @@
                                    :output-dir "output/out"
                                    :static-fns true
                                    :cache-analysis false
-                                   :main bytebuf.tests.main
+                                   :main octet.tests.main
                                    :source-map true
                                    :optimizations :none
                                    :target :nodejs

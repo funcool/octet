@@ -1,4 +1,4 @@
-= bytebuf - A library for working with ByteBuffer's
+= octet - A library for working with ByteBuffer's
 Andrey Antukh, <niwi@niwi.be>
 0.1.0
 :toc: left
@@ -12,23 +12,23 @@ Andrey Antukh, <niwi@niwi.be>
 Working with raw bytes is tedious, and sometimes the language abstractions for working
 with bytes is not very pleasant.
 
-_bytebuf_ library offers a simple api for working with raw byte arrays and compose binary protocols
+_octet_ library offers a simple api for working with raw byte arrays and compose binary protocols
 for two most used clojure implementations: clojure (jvm) and clojurescript (javascript).
 
 
 == Project Maturity
 
-Since _bytebuf_ is a young project there can be some API breakage.
+Since _octet_ is a young project there can be some API breakage.
 
 
 == Install
 
-This section covers the _bytebuf_ library installing process and its requirements.
+This section covers the _octet_ library installing process and its requirements.
 
 
 === Requirements
 
-_bytebuf_ is tested with these platforms:
+_octet_ is tested with these platforms:
 
 - jdk7
 - jdk8
@@ -44,33 +44,33 @@ vector on your *_project.clj_* file:
 ._on project.clj_
 [source,clojure]
 ----
-[funcool/bytebuf "0.1.0"]
+[funcool/octet "0.1.0"]
 ----
 
 === Get the Code
 
-_bytebuf_ is open source and can be found on link:https://github.com/funcool/bytebuf[github].
+_octet_ is open source and can be found on link:https://github.com/funcool/octet[github].
 
 You can clone the public repository with this command:
 
 [source,text]
 ----
-git clone https://github.com/funcool/bytebuf
+git clone https://github.com/funcool/octet
 ----
 
 
 == Getting started
 
-The main goal of _bytebuf_ is provide, multiplatform abstraction for work with bytebuffer's. For it
+The main goal of _octet_ is provide, multiplatform abstraction for work with bytebuffer's. For it
 offers a ligweight api for define message types in a declarative way and use them for read or
 write to bytebuffers.
 
-As previously said, _bytebuf_  works with both most used clojure implementations: clojure & clojurescript. Each platform has own bytebuffer like types. _bytebuf_ library offers implementations for link:http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[NIO ByteBuffer] and link:http://netty.io/4.1/api/io/netty/buffer/ByteBuf.html[Netty ByteBuf] in clojure and link:https://developer.mozilla.org/en/docs/Web/JavaScript/Typed_arrays[es6 typed arrays] in clojurescript.
+As previously said, _octet_  works with both most used clojure implementations: clojure & clojurescript. Each platform has own bytebuffer like types. _octet_ library offers implementations for link:http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[NIO ByteBuffer] and link:http://netty.io/4.1/api/io/netty/buffer/ByteBuf.html[Netty ByteBuf] in clojure and link:https://developer.mozilla.org/en/docs/Web/JavaScript/Typed_arrays[es6 typed arrays] in clojurescript.
 
 
 === Define a spec
 
-A spec in _bytebuf_ glossary represents a type definition or a composition of types. Two most common
+A spec in _octet_ glossary represents a type definition or a composition of types. Two most common
 composition types are: associative and indexed.
 
 The difference of indexed and associative compositions is the input and output. In associative
@@ -82,7 +82,7 @@ Let start defining one:
 
 [source, clojure]
 ----
-(require '[bytebuff.core :as buf])
+(require '[octetf.core :as buf])
 
 ;; Indexed composition
 (def my-spec1 (buf/spec buf/int32 buf/bool))
@@ -230,7 +230,7 @@ can specify it in a read or write operation:
 === Show readed bytes.
 
 The default `read` function returns readed data but not returns a amount of readed bytes. For it,
-_bytebuf_ exposes a convenience function `read*` that instead of return only readed data, returns
+_octet_ exposes a convenience function `read*` that instead of return only readed data, returns
 a vector with amount of bytes readed and the readed data:
 
 .Example using `read*` function
@@ -242,7 +242,7 @@ a vector with amount of bytes readed and the readed data:
 
 === Read & Write repeatedly
 
-At this moment, _bytebuf_ does not incluedes facilities for create repeated compositions, but it can
+At this moment, _octet_ does not incluedes facilities for create repeated compositions, but it can
 be solved using normal clojure primitives for it.
 
 .Example repeatedly write data into buffer using the same spec.
@@ -306,12 +306,12 @@ Also, the size of that type spec depends on data and can not be known outsize of
 ;; => 2
 
 (buf/size buf/string*)
-;; => IllegalArgumentException No implementation of method: :size of protocol: #'bytebuf.spec/ISpecSize found for class: bytebuf.spec.string$string_STAR_$reify__1804  clojure.core/-cache-protocol-fn (core_deftype.clj:555)
+;; => IllegalArgumentException No implementation of method: :size of protocol: #'octet.spec/ISpecSize found for class: octet.spec.string$string_STAR_$reify__1804  clojure.core/-cache-protocol-fn (core_deftype.clj:555)
 ----
 
 === Define own type spec
 
-In some circumstances, you probably need define own typespec for solve concrete situations. _bytebuf_
+In some circumstances, you probably need define own typespec for solve concrete situations. _octet_
 is build around abstractions and define new type spec is not very complicated job.
 
 An typespec consists mainly in `ISpec` protocol that has two methods: `read` and `write`. Let
@@ -320,7 +320,7 @@ see an example defining a typespec for point of coordenades:
 .Example definition of type spec that represents a point
 [source, clojure]
 ----
-(require '[bytebuf.spec :as spec])
+(require '[octet.spec :as spec])
 
 ;; Imagine you have a type Point defined like this:
 (defrecord Point [x y])
@@ -441,12 +441,12 @@ Five most important rules:
 - Complex is better than complicated.
 - Readability counts.
 
-All contributions to _bytebuf_ should keep these important rules in mind.
+All contributions to _octet_ should keep these important rules in mind.
 
 
 === Procedure
 
-**bytebuf** unlike Clojure and other Clojure contrib libs, does not have many
+**octet** unlike Clojure and other Clojure contrib libs, does not have many
 restrictions for contributions. Just follow the following steps depending on the
 situation:
 
@@ -463,7 +463,7 @@ situation:
 
 === License
 
-_bytebuf_ is licensed under BSD (2-Clause) license:
+_octet_ library is licensed under BSD (2-Clause) license:
 
 ----
 Copyright (c) 2015 Andrey Antukh <niwi@niwi.be>

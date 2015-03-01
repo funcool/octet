@@ -1,4 +1,4 @@
-(ns bytebuf.buffer
+(ns octet.buffer
   "Buffer abstractions."
   #+clj
   (:import java.nio.ByteBuffer

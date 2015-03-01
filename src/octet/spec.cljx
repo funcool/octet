@@ -1,6 +1,6 @@
-(ns bytebuf.spec
+(ns octet.spec
   (:refer-clojure :exclude [type read float double long short byte bytes])
-  (:require [bytebuf.buffer :as buffer]))
+  (:require [octet.buffer :as buffer]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Abstraction definition

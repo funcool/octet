@@ -1,6 +1,6 @@
-(ns bytebuf.spec.string
-  (:require [bytebuf.buffer :as buffer]
-            [bytebuf.spec :as spec]))
+(ns octet.spec.string
+  (:require [octet.buffer :as buffer]
+            [octet.spec :as spec]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers

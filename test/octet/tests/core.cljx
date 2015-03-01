@@ -12,11 +12,11 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns bytebuf.tests.core
+(ns octet.tests.core
   (:require #+clj [clojure.test :as t]
             #+cljs [cljs.test :as t]
-            [bytebuf.core :as buf]
-            [bytebuf.buffer :as impl])
+            [octet.core :as buf]
+            [octet.buffer :as impl])
   #+clj
   (:import java.nio.ByteBuffer
            io.netty.buffer.ByteBuf))

@@ -1,9 +1,9 @@
-(ns bytebuf.core
+(ns octet.core
   (:refer-clojure :exclude [read byte float double short long bytes])
-  (:require [bytebuf.spec :as spec]
-            [bytebuf.spec.basic :as basic-spec]
-            [bytebuf.spec.string :as string-spec]
-            [bytebuf.buffer :as buffer]))
+  (:require [octet.spec :as spec]
+            [octet.spec.basic :as basic-spec]
+            [octet.spec.string :as string-spec]
+            [octet.buffer :as buffer]))
 
 (def compose spec/compose)
 (def spec spec/spec)
