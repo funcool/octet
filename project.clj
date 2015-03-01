@@ -1,12 +1,11 @@
-(defproject funcool/octet "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
+(defproject funcool/octet "0.1.0"
+  :description "A clojure(script) library for work with binary data."
   :url "https://github.com/funcool/octet"
   :license {:name "BSD (2 Clause)"
             :url "http://opensource.org/licenses/BSD-2-Clause"}
-  :dependencies [[org.clojure/clojure "1.7.0-alpha5"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [io.netty/netty-buffer "4.1.0.Beta3"]
-                 [org.clojure/clojurescript "0.0-2913"]
-                 [potemkin "0.3.11"]]
+                 [org.clojure/clojurescript "0.0-2913"]]
 
   :source-paths ["output/src"]
   :test-paths ["output/test/clj"]
