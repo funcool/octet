@@ -120,10 +120,19 @@
         (buffer/write-bytes buff pos size tmpbuf)
         size))))
 
-(defn string*
-  "Arbitrary length string type spec constructor."
-  []
+(def ^{:doc "Arbitrary length string type spec."}
+  string*
   (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
+
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
+
     spec/ISpec
     (read [_ buff pos]
       (let [datasize (buffer/read-int buff pos)
