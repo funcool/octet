@@ -507,6 +507,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_show_readed_bytes">5.2. Show readed bytes.</a></li>
 <li><a href="#_read_write_repeatedly">5.3. Read &amp; Write repeatedly</a></li>
 <li><a href="#_using_arbitrary_size_type_specs">5.4. Using arbitrary size type specs</a></li>
+<li><a href="#_define_own_type_spec">5.5. Define own type spec</a></li>
 </ul>
 </li>
 <li><a href="#_additional_info">6. Additional info</a>
@@ -896,6 +897,63 @@ as <code>int32</code> following of fixed size string. The read phase is like wri
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_define_own_type_spec"><a class="link" href="#_define_own_type_spec">5.5. Define own type spec</a></h3>
+<div class="paragraph">
+<p>In some circumstances, you probably need define own typespec for solve concrete situations. <em>bytebuf</em>
+is build around abstractions and define new type spec is not very complicated job.</p>
+</div>
+<div class="paragraph">
+<p>An typespec consists mainly in <code>ISpec</code> protocol that has two methods: <code>read</code> and <code>write</code>. Let
+see an example defining a typespec for point of coordenades:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example definition of type spec that represents a point</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">bytebuf.spec</span> <span class="tok-ss">:as</span> <span class="tok-nv">spec</span><span class="tok-p">])</span>
+
+<span class="tok-c1">;; Imagine you have a type Point defined like this:</span>
+<span class="tok-p">(</span><span class="tok-kd">defrecord </span><span class="tok-nv">Point</span> <span class="tok-p">[</span><span class="tok-nv">x</span> <span class="tok-nv">y</span><span class="tok-p">])</span>
+
+<span class="tok-c1">;; Type spec definition for read/write Point instances.</span>
+<span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">point</span> <span class="tok-p">[]</span>
+  <span class="tok-p">(</span><span class="tok-nf">reify</span>
+    <span class="tok-nv">spec/ISpecSize</span>
+    <span class="tok-p">(</span><span class="tok-nf">size</span> <span class="tok-p">[</span><span class="tok-nv">_</span><span class="tok-p">]</span>
+      <span class="tok-c1">;; we kwno that is datatype has fixed size in bytes</span>
+      <span class="tok-c1">;; that represents two int32.</span>
+      <span class="tok-mi">8</span><span class="tok-p">)</span>
+
+    <span class="tok-nv">spec/ISpec</span>
+    <span class="tok-p">(</span><span class="tok-nb">read </span><span class="tok-p">[</span><span class="tok-nv">_</span> <span class="tok-nv">buff</span> <span class="tok-nv">pos</span><span class="tok-p">]</span>
+      <span class="tok-p">(</span><span class="tok-k">let </span><span class="tok-p">[[</span><span class="tok-nv">readed</span> <span class="tok-nv">xvalue</span><span class="tok-p">]</span> <span class="tok-p">(</span><span class="tok-nf">spec/read</span> <span class="tok-p">(</span><span class="tok-nf">buf/int32</span><span class="tok-p">)</span> <span class="tok-nv">buff</span> <span class="tok-nv">pos</span><span class="tok-p">)</span>
+            <span class="tok-p">[</span><span class="tok-nv">readed</span><span class="tok-o">&#39;</span> <span class="tok-nv">yvalue</span><span class="tok-p">]</span> <span class="tok-p">(</span><span class="tok-nf">spec/read</span> <span class="tok-p">(</span><span class="tok-nf">buf/int32</span><span class="tok-p">)</span> <span class="tok-nv">buff</span> <span class="tok-p">(</span><span class="tok-nb">+ </span><span class="tok-nv">pos</span> <span class="tok-nv">readed</span><span class="tok-p">))]</span>
+        <span class="tok-p">[(</span><span class="tok-nb">+ </span><span class="tok-nv">readed</span> <span class="tok-nv">readed</span><span class="tok-o">&#39;</span><span class="tok-p">)</span>
+         <span class="tok-p">(</span><span class="tok-nf">Point.</span> <span class="tok-nv">xvalue</span> <span class="tok-nv">yvalue</span><span class="tok-p">)]))</span>
+
+    <span class="tok-p">(</span><span class="tok-nf">write</span> <span class="tok-p">[</span><span class="tok-nv">_</span> <span class="tok-nv">buff</span> <span class="tok-nv">pos</span> <span class="tok-nv">point</span><span class="tok-p">]</span>
+      <span class="tok-p">(</span><span class="tok-k">let </span><span class="tok-p">[</span><span class="tok-nv">written</span> <span class="tok-p">(</span><span class="tok-nf">spec/write</span> <span class="tok-p">(</span><span class="tok-nf">buf/int32</span><span class="tok-p">)</span> <span class="tok-nv">buff</span> <span class="tok-nv">pos</span> <span class="tok-p">(</span><span class="tok-ss">:x</span> <span class="tok-nv">point</span><span class="tok-p">))</span>
+            <span class="tok-nv">written</span><span class="tok-o">&#39;</span> <span class="tok-p">(</span><span class="tok-nf">spec/write</span> <span class="tok-p">(</span><span class="tok-nf">buf/int32</span><span class="tok-p">)</span> <span class="tok-nv">buff</span> <span class="tok-p">(</span><span class="tok-nb">+ </span><span class="tok-nv">pos</span> <span class="tok-nv">written</span><span class="tok-p">)</span> <span class="tok-p">(</span><span class="tok-ss">:y</span> <span class="tok-nv">point</span><span class="tok-p">))]</span>
+        <span class="tok-p">(</span><span class="tok-nb">+ </span><span class="tok-nv">written</span> <span class="tok-nv">written</span><span class="tok-o">&#39;</span><span class="tok-p">)))))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And, here, an example on how to use the previously defined type spec: <strong>point</strong> for read and write
+<strong>Point</strong> instances to the buffer. Let&#8217;s go to see an example:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example using the previously defined typespec</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">mypoint</span> <span class="tok-p">(</span><span class="tok-nf">Point.</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-nv">mypoint</span> <span class="tok-p">(</span><span class="tok-nf">point</span><span class="tok-p">))</span>
+<span class="tok-c1">;; =&gt; 8</span>
+
+<span class="tok-p">(</span><span class="tok-nf">buf/read*</span> <span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">point</span><span class="tok-p">))</span>
+<span class="tok-c1">;; =&gt; [8 #user.Point{:x 1, :y 2}]</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1156,7 +1214,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-03-01 01:42:33 CET
+Last updated 2015-03-01 11:49:13 CET
 </div>
 </div>
 </body>
