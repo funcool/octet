@@ -13,7 +13,7 @@ Working with raw bytes is tedious, and sometimes the language abstractions for w
 with bytes is not very pleasant.
 
 _bytebuf_ library offers a simple api for working with raw byte arrays and compose binary protocols
-for two most developed clojure implementations: clojure (jvm) and clojurescript (javascript).
+for two most used clojure implementations: clojure (jvm) and clojurescript (javascript).
 
 
 == Project Maturity
