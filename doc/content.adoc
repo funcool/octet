@@ -12,8 +12,15 @@ Andrey Antukh, <niwi@niwi.be>
 Working with raw bytes is tedious, and sometimes the language abstractions for working
 with bytes is not very pleasant.
 
-_octet_ library offers a simple api for working with raw byte arrays and compose binary protocols
-for two most used clojure implementations: clojure (jvm) and clojurescript (javascript).
+_octet_ library offers a simple api for clojure (jvm) and clojurescript (js) that makes
+working with bytebuffer painless.
+
+This is a short list of project goals:
+
+- Not to be intrusive (no bytebuffer wrapping).
+- Provide host independent abstraction (in most possible way).
+- Partial deserialization (TODO).
+- Composability.
 
 
 == Project Maturity
@@ -427,6 +434,17 @@ implements the same abstraction and can be used in read or write operations.
   all spec related data.
 - nodejs/iojs buffer support.
 - more function for create compositions like repeated type, or key value pairs.
+
+
+== FAQ
+
+*What is the difference with _buffy_?*
+
+*Buffy* is a excelent library, and I have used it in some circumstances, but is has some things that I personally don't like:
+
+- It works only with netty bytebuf and I need an abstraction for work with different implementations, including in clojurescript.
+- It has slightly strange and not uniform api when dynamic frames (arbitrary length size types) are used. _octet_ offers unified api for both type of specs.
+- It wraps bytebuf in a self defined type. _octet_ is a lightweight abstraction that works over host implementations, without wrapping them.
 
 
 == How to Contribute?

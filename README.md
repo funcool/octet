@@ -1,3 +1,3 @@
-# Bytebuf
+# Octet
 
-A library for working with bytes.
+A clojure(script) library for working with binary data.
