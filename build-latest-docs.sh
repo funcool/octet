@@ -3,14 +3,14 @@ VERSION="latest"
 
 (cd doc; make)
 
-rm -rf /tmp/buddy-doc/
-mkdir -p /tmp/buddy-doc/
-mv doc/*.html /tmp/buddy-doc/
+rm -rf /tmp/bytebuf-doc/
+mkdir -p /tmp/bytebuf-doc/
+mv doc/*.html /tmp/bytebuf-doc/
 
 git checkout gh-pages;
 
 rm -rf ./$VERSION
-mv /tmp/buddy-doc/ ./$VERSION
+mv /tmp/bytebuf-doc/ ./$VERSION
 
 git add --all ./$VERSION
 git commit -a -m "Update ${VERSION} doc"
