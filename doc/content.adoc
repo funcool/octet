@@ -30,9 +30,9 @@ This section covers the _bytebuf_ library installing process and its requirement
 
 _bytebuf_ is tested with these platforms:
 
-- JDK7
-- JDK8
-- Node 0.12
+- jdk7
+- jdk8
+- node 0.12
 - iojs 1.4.1
 
 
