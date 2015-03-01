@@ -326,7 +326,7 @@ see an example defining a typespec for point of coordenades:
 (defrecord Point [x y])
 
 ;; Type spec definition for read/write Point instances.
-(defn point []
+(def point-spec
   (reify
     spec/ISpecSize
     (size [_]
@@ -347,15 +347,32 @@ see an example defining a typespec for point of coordenades:
         (+ written written')))))
 ----
 
-And, here, an example on how to use the previously defined type spec: *point* for read and write
-*Point* instances to the buffer. Let's go to see an example:
-
 .Example using the previously defined typespec
 [source, clojure]
 ----
 (def mypoint (Point. 1 2))
+(buf/write! buffer mypoint point-spec)
+;; => 8
 
-(buf/write! buffer mypoint (point))
+(buf/read* buffer (point))
+;; => [8 #user.Point{:x 1, :y 2}]
+----
+
+Moreover, knowing how it can be done in low level way, you can simplify this concrete step
+using *compose* function. The compose function is a type spec constructor that helps map an indexed
+type spec to specific user defined type.
+
+Let see how the previous code can be simplified in much less boilerplate code:
+
+.Example using *compose* function.
+[source, clojure]
+----
+(defrecord Point [x y])
+(def mypoint (Point. 1 2))
+
+(def point-spec (buf/compose ->Point [buf/int32 buf/int32]))
+
+(buf/write! buffer mypoint point-spec)
 ;; => 8
 
 (buf/read* buffer (point))
