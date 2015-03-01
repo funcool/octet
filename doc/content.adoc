@@ -309,6 +309,60 @@ Also, the size of that type spec depends on data and can not be known outsize of
 ;; => IllegalArgumentException No implementation of method: :size of protocol: #'bytebuf.proto/IStaticSize found for class: bytebuf.spec.string$string_STAR_$reify__1804  clojure.core/-cache-protocol-fn (core_deftype.clj:555)
 ----
 
+=== Define own type spec
+
+In some circumstances, you probably need define own typespec for solve concrete situations. _bytebuf_
+is build around abstractions and define new type spec is not very complicated job.
+
+An typespec consists mainly in `ISpec` protocol that has two methods: `read` and `write`. Let
+see an example defining a typespec for point of coordenades:
+
+.Example definition of type spec that represents a point
+[source, clojure]
+----
+(require '[bytebuf.spec :as spec])
+
+;; Imagine you have a type Point defined like this:
+(defrecord Point [x y])
+
+;; Type spec definition for read/write Point instances.
+(defn point []
+  (reify
+    spec/ISpecSize
+    (size [_]
+      ;; we kwno that is datatype has fixed size in bytes
+      ;; that represents two int32.
+      8)
+
+    spec/ISpec
+    (read [_ buff pos]
+      (let [[readed xvalue] (spec/read (buf/int32) buff pos)
+            [readed' yvalue] (spec/read (buf/int32) buff (+ pos readed))]
+        [(+ readed readed')
+         (Point. xvalue yvalue)]))
+
+    (write [_ buff pos point]
+      (let [written (spec/write (buf/int32) buff pos (:x point))
+            written' (spec/write (buf/int32) buff (+ pos written) (:y point))]
+        (+ written written')))))
+----
+
+And, here, an example on how to use the previously defined type spec: *point* for read and write
+*Point* instances to the buffer. Let's go to see an example:
+
+.Example using the previously defined typespec
+[source, clojure]
+----
+(def mypoint (Point. 1 2))
+
+(buf/write! buffer mypoint (point))
+;; => 8
+
+(buf/read* buffer (point))
+;; => [8 #user.Point{:x 1, :y 2}]
+----
+
+
 == Additional info
 
 [[supported-bytebuffers]]
