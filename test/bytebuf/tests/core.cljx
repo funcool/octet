@@ -246,8 +246,8 @@
       (t/is (= data ["1234567890" 1000])))))
 
 (t/deftest spec-composition
-  (let [spec (buf/spec (buf/compose-type (buf/int32) (buf/int32))
-                       (buf/compose-type (buf/string 10) (buf/string 5)))
+  (let [spec (buf/spec (buf/spec (buf/int32) (buf/int32))
+                       (buf/spec (buf/string 10) (buf/string 5)))
         buffer (buf/allocate (buf/size spec))
         data [[100 200] ["foo" "bar"]]]
     (buf/write! buffer data spec)
