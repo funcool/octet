@@ -87,7 +87,7 @@ Let start defining one:
 
 [source, clojure]
 ----
-(require '[octetf.core :as buf])
+(require '[octet.core :as buf])
 
 ;; Indexed composition
 (def my-spec1 (buf/spec buf/int32 buf/bool))
