@@ -436,13 +436,25 @@ implements the same abstraction and can be used in read or write operations.
 
 == FAQ
 
-*What is the difference with _buffy_?*
+*What is the difference with _clojurewerkz/buffy_?*
 
 *Buffy* is a excelent library, and I have used it in some circumstances, but is has some things that I personally don't like:
 
 - It works only with netty bytebuf and I need an abstraction for work with different implementations, including in clojurescript.
 - It has slightly strange and not uniform api when dynamic frames (arbitrary length size types) are used. _octet_ offers unified api for both type of specs.
 - It wraps bytebuf in a self defined type. _octet_ is a lightweight abstraction that works over host implementations, without wrapping them.
+- It not has support for ClojureScript
+
+
+*What is the difference with _ztellman/gloss_?*
+
+Gloss is also similiar project, and has similar purposes, but it has several differeces:
+
+- It has a limited set of types. Octet has an extensible abstraction for build own arbitrary type specs.
+- It only works with nio as buffer implementations. Octet exposes an extensible abstraction and support few differents out of the box.
+- In my opinion it has slightly ugly and unclear api.
+- Seems not very maintained (has issues from 2013).
+- It not has support for ClojureScript.
 
 
 == How to Contribute?
