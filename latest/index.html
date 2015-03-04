@@ -1146,7 +1146,7 @@ all spec related data.</p>
 <h2 id="_faq"><a class="link" href="#_faq">7. FAQ</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><strong>What is the difference with <em>buffy</em>?</strong></p>
+<p><strong>What is the difference with <em>clojurewerkz/buffy</em>?</strong></p>
 </div>
 <div class="paragraph">
 <p><strong>Buffy</strong> is a excelent library, and I have used it in some circumstances, but is has some things that I personally don&#8217;t like:</p>
@@ -1161,6 +1161,34 @@ all spec related data.</p>
 </li>
 <li>
 <p>It wraps bytebuf in a self defined type. <em>octet</em> is a lightweight abstraction that works over host implementations, without wrapping them.</p>
+</li>
+<li>
+<p>It not has support for ClojureScript</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>What is the difference with <em>ztellman/gloss</em>?</strong></p>
+</div>
+<div class="paragraph">
+<p>Gloss is also similiar project, and has similar purposes, but it has several differeces:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It has a limited set of types. Octet has an extensible abstraction for build own arbitrary type specs.</p>
+</li>
+<li>
+<p>It only works with nio as buffer implementations. Octet exposes an extensible abstraction and support few differents out of the box.</p>
+</li>
+<li>
+<p>In my opinion it has slightly ugly and unclear api.</p>
+</li>
+<li>
+<p>Seems not very maintained (has issues from 2013).</p>
+</li>
+<li>
+<p>It not has support for ClojureScript.</p>
 </li>
 </ul>
 </div>
@@ -1273,7 +1301,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-03-01 21:09:54 CET
+Last updated 2015-03-04 20:17:08 CET
 </div>
 </div>
 </body>
