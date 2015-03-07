@@ -14,6 +14,9 @@
 (defprotocol ISpecSize
   (size [_] "Calculate the size in bytes of the object."))
 
+(defprotocol ISpecDynamicSize
+  (size* [_ data] "Calculate the size in bytes of the object having a data."))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Composed Spec Types
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -34,6 +37,16 @@
   ISpecSize
   (size [_]
     (reduce #(+ %1 (size %2)) 0 types))
+
+  ISpecDynamicSize
+  (size* [_ data]
+    (reduce (fn [acc [field data]]
+              (let [type (field dict)]
+                (if (satisfies? ISpecSize type)
+                  (+ acc (size type))
+                  (+ acc (size* type data)))))
+            0
+            (into [] data)))
 
   ISpec
   (read [_ buff pos]
@@ -69,6 +82,16 @@
   ISpecSize
   (size [_]
     (reduce #(+ %1 (size %2)) 0 types))
+
+  ISpecDynamicSize
+  (size* [_ data]
+    (reduce (fn [acc [index data]]
+              (let [type (nth types index)]
+                (if (satisfies? ISpecSize type)
+                  (+ acc (size type))
+                  (+ acc (size* type data)))))
+            0
+            (map-indexed vector data)))
 
   ISpec
   (read [_ buff pos]
@@ -141,6 +164,10 @@
 (defmethod spec :indexed
   [& types]
   (IndexedSpec. types))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Spec Composition Helpers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn compose
   "Constructor of composed typespecs with specific constructor."

@@ -1,5 +1,5 @@
 (ns octet.core
-  (:refer-clojure :exclude [read byte float double short long bytes])
+  (:refer-clojure :exclude [read byte float double short long bytes into])
   (:require [octet.spec :as spec]
             [octet.spec.basic :as basic-spec]
             [octet.spec.string :as string-spec]
@@ -60,3 +60,13 @@
   and it returns only the readed data."
   [& args]
   (second (apply read* args)))
+
+(defn into
+  "Returns a buffer of exact size of
+  spec with data already serialized."
+  ([spec data] (into spec data {}))
+  ([spec data opts]
+   (let [size (spec/size* spec data)
+         buffer (buffer/allocate size opts)]
+     (write! buffer data spec opts)
+     buffer)))

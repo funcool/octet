@@ -264,3 +264,14 @@
         buffer (buf/allocate 8)]
     (t/is (= 8 (buf/write! buffer point pointspec)))
     (t/is (= point (buf/read buffer pointspec)))))
+
+
+#+clj
+(t/deftest into-buffer
+  (let [spec (buf/spec buf/int32 buf/int32)
+        result (buf/into spec [1 3])]
+    (t/is (= (.capacity result) 8)))
+
+  (let [spec (buf/spec buf/string* buf/string*)
+        result (buf/into spec ["hello" "world!"])]
+    (t/is (= (.capacity result) 19))))

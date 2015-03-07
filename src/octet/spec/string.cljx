@@ -133,6 +133,10 @@
     #+cljs
     (-invoke [s] s)
 
+    spec/ISpecDynamicSize
+    (size* [_ data]
+      (+ 4 (count (.getBytes data "UTF-8"))))
+
     spec/ISpec
     (read [_ buff pos]
       (let [datasize (buffer/read-int buff pos)
