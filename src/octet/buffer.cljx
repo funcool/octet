@@ -135,6 +135,10 @@
   (write-bytes [buff pos size data]
     (.setBytes buff pos data 0 size)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ES6 Typed Arrays
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 #+cljs
 (extend-type js/DataView
   IBufferShort
