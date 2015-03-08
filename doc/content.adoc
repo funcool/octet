@@ -276,6 +276,7 @@ be solved using normal clojure primitives for it.
 In future versions, this surelly will be improved providing facilities for
 create repeated compositions.
 
+
 === Using arbitrary size type specs
 
 Until now, we have seen examples alway using fixed size compositions. Fixed size compositions
@@ -313,6 +314,57 @@ Also, the size of that type spec depends on data and can not be known outsize of
 (buf/size buf/string*)
 ;; => IllegalArgumentException No implementation of method: :size of protocol: #'octet.spec/ISpecSize found for class: octet.spec.string$string_STAR_$reify__1804  clojure.core/-cache-protocol-fn (core_deftype.clj:555)
 ----
+
+
+=== Put data into new buffer
+
+This is a some kind of helper, that allows easy create a buffer with exactly size for concrete spec
+and concrete data. It works perfectly with static size specs and arbitrary size specs.
+
+Let see how you can use it:
+
+.Example using `octet.core/into` function (semantically similar to clojure's `into`)
+[source, clojure]
+----
+(def myspec (buf/spec buf/string* buf/string*))
+(def buffer (buf/into myspec ["hello" "world!"]))
+
+(buf/get-capacity buffer)
+;; => 19
+
+(buf/read buffer myspec)
+;; => ["hello", "world!"]
+----
+
+
+=== Read and write spec to multiple byte buffers
+
+In some circumstances (specially when we working with streams) the buffers are splitted. The simplest
+but not very efficient approach will be copy all data in one unique byte buffer and read a spec
+from it. Octet comes with facilities for read a spec from a vector of buffers that prevents unnecesary
+copy action.
+
+.Example reading and writing data to a vector of buffers
+[source, clojure]
+----
+(def myspec (buf/spec buf/short buf/int32))
+
+(def buffers [(buf/allocate 2)
+              (buf/allocate 4)])
+
+(buf/write! buffers [20 30] myspec)
+;; => 6
+
+(buf/read buffers spec)
+;; => [20 30]
+
+(buf/read (nth buffers 0) buf/short)
+;; => 20
+
+(buf/read (nth buffers 1) buf/int32)
+;; => 30
+----
+
 
 === Define own type spec
 
