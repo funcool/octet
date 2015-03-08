@@ -33,6 +33,9 @@
   (read-bytes [_ pos size] "Read a byte array.")
   (write-bytes [_ pos size data] "Write byte array."))
 
+(defprotocol IBufferLimit
+  (get-capacity [_] "Get the read/write capacity in bytes."))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NIO & Netty Buffer implementations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -87,7 +90,11 @@
     (let [oldpos (.position buff)]
       (.position buff pos)
       (.put buff data 0 size)
-      (.position buff oldpos))))
+      (.position buff oldpos)))
+
+  IBufferLimit
+  (get-capacity [buff]
+    (.limit buff)))
 
 #+clj
 (extend-type ByteBuf
@@ -178,7 +185,11 @@
       (js/Int8Array. buffer (+ offset pos) size)))
   (write-bytes [buff pos size data]
     (doseq [i (range (.-length data))]
-      (.setInt8 buff (+ pos i) (aget data i)))))
+      (.setInt8 buff (+ pos i) (aget data i))))
+
+  IBufferLimit
+  (get-capacity [buff]
+    (.-byteLength buff)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public Api

@@ -255,7 +255,6 @@
       (t/is (= readed (buf/size spec)))
       (t/is (= data' data)))))
 
-
 (defrecord Point [x y])
 
 (t/deftest spec-composition-with-compose
@@ -265,13 +264,23 @@
     (t/is (= 8 (buf/write! buffer point pointspec)))
     (t/is (= point (buf/read buffer pointspec)))))
 
-
-#+clj
 (t/deftest into-buffer
   (let [spec (buf/spec buf/int32 buf/int32)
         result (buf/into spec [1 3])]
-    (t/is (= (.capacity result) 8)))
+    (t/is (= (impl/get-capacity result) 8)))
 
   (let [spec (buf/spec buf/string* buf/string*)
         result (buf/into spec ["hello" "world!"])]
-    (t/is (= (.capacity result) 19))))
+    (t/is (= (impl/get-capacity result) 19))))
+
+(t/deftest vector-buffer
+  (let [spec (buf/spec buf/short buf/int32)
+        buffers [(buf/allocate 2)
+                 (buf/allocate 4)]]
+    (buf/write! buffers [20 30] spec)
+    (t/is (= (buf/read buffers spec) [20 30]))
+    (t/is (= (buf/read (nth buffers 0) buf/short) 20))
+    (t/is (= (buf/read (nth buffers 1) buf/int32) 30))))
+
+
+
