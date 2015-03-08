@@ -135,7 +135,8 @@
 
     spec/ISpecDynamicSize
     (size* [_ data]
-      (+ 4 (count (.getBytes data "UTF-8"))))
+      (let [data (string->bytes data)]
+        (+ 4 (count data))))
 
     spec/ISpec
     (read [_ buff pos]
