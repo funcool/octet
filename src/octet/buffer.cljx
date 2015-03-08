@@ -228,10 +228,3 @@
   [size & _]
   (let [bf (js/ArrayBuffer. size)]
     (js/DataView. bf)))
-
-;; #+cljs
-;; (defmethod allocate [:heap :node]
-;;   [size & _]
-;;   (let [bf (js/require "buffer")
-;;         bf (.-Buffer bf)]
-;;     (bf. size)))
