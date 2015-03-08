@@ -188,7 +188,6 @@
     (assert (every? #(satisfies? IBufferLong %) buff))
     (stream-operation #(write-long %1 %2 value) buff pos))
 
-
   IBufferFloat
   (read-float [buff pos]
     (assert (every? #(satisfies? IBufferFloat %) buff))
