@@ -281,6 +281,3 @@
     (t/is (= (buf/read buffers spec) [20 30]))
     (t/is (= (buf/read (nth buffers 0) buf/short) 20))
     (t/is (= (buf/read (nth buffers 1) buf/int32) 30))))
-
-
-
