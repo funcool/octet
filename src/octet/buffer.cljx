@@ -140,7 +140,94 @@
       (.getBytes buff pos tmpbuf)
       tmpbuf))
   (write-bytes [buff pos size data]
-    (.setBytes buff pos data 0 size)))
+    (.setBytes buff pos data 0 size))
+
+  IBufferLimit
+  (get-capacity [buff]
+    (.capacity buff)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; A vector of buffers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- stream-operation
+  [opfn buff pos]
+  (reduce (fn [pos buff]
+            (let [buffsize (get-capacity buff)]
+                (if (>= pos buffsize)
+                  (- pos buffsize)
+                  (reduced (opfn buff pos)))))
+            pos buff))
+
+(extend-type #+clj clojure.lang.IPersistentVector
+             #+cljs cljs.core.PersistentVector
+  IBufferShort
+  (read-short [buff pos]
+    (assert (every? #(satisfies? IBufferShort %) buff))
+    (stream-operation read-short buff pos))
+
+  (write-short [buff pos value]
+    (assert (every? #(satisfies? IBufferShort %) buff))
+    (stream-operation #(write-short %1 %2 value) buff pos))
+
+  IBufferInt
+  (read-int [buff pos]
+    (assert (every? #(satisfies? IBufferInt %) buff))
+    (stream-operation read-int buff pos))
+
+  (write-int [buff pos value]
+    (assert (every? #(satisfies? IBufferInt %) buff))
+    (stream-operation #(write-int %1 %2 value) buff pos))
+
+  IBufferLong
+  (read-long [buff pos]
+    (assert (every? #(satisfies? IBufferLong %) buff))
+    (stream-operation read-long buff pos))
+
+  (write-long [buff pos value]
+    (assert (every? #(satisfies? IBufferLong %) buff))
+    (stream-operation #(write-long %1 %2 value) buff pos))
+
+
+  IBufferFloat
+  (read-float [buff pos]
+    (assert (every? #(satisfies? IBufferFloat %) buff))
+    (stream-operation read-float buff pos))
+
+  (write-float [buff pos value]
+    (assert (every? #(satisfies? IBufferLong %) buff))
+    (stream-operation #(write-float %1 %2 value) buff pos))
+
+  IBufferDouble
+  (read-double [buff pos]
+    (assert (every? #(satisfies? IBufferDouble %) buff))
+    (stream-operation read-double buff pos))
+
+  (write-double [buff pos value]
+    (assert (every? #(satisfies? IBufferDouble %) buff))
+    (stream-operation #(write-double %1 %2 value) buff pos))
+
+  IBufferByte
+  (read-byte [buff pos]
+    (assert (every? #(satisfies? IBufferByte %) buff))
+    (stream-operation read-byte buff pos))
+
+  (write-byte [buff pos value]
+    (assert (every? #(satisfies? IBufferByte %) buff))
+    (stream-operation #(write-byte %1 %2 value) buff pos))
+
+  IBufferBytes
+  (read-bytes [buff pos size]
+    (assert (every? #(satisfies? IBufferBytes %) buff))
+    (stream-operation #(read-bytes %1 %2 size) buff pos))
+
+  (write-bytes [buff pos size data]
+    (assert (every? #(satisfies? IBufferByte %) buff))
+    (stream-operation #(write-bytes %1 %2 size data) buff pos))
+
+  IBufferLimit
+  (get-capacity [buff]
+    (reduce #(+ %1 (get-capacity %2)) 0 buff)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ES6 Typed Arrays
