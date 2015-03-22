@@ -1,4 +1,11 @@
 (ns octet.spec
+  "The spec abstraction.
+
+  It includes the basic abstraction protocols for define
+  own type specs and some useful types that allows build
+  asociative or indexed spec compositions.
+
+  For more examples see the `spec` function docstring."
   (:refer-clojure :exclude [type read float double long short byte bytes])
   (:require [octet.buffer :as buffer]))
 
@@ -12,9 +19,11 @@
   (write [_ buff start data] "Read all data from buffer."))
 
 (defprotocol ISpecSize
+  "Abstraction for calculate size of static specs."
   (size [_] "Calculate the size in bytes of the object."))
 
 (defprotocol ISpecDynamicSize
+  "Abstraction for calculate size for dynamic specs."
   (size* [_ data] "Calculate the size in bytes of the object having a data."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -112,6 +121,10 @@
                           pos indexedtypes)]
       (- written pos))))
 
+#+clj (alter-meta! #'->AssociativeSpec assoc :private true)
+#+clj (alter-meta! #'->IndexedSpec assoc :private true)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec Constructors
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -126,14 +139,14 @@
   Little example on how to create associative
   composition:
 
-    (spec :field1 (long)
-          :field2 (string 20))
+      (spec :field1 (long)
+            :field2 (string 20))
 
   An other example on how to create indexed
   composition that represents the same bytes
   representation that previous one:
 
-    (spec (long) (string 20))
+      (spec (long) (string 20))
 
   The main difference between the two reprensentation
   is that if you read a buffer using an associative
@@ -170,7 +183,35 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn compose
-  "Constructor of composed typespecs with specific constructor."
+  "Constructor of composed typespecs with specific constructor.
+
+  This is very usefull when you have some datatype and
+  you want serialize and deserialize it on your binary
+  protocol.
+
+  As example code, imagine you are have this data type:
+
+      ;; Imagine that your have this datatype.
+      (defrecord Point [x y])
+
+  With help of `compose` function, create a new spec
+  for your datatype:
+
+      (def point-spec (buf/compose ->Point [buf/int32 buf/int32]))
+
+  Now, you can use the previously defined datatype for write
+  into buffer:
+
+      (buf/write! buffer mypoint point-spec)
+      ;; => 8
+
+  Or read from the buffer:
+
+      (buf/read buffer (point))
+      ;; => #user.Point{:x 1, :y 2}
+
+  This a helper for avoid learn the internals of octer library
+  for build a specific spec constructor for your data type."
   [constructor types]
   {:pre [(fn? constructor)
          (vector? types)]}

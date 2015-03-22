@@ -37,7 +37,19 @@
                                    :optimizations :none
                                    :target :nodejs
                                    :pretty-print true}}]}
+
+  :codeina {:output-dir "doc/api"
+            :sources ["output/src"]
+            :exclude [octet.spec.basic
+                      octet.spec.string]
+            :language :clojure
+            :src-uri-mapping {#"output/src" #(str "src/" % "x")}
+            :src-dir-uri "http://github.com/funcool/octet/blob/master/"
+            :src-linenum-anchor-prefix "L"}
+
   :profiles {:dev {:plugins [[org.clojars.cemerick/cljx "0.6.0-SNAPSHOT"
+                              :exclude [org.clojure/clojure]]
+                             [funcool/codeina "0.1.0-SNAPSHOT"
                               :exclude [org.clojure/clojure]]
                              [lein-cljsbuild "1.0.4"]]
                    :dependencies [[funcool/cljs-testrunners "0.1.0-SNAPSHOT"]]}})

@@ -1,5 +1,13 @@
 (ns octet.buffer
-  "Buffer abstractions."
+  "Buffer abstractions.
+
+  This includes a common, plataform agnostic abstractions defined
+  with clojure protocols for treat with different bytebuffers
+  implementations.
+
+  Also inclues a polymorphic methods for allocate new bytebuffers
+  with support for nio bytebuffers, netty41 bytebuffers and
+  es6 typed arrays (from javascript environments)."
   #+clj
   (:import java.nio.ByteBuffer
            io.netty.buffer.ByteBuf
@@ -286,6 +294,26 @@
   allocator (ByteBufAllocator/DEFAULT))
 
 (defmulti allocate
+  "Polymorphic function for allocate new bytebuffers.
+
+  It allows allocate using different implementation
+  of bytebuffers and different types of them.
+
+  As example, you may want allocate nio direct buffer of 4 bytes:
+
+      (allocate 4 {:type :direct :impl :nio})
+
+  The supported options pairs are:
+
+  - type: `:heap`, impl: `:nio` (default)
+  - type: `:direct`, impl: `:nio`
+  - type: `:heap`, impl: `:netty`
+  - type: `:direct`, impl: `:netty`
+  - impl: `:es6` (clojurescript) (default)
+
+  This function is defined as multimethod and you can
+  extend it with your own bytebuffer implementations
+  if you want or need."
   (fn [size & [{:keys [type impl] :or {type :heap impl #+clj :nio #+cljs :es6}}]]
     [type impl]))
 

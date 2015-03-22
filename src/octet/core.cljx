@@ -5,23 +5,48 @@
             [octet.spec.string :as string-spec]
             [octet.buffer :as buffer]))
 
-(def compose spec/compose)
-(def spec spec/spec)
-(def size spec/size)
+(def ^{:doc "Alias for `octet.spec/compose`."}
+  compose spec/compose)
 
-(def string string-spec/string)
-(def string* string-spec/string*)
+(def ^{:doc "Alias for `octet.spec/spec`."}
+  spec spec/spec)
 
-(def int16 basic-spec/int16)
-(def int32 basic-spec/int32)
-(def int64 basic-spec/int64)
-(def float basic-spec/float)
-(def double basic-spec/double)
-(def byte basic-spec/byte)
-(def bytes basic-spec/bytes)
-(def bool basic-spec/bool)
+(def ^{:doc "Alias for `octet.spec/size`."}
+  size spec/size)
 
-(def allocate buffer/allocate)
+(def ^{:doc "Fixed size string spec constructor."}
+  string string-spec/string)
+
+(def ^{:doc "Variable length string spec singleton instance."}
+  string* string-spec/string*)
+
+(def ^{:doc "Short spec instance."}
+  int16 basic-spec/int16)
+
+(def ^{:doc "Integer spec instance."}
+  int32 basic-spec/int32)
+
+(def ^{:doc "Long spec instance."}
+  int64 basic-spec/int64)
+
+(def ^{:doc "Float spec instance."}
+  float basic-spec/float)
+
+(def ^{:doc "Double spec instance."}
+  double basic-spec/double)
+
+(def ^{:doc "Byte spec instance."}
+  byte basic-spec/byte)
+
+(def ^{:doc "Fixed length byte array spec constructor."}
+  bytes basic-spec/bytes)
+
+(def ^{:doc "Boolean spec constructor."}
+  bool basic-spec/bool)
+
+(def ^{:doc (str "Polymorphic method for allocate new byte buffers. \n\n"
+                 "Alias for `octer.buffer/allocate`.")}
+  allocate buffer/allocate)
 
 (def ^{:doc "Alias for int16"} short int16)
 (def ^{:doc "Alias for int32"} integer int32)
@@ -42,9 +67,11 @@
 
 (defn read*
   "Read data from buffer following the specified spec
-  instance. This method returns a vector of readed data
-  and the data itself.
-  If you need only data, use `read` function."
+  instance.
+
+  This method returns a vector of readed data
+  and the data itself. If you need only data,
+  use `read` function instead."
   ([buff spec]
    (read* buff spec {}))
   ([buff spec {:keys [offset] :or {offset 0}}]
