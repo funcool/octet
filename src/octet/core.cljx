@@ -1,5 +1,5 @@
 (ns octet.core
-  (:refer-clojure :exclude [read byte float double short long bytes into])
+  (:refer-clojure :exclude [read byte float double short long bytes into repeat])
   #+cljs (:require-macros [octet.util :refer [defalias]])
   (:require [octet.spec :as spec]
             #+clj [octet.util :refer [defalias]]
@@ -10,6 +10,7 @@
 (defalias compose spec/compose)
 (defalias spec spec/spec)
 (defalias size spec/size)
+(defalias repeat spec/repeat)
 (defalias string string-spec/string)
 (defalias string* string-spec/string*)
 (defalias int16 basic-spec/int16)

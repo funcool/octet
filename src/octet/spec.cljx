@@ -6,7 +6,7 @@
   asociative or indexed spec compositions.
 
   For more examples see the `spec` function docstring."
-  (:refer-clojure :exclude [type read float double long short byte bytes])
+  (:refer-clojure :exclude [type read float double long short byte bytes repeat])
   (:require [octet.buffer :as buffer]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -124,7 +124,6 @@
 #+clj (alter-meta! #'->AssociativeSpec assoc :private true)
 #+clj (alter-meta! #'->IndexedSpec assoc :private true)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec Constructors
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -178,29 +177,80 @@
   [& types]
   (IndexedSpec. types))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Spec Composition Helpers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn repeat
+  "Creare a composed typespec that repeats `n` times
+  a provided `type` spec.
+
+  As example, create a spec with help of `repeat`
+  function:
+
+      (def spec (buf/repeat 2 buf/int32))
+
+  Write data into buffer using previously defined
+  typespec:
+
+      (buf/write! yourbuffer [200 300] spec)
+      ;; => 8
+
+  Or read data from your buffer using previously defined
+  typespec:
+
+      (buf/read yourbuffer spec)
+      ;; => [200 300]
+  "
+  [n type]
+  (reify
+    ISpecSize
+    (size [_] (* n (size type)))
+
+    ISpecDynamicSize
+    (size* [_ data]
+      (reduce (fn [acc [index data]]
+                (if (satisfies? ISpecSize type)
+                  (+ acc (size type))
+                  (+ acc (size* type data))))
+              0
+              (map-indexed vector data)))
+
+    ISpec
+    (read [_ buff pos]
+      (loop [index pos result [] types (take n (repeatedly (constantly type)))]
+        (if-let [type (first types)]
+          (let [[readedbytes readeddata] (read type buff index)]
+            (recur (+ index readedbytes)
+                   (conj result readeddata)
+                   (rest types)))
+          [(- index pos) result])))
+
+    (write [_ buff pos data]
+      (loop [data data written pos]
+        (if-let [value (first data)]
+          (let [written' (write type buff written value)]
+            (recur (rest data)
+                   (+ written written')))
+          (- written pos))))))
 
 (defn compose
-  "Constructor of composed typespecs with specific constructor.
+  "Create a composed typespec with user defined
+  type constructor.
 
-  This is very usefull when you have some datatype and
-  you want serialize and deserialize it on your binary
-  protocol.
+  This allows define a typespec with automatic conversion
+  between user data type and serialized data without
+  defining yourself a datatype using low level constructions.
 
-  As example code, imagine you are have this data type:
+  Let see an exameple for understand it better.
 
-      ;; Imagine that your have this datatype.
+  Imagine you are have this data type:
+
       (defrecord Point [x y])
 
-  With help of `compose` function, create a new spec
+  With help of `compose`, create a new spec
   for your datatype:
 
       (def point-spec (buf/compose ->Point [buf/int32 buf/int32]))
 
-  Now, you can use the previously defined datatype for write
-  into buffer:
+  Now, you can use the previously defined datatype and typespec
+  for write into buffer:
 
       (buf/write! buffer mypoint point-spec)
       ;; => 8
@@ -209,9 +259,7 @@
 
       (buf/read buffer (point))
       ;; => #user.Point{:x 1, :y 2}
-
-  This a helper for avoid learn the internals of octer library
-  for build a specific spec constructor for your data type."
+  "
   [constructor types]
   {:pre [(fn? constructor)
          (vector? types)]}

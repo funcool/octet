@@ -255,15 +255,6 @@
       (t/is (= readed (buf/size spec)))
       (t/is (= data' data)))))
 
-(defrecord Point [x y])
-
-(t/deftest spec-composition-with-compose
-  (let [pointspec (buf/compose ->Point [buf/int32 buf/int32])
-        point (->Point 1 2)
-        buffer (buf/allocate 8)]
-    (t/is (= 8 (buf/write! buffer point pointspec)))
-    (t/is (= point (buf/read buffer pointspec)))))
-
 (t/deftest into-buffer
   (let [spec (buf/spec buf/int32 buf/int32)
         result (buf/into spec [1 3])]
@@ -282,5 +273,23 @@
     (t/is (= (buf/read (nth buffers 0) buf/short) 20))
     (t/is (= (buf/read (nth buffers 1) buf/int32) 30))))
 
+(defrecord Point [x y])
+
+(t/deftest spec-composition-with-compose
+  (let [pointspec (buf/compose ->Point [buf/int32 buf/int32])
+        point (->Point 1 2)
+        buffer (buf/allocate 8)]
+    (t/is (= 8 (buf/write! buffer point pointspec)))
+    (t/is (= point (buf/read buffer pointspec)))))
+
+(t/deftest spec-composition-with-repeat
+  (let [spec (buf/repeat 5 buf/int32)
+        specsize (buf/size spec)
+        buffer (buf/allocate specsize)
+        written (buf/write! buffer [1 2 3 4 5] spec)]
+    (t/is (= written 20))
+    (let [[readed data] (buf/read* buffer spec)]
+      (t/is (= readed 20))
+      (t/is (= data [1 2 3 4 5])))))
 
 #+cljs (set! *main-cli-fn* #(node/run-tests))
