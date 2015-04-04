@@ -27,11 +27,11 @@
                         :source-paths ["output/test/cljs" "output/src"]
                         :notify-command ["node" "output/tests.js"]
                         :compiler {:output-to "output/tests.js"
-                                   :output-dir "output/out"
+                                   :output-dir "output/"
+                                   :source-map true
                                    :static-fns true
                                    :cache-analysis false
-                                   :main octet.tests.main
-                                   :source-map true
+                                   :main octet.tests.core
                                    :optimizations :none
                                    :target :nodejs
                                    :pretty-print true}}]}
