@@ -15,12 +15,12 @@
 (ns octet.tests.core
   (:require #+clj [clojure.test :as t]
             #+cljs [cljs.test :as t]
+            #+cljs [cljs-testrunners.node :as node]
             [octet.core :as buf]
             [octet.buffer :as impl])
   #+clj
   (:import java.nio.ByteBuffer
            io.netty.buffer.ByteBuf))
-
 
 #+clj
 (defn random-bytes
@@ -281,3 +281,6 @@
     (t/is (= (buf/read buffers spec) [20 30]))
     (t/is (= (buf/read (nth buffers 0) buf/short) 20))
     (t/is (= (buf/read (nth buffers 1) buf/int32) 30))))
+
+
+#+cljs (set! *main-cli-fn* #(node/run-tests))
