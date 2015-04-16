@@ -15,15 +15,21 @@
 
 (defprotocol IBufferShort
   (read-short [_ pos] "Read short integer (16 bits) from buffer.")
-  (write-short [_ pos value] "Write a short integer to the buffer."))
+  (write-short [_ pos value] "Write a short integer to the buffer.")
+  (read-ushort [_ pos] "Read unsigned short integer (16 bits) from buffer.")
+  (write-ushort [_ pos value] "Write a unsigned short integer to the buffer."))
 
 (defprotocol IBufferInt
   (read-int [_ pos] "Read an integer (32 bits) from buffer.")
-  (write-int [_ pos value] "Write an integer to the buffer."))
+  (write-int [_ pos value] "Write an integer to the buffer.")
+  (read-uint [_ pos] "Read an unsigned integer (32 bits) from buffer.")
+  (write-uint [_ pos value] "Write an unsigned integer to the buffer."))
 
 (defprotocol IBufferLong
   (read-long [_ pos] "Read an long (64 bits) from buffer.")
-  (write-long [_ pos value] "Write a long to the buffer."))
+  (write-long [_ pos value] "Write a long to the buffer.")
+  (read-ulong [_ pos] "Read an unsigned long (64 bits) from buffer.")
+  (write-ulong [_ pos value] "Write an unsigned long to the buffer."))
 
 (defprotocol IBufferFloat
   (read-float [_ pos] "Read an float (32 bits) from buffer.")
@@ -35,7 +41,9 @@
 
 (defprotocol IBufferByte
   (read-byte [_ pos] "Read one byte from buffer.")
-  (write-byte [_ pos value] "Write one byte to the buffer."))
+  (write-byte [_ pos value] "Write one byte to the buffer.")
+  (read-ubyte [_ pos] "Read one unsigned byte from buffer.")
+  (write-ubyte [_ pos value] "Write one unsigned byte to the buffer."))
 
 (defprotocol IBufferBytes
   (read-bytes [_ pos size] "Read a byte array.")
@@ -55,18 +63,37 @@
     (.getShort buff pos))
   (write-short [buff pos value]
     (.putShort buff pos value))
+  (read-ushort [buff pos]
+    (let [val (.getShort buff pos)]
+      (bit-and 0xFFFF (Integer. (int val)))))
+  (write-ushort [buff pos value]
+    (let [value (.shortValue (Integer. (int value)))]
+      (.putShort buff pos value)))
 
   IBufferInt
   (read-int [buff pos]
     (.getInt buff pos))
   (write-int [buff pos value]
     (.putInt buff pos value))
+  (read-uint [buff pos]
+    (let [val (.getInt buff pos)]
+      (bit-and 0xFFFFFFFF (Long. (long val)))))
+  (write-uint [buff pos value]
+    (let [value (.intValue (Long. (long value)))]
+      (.putInt buff pos value)))
 
   IBufferLong
   (read-long [buff pos]
     (.getLong buff pos))
   (write-long [buff pos value]
     (.putLong buff pos value))
+  (read-ulong [buff pos]
+    (let [val (.getLong buff pos)
+          ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+      (bigint (BigInteger. 1 magnitude))))
+  (write-ulong [buff pos value]
+    (let [value (.longValue (bigint value))]
+      (.putLong buff pos value)))
 
   IBufferFloat
   (read-float [buff pos]
@@ -85,6 +112,12 @@
     (.get buff pos))
   (write-byte [buff pos value]
     (.put buff pos value))
+  (read-ubyte [buff pos]
+    (let [val (.get buff pos)]
+      (bit-and 0xFF (short val))))
+  (write-ubyte [buff pos value]
+    (let [value (.byteValue (Short. (short value)))]
+      (.put buff pos value)))
 
   IBufferBytes
   (read-bytes [buff pos size]
@@ -111,18 +144,37 @@
     (.getShort buff pos))
   (write-short [buff pos value]
     (.setShort buff pos value))
+  (read-ushort [buff pos]
+    (let [val (.getShort buff pos)]
+      (bit-and 0xFFFF (Integer. (int val)))))
+  (write-ushort [buff pos value]
+    (let [value (.shortValue (Integer. (int value)))]
+      (.setShort buff pos value)))
 
   IBufferInt
   (read-int [buff pos]
     (.getInt buff pos))
   (write-int [buff pos value]
     (.setInt buff pos value))
+  (read-uint [buff pos]
+    (let [val (.getInt buff pos)]
+      (bit-and 0xFFFFFFFF (Long. (long val)))))
+  (write-uint [buff pos value]
+    (let [value (.intValue (Long. (long value)))]
+      (.setInt buff pos value)))
 
   IBufferLong
   (read-long [buff pos]
     (.getLong buff pos))
   (write-long [buff pos value]
     (.setLong buff pos value))
+  (read-ulong [buff pos]
+    (let [val (.getLong buff pos)
+          ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+      (bigint (BigInteger. 1 magnitude))))
+  (write-ulong [buff pos value]
+    (let [value (.longValue (bigint value))]
+      (.setLong buff pos value)))
 
   IBufferFloat
   (read-float [buff pos]
@@ -141,6 +193,12 @@
     (.getByte buff pos))
   (write-byte [buff pos value]
     (.setByte buff pos value))
+  (read-ubyte [buff pos]
+    (let [val (.getByte buff pos)]
+      (bit-and 0xFF (short val))))
+  (write-ubyte [buff pos value]
+    (let [value (.byteValue (Short. (short value)))]
+      (.setByte buff pos value)))
 
   IBufferBytes
   (read-bytes [buff pos size]
@@ -173,34 +231,48 @@
   (read-short [buff pos]
     (assert (every? #(satisfies? IBufferShort %) buff))
     (stream-operation read-short buff pos))
-
   (write-short [buff pos value]
     (assert (every? #(satisfies? IBufferShort %) buff))
     (stream-operation #(write-short %1 %2 value) buff pos))
+  (read-ushort [buff pos]
+    (assert (every? #(satisfies? IBufferShort %) buff))
+    (stream-operation read-ushort buff pos))
+  (write-ushort [buff pos value]
+    (assert (every? #(satisfies? IBufferShort %) buff))
+    (stream-operation #(write-ushort %1 %2 value) buff pos))
 
   IBufferInt
   (read-int [buff pos]
     (assert (every? #(satisfies? IBufferInt %) buff))
     (stream-operation read-int buff pos))
-
   (write-int [buff pos value]
     (assert (every? #(satisfies? IBufferInt %) buff))
     (stream-operation #(write-int %1 %2 value) buff pos))
+  (read-uint [buff pos]
+    (assert (every? #(satisfies? IBufferInt %) buff))
+    (stream-operation read-uint buff pos))
+  (write-uint [buff pos value]
+    (assert (every? #(satisfies? IBufferInt %) buff))
+    (stream-operation #(write-uint %1 %2 value) buff pos))
 
   IBufferLong
   (read-long [buff pos]
     (assert (every? #(satisfies? IBufferLong %) buff))
     (stream-operation read-long buff pos))
-
   (write-long [buff pos value]
     (assert (every? #(satisfies? IBufferLong %) buff))
     (stream-operation #(write-long %1 %2 value) buff pos))
+  (read-ulong [buff pos]
+    (assert (every? #(satisfies? IBufferLong %) buff))
+    (stream-operation read-ulong buff pos))
+  (write-ulong [buff pos value]
+    (assert (every? #(satisfies? IBufferLong %) buff))
+    (stream-operation #(write-ulong %1 %2 value) buff pos))
 
   IBufferFloat
   (read-float [buff pos]
     (assert (every? #(satisfies? IBufferFloat %) buff))
     (stream-operation read-float buff pos))
-
   (write-float [buff pos value]
     (assert (every? #(satisfies? IBufferLong %) buff))
     (stream-operation #(write-float %1 %2 value) buff pos))
@@ -209,7 +281,6 @@
   (read-double [buff pos]
     (assert (every? #(satisfies? IBufferDouble %) buff))
     (stream-operation read-double buff pos))
-
   (write-double [buff pos value]
     (assert (every? #(satisfies? IBufferDouble %) buff))
     (stream-operation #(write-double %1 %2 value) buff pos))
@@ -218,16 +289,20 @@
   (read-byte [buff pos]
     (assert (every? #(satisfies? IBufferByte %) buff))
     (stream-operation read-byte buff pos))
-
   (write-byte [buff pos value]
     (assert (every? #(satisfies? IBufferByte %) buff))
     (stream-operation #(write-byte %1 %2 value) buff pos))
+  (read-ubyte [buff pos]
+    (assert (every? #(satisfies? IBufferByte %) buff))
+    (stream-operation read-ubyte buff pos))
+  (write-ubyte [buff pos value]
+    (assert (every? #(satisfies? IBufferByte %) buff))
+    (stream-operation #(write-ubyte %1 %2 value) buff pos))
 
   IBufferBytes
   (read-bytes [buff pos size]
     (assert (every? #(satisfies? IBufferBytes %) buff))
     (stream-operation #(read-bytes %1 %2 size) buff pos))
-
   (write-bytes [buff pos size data]
     (assert (every? #(satisfies? IBufferByte %) buff))
     (stream-operation #(write-bytes %1 %2 size data) buff pos))
@@ -247,12 +322,20 @@
     (.getInt16 buff pos))
   (write-short [buff pos value]
     (.setInt16 buff pos value))
+  (read-ushort [buff pos]
+    (.getUint16 buff pos))
+  (write-ushort [buff pos value]
+    (.setUint16 buff pos value))
 
   IBufferInt
   (read-int [buff pos]
     (.getInt32 buff pos))
   (write-int [buff pos value]
     (.setInt32 buff pos value))
+  (read-uint [buff pos]
+    (.getUint32 buff pos))
+  (write-uint [buff pos value]
+    (.setUint32 buff pos value))
 
   IBufferFloat
   (read-float [buff pos]
@@ -271,6 +354,10 @@
     (.getInt8 buff pos))
   (write-byte [buff pos value]
     (.setInt8 buff pos value))
+  (read-ubyte [buff pos]
+    (.getUint8 buff pos))
+  (write-ubyte [buff pos value]
+    (.setUint8 buff pos value))
 
   IBufferBytes
   (read-bytes [buff pos size]

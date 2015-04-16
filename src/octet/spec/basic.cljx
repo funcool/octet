@@ -7,6 +7,31 @@
 ;; Types implementation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn primitive-spec
+  [size readfn writefn]
+  (reify
+    #+clj
+    clojure.lang.IFn
+    #+clj
+    (invoke [s] s)
+
+    #+cljs
+    IFn
+    #+cljs
+    (-invoke [s] s)
+
+    spec/ISpecSize
+    (size [_] size)
+
+    spec/ISpec
+    (read [_ buff pos]
+      (let [readed (readfn buff pos)]
+        [size readed]))
+
+    (write [_ buff pos value]
+      (some->> value (writefn buff pos))
+      size)))
+
 (def ^{:doc "Boolean type spec."}
   bool
   (reify
@@ -21,10 +46,10 @@
     (-invoke [s] s)
 
     spec/ISpecSize
-    (size [_] 1)
+    (size [_#] 1)
 
     spec/ISpec
-    (read [_ buff pos]
+    (read [_# buff pos]
       (let [readed (buffer/read-byte buff pos)]
         [1 (condp = readed
              (clojure.core/byte 0) false
@@ -40,154 +65,22 @@
          1))))
 
 (def ^{:doc "Byte type spec."}
-  byte
-  (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
-
-    spec/ISpecSize
-    (size [_] 1)
-
-    spec/ISpec
-    (read [_ buff pos]
-      (let [readed (buffer/read-byte buff pos)]
-        [1 readed]))
-
-    (write [_ buff pos value]
-      (some->> value (buffer/write-byte buff pos))
-      1)))
+  byte (primitive-spec 1 buffer/read-byte buffer/write-byte))
 
 (def ^{:doc "Short type spec."}
-  int16
-  (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
-
-    spec/ISpecSize
-    (size [_] 2)
-
-    spec/ISpec
-    (read [s buff pos]
-      [(spec/size s)
-       (buffer/read-short buff pos)])
-
-    (write [s buff pos value]
-      (some->> value (buffer/write-short buff pos))
-      (spec/size s))))
+  int16 (primitive-spec 2 buffer/read-short buffer/write-short))
 
 (def ^{:doc "Integer type spec."}
-  int32
-  (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
-
-    spec/ISpecSize
-    (size [_] 4)
-
-    spec/ISpec
-    (read [s buff pos]
-      [(spec/size s)
-       (buffer/read-int buff pos)])
-
-    (write [s buff pos value]
-      (some->> value (buffer/write-int buff pos))
-      (spec/size s))))
+  int32 (primitive-spec 4 buffer/read-int buffer/write-int))
 
 (def ^{:doc "Long type spec."}
-  int64
-  (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
-
-    spec/ISpecSize
-    (size [_] 8)
-
-    spec/ISpec
-    (read [s buff pos]
-      [(spec/size s)
-       (buffer/read-long buff pos)])
-
-    (write [s buff pos value]
-      (some->> value (buffer/write-long buff pos))
-      (spec/size s))))
+  int64 (primitive-spec 8 buffer/read-long buffer/write-long))
 
 (def ^{:doc "Float type spec"}
-  float
-  (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
-
-    spec/ISpecSize
-    (size [_] 4)
-
-    spec/ISpec
-    (read [s buff pos]
-      [(spec/size s)
-       (buffer/read-float buff pos)])
-
-    (write [s buff pos value]
-      (some->> value (buffer/write-float buff pos))
-      (spec/size s))))
+  float (primitive-spec 4 buffer/read-float buffer/write-float))
 
 (def ^{:doc "Double type spec."}
-  double
-  (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
-
-    spec/ISpecSize
-    (size [_] 8)
-
-    spec/ISpec
-    (read [s buff pos]
-      [(spec/size s)
-       (buffer/read-double buff pos)])
-
-    (write [s buff pos value]
-      (some->> value (buffer/write-double buff pos))
-      (spec/size s))))
+  double (primitive-spec 8 buffer/read-double buffer/write-double))
 
 (defn bytes
   "Fixed size byte array type spec constructor."
@@ -203,3 +96,19 @@
     (write [_ buff pos value]
       (buffer/write-bytes buff pos size value)
       size)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Unsigned Primitives
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def ^{:doc "Unsinged int16 type spec."}
+  uint16 (primitive-spec 2 buffer/read-ushort buffer/write-ushort))
+
+(def ^{:doc "Unsinged int32 type spec."}
+  uint32 (primitive-spec 4 buffer/read-uint buffer/write-uint))
+
+(def ^{:doc "Unsinged byte type spec."}
+  ubyte (primitive-spec 1 buffer/read-ubyte buffer/write-ubyte))
+
+(def ^{:doc "Unsinged int64 type spec."}
+  uint64 (primitive-spec 8 buffer/read-ulong buffer/write-ulong))

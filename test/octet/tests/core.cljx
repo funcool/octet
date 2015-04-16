@@ -189,8 +189,12 @@
               (buf/long)     1002
               (buf/integer)  1001
               (buf/bool)     false
+              (buf/uint16)   55000
+              (buf/uint32)   4294967295
+              (buf/ubyte)    (short 255)
               (buf/double)   (double 4.3)
               (buf/float)    (float 3.2)
+              (buf/uint64)    18446744073709551615N
               (buf/byte)     (byte 32)]]
               ;; (buf/bytes 5)  (bytes/random-bytes 5)]]
     (doseq [[spec data] (partition 2 data)]
@@ -210,6 +214,9 @@
   (let [data [(buf/string 5) "äåéëþ"
               (buf/short)    100
               (buf/integer)  1001
+              (buf/uint16)   55000
+              (buf/uint32)   4294967295
+              (buf/ubyte)    (byte 255)
               (buf/bool)     false
               (buf/double)   (double 4.3)
               (buf/float)    (float 3.5)
