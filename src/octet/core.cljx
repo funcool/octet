@@ -5,6 +5,7 @@
             #+clj [octet.util :refer [defalias]]
             [octet.spec.basic :as basic-spec]
             [octet.spec.string :as string-spec]
+            [octet.spec.collections :as coll-spec]
             [octet.buffer :as buffer]))
 
 (defalias compose spec/compose)
@@ -13,6 +14,7 @@
 (defalias repeat spec/repeat)
 (defalias string string-spec/string)
 (defalias string* string-spec/string*)
+(defalias vector* coll-spec/vector*)
 (defalias int16 basic-spec/int16)
 (defalias uint16 basic-spec/uint16)
 (defalias int32 basic-spec/int32)

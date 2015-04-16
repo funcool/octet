@@ -299,4 +299,14 @@
       (t/is (= readed 20))
       (t/is (= data [1 2 3 4 5])))))
 
+(t/deftest spec-data-with-dynamic-vector
+  (let [spec (buf/vector* buf/int32)
+        buffer (buf/into spec [1 2 3 4 5])
+        written (impl/get-capacity buffer)]
+    (t/is (= written 24))
+
+    (let [[readed data] (buf/read* buffer spec)]
+      (t/is (= readed 24))
+      (t/is (= data [1 2 3 4 5])))))
+
 #+cljs (set! *main-cli-fn* #(node/run-tests))
