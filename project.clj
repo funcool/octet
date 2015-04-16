@@ -39,7 +39,8 @@
   :codeina {:output-dir "doc/api"
             :sources ["output/src"]
             :exclude [octet.spec.basic
-                      octet.spec.string]
+                      octet.spec.string
+                      octet.spec.collections]
             :language :clojure
             :src-uri-mapping {#"output/src" #(str "src/" % "x")}
             :src-dir-uri "http://github.com/funcool/octet/blob/master/"
