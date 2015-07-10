@@ -1,5 +1,5 @@
 = octet - A library for working with ByteBuffer's
-Andrey Antukh, <niwi@niwi.be>
+Andrey Antukh, <niwi@niwi.nz>
 0.1.0
 :toc: left
 :numbered:
