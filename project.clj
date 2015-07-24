@@ -3,7 +3,7 @@
   :url "https://github.com/funcool/octet"
   :license {:name "BSD (2 Clause)"
             :url "http://opensource.org/licenses/BSD-2-Clause"}
-  :dependencies [[io.netty/netty-buffer "4.1.0.Beta4"]]
+  :dependencies [[io.netty/netty-buffer "4.1.0.Beta5"]]
 
   :source-paths ["output/src"]
   :test-paths ["output/test/clj"]
