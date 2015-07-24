@@ -24,37 +24,37 @@
 
 (ns octet.core
   (:refer-clojure :exclude [read byte float double short long bytes into repeat])
-  #+cljs (:require-macros [octet.util :refer [defalias]])
   (:require [octet.spec :as spec]
-            #+clj [octet.util :refer [defalias]]
+            #?(:cljs
+               [octet.util :as util :require-macros true])
             [octet.spec.basic :as basic-spec]
             [octet.spec.string :as string-spec]
             [octet.spec.collections :as coll-spec]
             [octet.buffer :as buffer]))
 
-(defalias compose spec/compose)
-(defalias spec spec/spec)
-(defalias size spec/size)
-(defalias repeat spec/repeat)
-(defalias string string-spec/string)
-(defalias string* string-spec/string*)
-(defalias vector* coll-spec/vector*)
-(defalias int16 basic-spec/int16)
-(defalias uint16 basic-spec/uint16)
-(defalias int32 basic-spec/int32)
-(defalias uint32 basic-spec/uint32)
-(defalias int64 basic-spec/int64)
-(defalias uint64 basic-spec/uint64)
-(defalias float basic-spec/float)
-(defalias double basic-spec/double)
-(defalias byte basic-spec/byte)
-(defalias ubyte basic-spec/ubyte)
-(defalias bytes basic-spec/bytes)
-(defalias bool basic-spec/bool)
-(defalias allocate buffer/allocate)
-(defalias short int16)
-(defalias integer int32)
-(defalias long int64)
+(util/defalias compose spec/compose)
+(util/defalias spec spec/spec)
+(util/defalias size spec/size)
+(util/defalias repeat spec/repeat)
+(util/defalias string string-spec/string)
+(util/defalias string* string-spec/string*)
+(util/defalias vector* coll-spec/vector*)
+(util/defalias int16 basic-spec/int16)
+(util/defalias uint16 basic-spec/uint16)
+(util/defalias int32 basic-spec/int32)
+(util/defalias uint32 basic-spec/uint32)
+(util/defalias int64 basic-spec/int64)
+(util/defalias uint64 basic-spec/uint64)
+(util/defalias float basic-spec/float)
+(util/defalias double basic-spec/double)
+(util/defalias byte basic-spec/byte)
+(util/defalias ubyte basic-spec/ubyte)
+(util/defalias bytes basic-spec/bytes)
+(util/defalias bool basic-spec/bool)
+(util/defalias allocate buffer/allocate)
+(util/defalias short int16)
+(util/defalias integer int32)
+(util/defalias long int64)
 
 (defn write!
   "Write data into buffer following the specified
@@ -62,8 +62,9 @@
   ([buff data spec]
    (write! buff data spec {}))
   ([buff data spec {:keys [offset] :or {offset 0}}]
-   #+clj
-   (locking buff
+   #(:
+     #+clj
+     (locking buff
      (spec/write spec buff offset data))
    #+cljs
    (do
@@ -79,11 +80,9 @@
   ([buff spec]
    (read* buff spec {}))
   ([buff spec {:keys [offset] :or {offset 0}}]
-   #+clj
-   (locking buff
-     (spec/read spec buff offset))
-   #+cljs
-   (spec/read spec buff offset)))
+   #?(:clj (locking buff
+             (spec/read spec buff offset))
+      :cljs (spec/read spec buff offset))))
 
 (defn read
   "Read data from buffer following the specified
