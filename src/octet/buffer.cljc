@@ -80,161 +80,161 @@
 ;; NIO & Netty Buffer implementations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#+clj
-(extend-type ByteBuffer
-  IBufferShort
-  (read-short [buff pos]
-    (.getShort buff pos))
-  (write-short [buff pos value]
-    (.putShort buff pos value))
-  (read-ushort [buff pos]
-    (let [val (.getShort buff pos)]
-      (bit-and 0xFFFF (Integer. (int val)))))
-  (write-ushort [buff pos value]
-    (let [value (.shortValue (Integer. (int value)))]
+#?(:clj
+   (extend-type ByteBuffer
+     IBufferShort
+     (read-short [buff pos]
+       (.getShort buff pos))
+     (write-short [buff pos value]
+       (.putShort buff pos value))
+     (read-ushort [buff pos]
+       (let [val (.getShort buff pos)]
+         (bit-and 0xFFFF (Integer. (int val)))))
+     (write-ushort [buff pos value]
+       (let [value (.shortValue (Integer. (int value)))]
       (.putShort buff pos value)))
 
-  IBufferInt
-  (read-int [buff pos]
-    (.getInt buff pos))
-  (write-int [buff pos value]
-    (.putInt buff pos value))
-  (read-uint [buff pos]
-    (let [val (.getInt buff pos)]
-      (bit-and 0xFFFFFFFF (Long. (long val)))))
-  (write-uint [buff pos value]
-    (let [value (.intValue (Long. (long value)))]
-      (.putInt buff pos value)))
+     IBufferInt
+     (read-int [buff pos]
+       (.getInt buff pos))
+     (write-int [buff pos value]
+       (.putInt buff pos value))
+     (read-uint [buff pos]
+       (let [val (.getInt buff pos)]
+         (bit-and 0xFFFFFFFF (Long. (long val)))))
+     (write-uint [buff pos value]
+       (let [value (.intValue (Long. (long value)))]
+         (.putInt buff pos value)))
 
-  IBufferLong
-  (read-long [buff pos]
-    (.getLong buff pos))
-  (write-long [buff pos value]
-    (.putLong buff pos value))
-  (read-ulong [buff pos]
-    (let [val (.getLong buff pos)
-          ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
-      (bigint (BigInteger. 1 magnitude))))
-  (write-ulong [buff pos value]
-    (let [value (.longValue (bigint value))]
-      (.putLong buff pos value)))
+     IBufferLong
+     (read-long [buff pos]
+       (.getLong buff pos))
+     (write-long [buff pos value]
+       (.putLong buff pos value))
+     (read-ulong [buff pos]
+       (let [val (.getLong buff pos)
+             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+         (bigint (BigInteger. 1 magnitude))))
+     (write-ulong [buff pos value]
+       (let [value (.longValue (bigint value))]
+         (.putLong buff pos value)))
 
-  IBufferFloat
-  (read-float [buff pos]
-    (.getFloat buff pos))
-  (write-float [buff pos value]
-    (.putFloat buff pos value))
+     IBufferFloat
+     (read-float [buff pos]
+       (.getFloat buff pos))
+     (write-float [buff pos value]
+       (.putFloat buff pos value))
 
-  IBufferDouble
-  (read-double [buff pos]
-    (.getDouble buff pos))
-  (write-double [buff pos value]
-    (.putDouble buff pos value))
+     IBufferDouble
+     (read-double [buff pos]
+       (.getDouble buff pos))
+     (write-double [buff pos value]
+       (.putDouble buff pos value))
 
-  IBufferByte
-  (read-byte [buff pos]
-    (.get buff pos))
-  (write-byte [buff pos value]
-    (.put buff pos value))
-  (read-ubyte [buff pos]
-    (let [val (.get buff pos)]
-      (bit-and 0xFF (short val))))
-  (write-ubyte [buff pos value]
-    (let [value (.byteValue (Short. (short value)))]
-      (.put buff pos value)))
+     IBufferByte
+     (read-byte [buff pos]
+       (.get buff pos))
+     (write-byte [buff pos value]
+       (.put buff pos value))
+     (read-ubyte [buff pos]
+       (let [val (.get buff pos)]
+         (bit-and 0xFF (short val))))
+     (write-ubyte [buff pos value]
+       (let [value (.byteValue (Short. (short value)))]
+         (.put buff pos value)))
 
-  IBufferBytes
-  (read-bytes [buff pos size]
-    (let [tmpbuf (byte-array size)
-          oldpos (.position buff)]
-      (.position buff pos)
-      (.get buff tmpbuf)
-      (.position buff oldpos)
-      tmpbuf))
-  (write-bytes [buff pos size data]
-    (let [oldpos (.position buff)]
-      (.position buff pos)
-      (.put buff data 0 size)
-      (.position buff oldpos)))
+     IBufferBytes
+     (read-bytes [buff pos size]
+       (let [tmpbuf (byte-array size)
+             oldpos (.position buff)]
+         (.position buff pos)
+         (.get buff tmpbuf)
+         (.position buff oldpos)
+         tmpbuf))
+     (write-bytes [buff pos size data]
+       (let [oldpos (.position buff)]
+         (.position buff pos)
+         (.put buff data 0 size)
+         (.position buff oldpos)))
 
-  IBufferLimit
-  (get-capacity [buff]
-    (.limit buff)))
+     IBufferLimit
+     (get-capacity [buff]
+       (.limit buff))))
 
-#+clj
-(extend-type ByteBuf
-  IBufferShort
-  (read-short [buff pos]
-    (.getShort buff pos))
-  (write-short [buff pos value]
-    (.setShort buff pos value))
-  (read-ushort [buff pos]
-    (let [val (.getShort buff pos)]
-      (bit-and 0xFFFF (Integer. (int val)))))
-  (write-ushort [buff pos value]
-    (let [value (.shortValue (Integer. (int value)))]
-      (.setShort buff pos value)))
+#?(:clj
+   (extend-type ByteBuf
+     IBufferShort
+     (read-short [buff pos]
+       (.getShort buff pos))
+     (write-short [buff pos value]
+       (.setShort buff pos value))
+     (read-ushort [buff pos]
+       (let [val (.getShort buff pos)]
+         (bit-and 0xFFFF (Integer. (int val)))))
+     (write-ushort [buff pos value]
+       (let [value (.shortValue (Integer. (int value)))]
+         (.setShort buff pos value)))
 
-  IBufferInt
-  (read-int [buff pos]
-    (.getInt buff pos))
-  (write-int [buff pos value]
-    (.setInt buff pos value))
-  (read-uint [buff pos]
-    (let [val (.getInt buff pos)]
-      (bit-and 0xFFFFFFFF (Long. (long val)))))
-  (write-uint [buff pos value]
-    (let [value (.intValue (Long. (long value)))]
-      (.setInt buff pos value)))
+     IBufferInt
+     (read-int [buff pos]
+       (.getInt buff pos))
+     (write-int [buff pos value]
+       (.setInt buff pos value))
+     (read-uint [buff pos]
+       (let [val (.getInt buff pos)]
+         (bit-and 0xFFFFFFFF (Long. (long val)))))
+     (write-uint [buff pos value]
+       (let [value (.intValue (Long. (long value)))]
+         (.setInt buff pos value)))
 
-  IBufferLong
-  (read-long [buff pos]
-    (.getLong buff pos))
-  (write-long [buff pos value]
-    (.setLong buff pos value))
-  (read-ulong [buff pos]
-    (let [val (.getLong buff pos)
-          ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
-      (bigint (BigInteger. 1 magnitude))))
-  (write-ulong [buff pos value]
-    (let [value (.longValue (bigint value))]
-      (.setLong buff pos value)))
+     IBufferLong
+     (read-long [buff pos]
+       (.getLong buff pos))
+     (write-long [buff pos value]
+       (.setLong buff pos value))
+     (read-ulong [buff pos]
+       (let [val (.getLong buff pos)
+             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+         (bigint (BigInteger. 1 magnitude))))
+     (write-ulong [buff pos value]
+       (let [value (.longValue (bigint value))]
+         (.setLong buff pos value)))
 
-  IBufferFloat
-  (read-float [buff pos]
-    (.getFloat buff pos))
-  (write-float [buff pos value]
-    (.setFloat buff pos value))
+     IBufferFloat
+     (read-float [buff pos]
+       (.getFloat buff pos))
+     (write-float [buff pos value]
+       (.setFloat buff pos value))
 
-  IBufferDouble
-  (read-double [buff pos]
-    (.getDouble buff pos))
-  (write-double [buff pos value]
-    (.setDouble buff pos value))
+     IBufferDouble
+     (read-double [buff pos]
+       (.getDouble buff pos))
+     (write-double [buff pos value]
+       (.setDouble buff pos value))
 
-  IBufferByte
-  (read-byte [buff pos]
-    (.getByte buff pos))
-  (write-byte [buff pos value]
-    (.setByte buff pos value))
-  (read-ubyte [buff pos]
-    (let [val (.getByte buff pos)]
-      (bit-and 0xFF (short val))))
-  (write-ubyte [buff pos value]
-    (let [value (.byteValue (Short. (short value)))]
-      (.setByte buff pos value)))
+     IBufferByte
+     (read-byte [buff pos]
+       (.getByte buff pos))
+     (write-byte [buff pos value]
+       (.setByte buff pos value))
+     (read-ubyte [buff pos]
+       (let [val (.getByte buff pos)]
+         (bit-and 0xFF (short val))))
+     (write-ubyte [buff pos value]
+       (let [value (.byteValue (Short. (short value)))]
+         (.setByte buff pos value)))
 
-  IBufferBytes
-  (read-bytes [buff pos size]
-    (let [tmpbuf (byte-array size)]
-      (.getBytes buff pos tmpbuf)
-      tmpbuf))
-  (write-bytes [buff pos size data]
-    (.setBytes buff pos data 0 size))
+     IBufferBytes
+     (read-bytes [buff pos size]
+       (let [tmpbuf (byte-array size)]
+         (.getBytes buff pos tmpbuf)
+         tmpbuf))
+     (write-bytes [buff pos size data]
+       (.setBytes buff pos data 0 size))
 
-  IBufferLimit
-  (get-capacity [buff]
-    (.capacity buff)))
+     IBufferLimit
+     (get-capacity [buff]
+       (.capacity buff))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; A vector of buffers
@@ -249,8 +249,8 @@
                   (reduced (opfn buff pos)))))
             pos buff))
 
-(extend-type #+clj clojure.lang.IPersistentVector
-             #+cljs cljs.core.PersistentVector
+(extend-type #?(:clj clojure.lang.IPersistentVector
+                :cljs cljs.core.PersistentVector)
   IBufferShort
   (read-short [buff pos]
     (assert (every? #(satisfies? IBufferShort %) buff))
@@ -339,79 +339,70 @@
 ;; ES6 Typed Arrays
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ES6 Typed Array Buffer implementations
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#?(:cljs
+   (extend-type js/DataView
+     IBufferShort
+     (read-short [buff pos]
+       (.getInt16 buff pos))
+     (write-short [buff pos value]
+       (.setInt16 buff pos value))
+     (read-ushort [buff pos]
+       (.getUint16 buff pos))
+     (write-ushort [buff pos value]
+       (.setUint16 buff pos value))
 
-#+cljs
-(extend-type js/DataView
-  IBufferShort
-  (read-short [buff pos]
-    (.getInt16 buff pos))
-  (write-short [buff pos value]
-    (.setInt16 buff pos value))
-  (read-ushort [buff pos]
-    (.getUint16 buff pos))
-  (write-ushort [buff pos value]
-    (.setUint16 buff pos value))
+     IBufferInt
+     (read-int [buff pos]
+       (.getInt32 buff pos))
+     (write-int [buff pos value]
+       (.setInt32 buff pos value))
+     (read-uint [buff pos]
+       (.getUint32 buff pos))
+     (write-uint [buff pos value]
+       (.setUint32 buff pos value))
 
-  IBufferInt
-  (read-int [buff pos]
-    (.getInt32 buff pos))
-  (write-int [buff pos value]
-    (.setInt32 buff pos value))
-  (read-uint [buff pos]
-    (.getUint32 buff pos))
-  (write-uint [buff pos value]
-    (.setUint32 buff pos value))
+     IBufferFloat
+     (read-float [buff pos]
+       (.getFloat32 buff pos))
+     (write-float [buff pos value]
+       (.setFloat32 buff pos value))
 
-  IBufferFloat
-  (read-float [buff pos]
-    (.getFloat32 buff pos))
-  (write-float [buff pos value]
-    (.setFloat32 buff pos value))
+     IBufferDouble
+     (read-double [buff pos]
+       (.getFloat64 buff pos))
+     (write-double [buff pos value]
+       (.setFloat64 buff pos value))
 
-  IBufferDouble
-  (read-double [buff pos]
-    (.getFloat64 buff pos))
-  (write-double [buff pos value]
-    (.setFloat64 buff pos value))
+     IBufferByte
+     (read-byte [buff pos]
+       (.getInt8 buff pos))
+     (write-byte [buff pos value]
+       (.setInt8 buff pos value))
+     (read-ubyte [buff pos]
+       (.getUint8 buff pos))
+     (write-ubyte [buff pos value]
+       (.setUint8 buff pos value))
 
-  IBufferByte
-  (read-byte [buff pos]
-    (.getInt8 buff pos))
-  (write-byte [buff pos value]
-    (.setInt8 buff pos value))
-  (read-ubyte [buff pos]
-    (.getUint8 buff pos))
-  (write-ubyte [buff pos value]
-    (.setUint8 buff pos value))
+     IBufferBytes
+     (read-bytes [buff pos size]
+       (let [offset (.-byteOffset buff)
+             buffer (.-buffer buff)]
+         (js/Int8Array. buffer (+ offset pos) size)))
+     (write-bytes [buff pos size data]
+       (doseq [i (range (.-length data))]
+         (.setInt8 buff (+ pos i) (aget data i))))
 
-  IBufferBytes
-  (read-bytes [buff pos size]
-    (let [offset (.-byteOffset buff)
-          buffer (.-buffer buff)]
-      (js/Int8Array. buffer (+ offset pos) size)))
-  (write-bytes [buff pos size data]
-    (doseq [i (range (.-length data))]
-      (.setInt8 buff (+ pos i) (aget data i))))
-
-  IBufferLimit
-  (get-capacity [buff]
-    (.-byteLength buff)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ES6 Typed Array Buffer implementations
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+     IBufferLimit
+     (get-capacity [buff]
+       (.-byteLength buff))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public Api
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#+clj
-(def ^{:private true}
-  allocator (ByteBufAllocator/DEFAULT))
+#?(:clj
+   (def ^{:private true}
+     allocator (ByteBufAllocator/DEFAULT)))
 
 (defmulti allocate
   "Polymorphic function for allocate new bytebuffers.
@@ -437,28 +428,24 @@
   (fn [size & [{:keys [type impl] :or {type :heap impl #+clj :nio #+cljs :es6}}]]
     [type impl]))
 
-#+clj
-(defmethod allocate [:heap :nio]
-  [size & _]
-  (ByteBuffer/allocate size))
+#?@(:clj
+    [(defmethod allocate [:heap :nio]
+       [size & _]
+       (ByteBuffer/allocate size))
 
-#+clj
-(defmethod allocate [:direct :nio]
-  [size & _]
-  (ByteBuffer/allocateDirect size))
+     (defmethod allocate [:direct :nio]
+       [size & _]
+       (ByteBuffer/allocateDirect size))
 
-#+clj
-(defmethod allocate [:heap :netty]
-  [size & _]
-  (.heapBuffer allocator size))
+     (defmethod allocate [:heap :netty]
+       [size & _]
+       (.heapBuffer allocator size))
 
-#+clj
-(defmethod allocate [:direct :netty]
-  [size & _]
-  (.directBuffer allocator size))
-
-#+cljs
-(defmethod allocate [:heap :es6]
-  [size & _]
-  (let [bf (js/ArrayBuffer. size)]
-    (js/DataView. bf)))
+     (defmethod allocate [:direct :netty]
+       [size & _]
+       (.directBuffer allocator size))]
+    :cljs
+    [(defmethod allocate [:heap :es6]
+       [size & _]
+       (let [bf (js/ArrayBuffer. size)]
+         (js/DataView. bf)))])
