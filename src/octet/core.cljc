@@ -26,7 +26,7 @@
   (:refer-clojure :exclude [read byte float double short long bytes into repeat])
   (:require [octet.spec :as spec]
             #?(:cljs
-               [octet.util :as util :require-macros true])
+               [octet.util :as util :include-macros true])
             [octet.spec.basic :as basic-spec]
             [octet.spec.string :as string-spec]
             [octet.spec.collections :as coll-spec]
@@ -62,13 +62,11 @@
   ([buff data spec]
    (write! buff data spec {}))
   ([buff data spec {:keys [offset] :or {offset 0}}]
-   #(:
-     #+clj
-     (locking buff
-     (spec/write spec buff offset data))
-   #+cljs
-   (do
-     (spec/write spec buff offset data))))
+   #?(:clj
+      (locking buff
+        (spec/write spec buff offset data))
+      :cljs
+      (spec/write spec buff offset data))))
 
 (defn read*
   "Read data from buffer following the specified spec

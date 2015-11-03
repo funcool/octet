@@ -32,10 +32,10 @@
   Also inclues a polymorphic methods for allocate new bytebuffers
   with support for nio bytebuffers, netty41 bytebuffers and
   es6 typed arrays (from javascript environments)."
-  #+clj
-  (:import java.nio.ByteBuffer
-           io.netty.buffer.ByteBuf
-           io.netty.buffer.ByteBufAllocator))
+  #?(:clj
+     (:import java.nio.ByteBuffer
+              io.netty.buffer.ByteBuf
+              io.netty.buffer.ByteBufAllocator)))
 
 (defprotocol IBufferShort
   (read-short [_ pos] "Read short integer (16 bits) from buffer.")
@@ -76,9 +76,9 @@
 (defprotocol IBufferLimit
   (get-capacity [_] "Get the read/write capacity in bytes."))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; NIO & Netty Buffer implementations
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #?(:clj
    (extend-type ByteBuffer
@@ -236,9 +236,9 @@
      (get-capacity [buff]
        (.capacity buff))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; A vector of buffers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- stream-operation
   [opfn buff pos]
@@ -335,9 +335,9 @@
   (get-capacity [buff]
     (reduce #(+ %1 (get-capacity %2)) 0 buff)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ES6 Typed Arrays
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #?(:cljs
    (extend-type js/DataView
@@ -396,9 +396,9 @@
      (get-capacity [buff]
        (.-byteLength buff))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public Api
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #?(:clj
    (def ^{:private true}
@@ -425,27 +425,32 @@
   This function is defined as multimethod and you can
   extend it with your own bytebuffer implementations
   if you want or need."
-  (fn [size & [{:keys [type impl] :or {type :heap impl #+clj :nio #+cljs :es6}}]]
+  (fn [size & [{:keys [type impl] :or {type :heap
+                                       impl #?(:clj :nio :cljs :es6)}}]]
     [type impl]))
 
-#?@(:clj
-    [(defmethod allocate [:heap :nio]
-       [size & _]
-       (ByteBuffer/allocate size))
+#?(:clj
+   (defmethod allocate [:heap :nio]
+     [size & _]
+     (ByteBuffer/allocate size)))
 
-     (defmethod allocate [:direct :nio]
-       [size & _]
-       (ByteBuffer/allocateDirect size))
+#?(:clj
+   (defmethod allocate [:direct :nio]
+     [size & _]
+     (ByteBuffer/allocateDirect size)))
 
-     (defmethod allocate [:heap :netty]
-       [size & _]
-       (.heapBuffer allocator size))
+#?(:clj
+   (defmethod allocate [:heap :netty]
+     [size & _]
+     (.heapBuffer allocator size)))
 
-     (defmethod allocate [:direct :netty]
-       [size & _]
-       (.directBuffer allocator size))]
-    :cljs
-    [(defmethod allocate [:heap :es6]
-       [size & _]
-       (let [bf (js/ArrayBuffer. size)]
-         (js/DataView. bf)))])
+#?(:clj
+   (defmethod allocate [:direct :netty]
+     [size & _]
+     (.directBuffer allocator size)))
+
+#?(:cljs
+   (defmethod allocate [:heap :es6]
+     [size & _]
+     (let [bf (js/ArrayBuffer. size)]
+       (js/DataView. bf))))

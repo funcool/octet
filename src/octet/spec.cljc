@@ -33,9 +33,9 @@
   (:refer-clojure :exclude [type read float double long short byte bytes repeat])
   (:require [octet.buffer :as buffer]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Abstraction definition
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defprotocol ISpec
   "Basic abstraction for something that can be work like a Spec."
@@ -50,22 +50,17 @@
   "Abstraction for calculate size for dynamic specs."
   (size* [_ data] "Calculate the size in bytes of the object having a data."))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Composed Spec Types
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (deftype AssociativeSpec [data dict types]
-  #+clj
-  clojure.lang.Counted
-  #+clj
-  (count [_]
-    (count types))
-
-  #+cljs
-  ICounted
-  #+cljs
-  (-count [_]
-    (count types))
+  #?@(:clj
+      [clojure.lang.Counted
+       (count [_] (count types))]
+      :cljs
+      [cljs.core/ICounted
+       (-count [_] (count types))])
 
   ISpecSize
   (size [_]
@@ -100,17 +95,12 @@
       (- written pos))))
 
 (deftype IndexedSpec [types]
-  #+clj
-  clojure.lang.Counted
-  #+clj
-  (count [_]
-    (count types))
-
-  #+cljs
-  ICounted
-  #+cljs
-  (-count [_]
-    (count types))
+  #?@(:clj
+      [clojure.lang.Counted
+       (count [_] (count types))]
+      :cljs
+      [cljs.core/ICounted
+       (-count [_] (count types))])
 
   ISpecSize
   (size [_]
@@ -145,12 +135,14 @@
                           pos indexedtypes)]
       (- written pos))))
 
-#+clj (alter-meta! #'->AssociativeSpec assoc :private true)
-#+clj (alter-meta! #'->IndexedSpec assoc :private true)
+#?(:clj
+   (do
+     (alter-meta! #'->AssociativeSpec assoc :private true)
+     (alter-meta! #'->IndexedSpec assoc :private true)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spec Constructors
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti spec
   "Polymorphic constructor for Spec instances.

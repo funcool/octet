@@ -13,77 +13,83 @@
 ;; limitations under the License.
 
 (ns octet.tests.core
-  (:require #+clj [clojure.test :as t]
-            #+cljs [cljs.test :as t]
-            #+cljs [cljs-testrunners.node :as node]
+  (:require #?(:cljs [cljs.test :as t]
+               :clj  [clojure.test :as t])
             [octet.core :as buf]
             [octet.buffer :as impl])
-  #+clj
-  (:import java.nio.ByteBuffer
-           io.netty.buffer.ByteBuf))
+  #?(:clj
+     (:import java.nio.ByteBuffer
+              io.netty.buffer.ByteBuf)))
 
-#+clj
-(defn random-bytes
-  [^long numbytes]
-  (let [sr (java.util.Random.)
-        buffer (byte-array numbytes)]
-    (.nextBytes sr buffer)
-    buffer))
+#?(:clj
+   (do
+     (defn random-bytes
+       [^long numbytes]
+       (let [sr (java.util.Random.)
+             buffer (byte-array numbytes)]
+         (.nextBytes sr buffer)
+         buffer))
 
-#+cljs
-(defn random-bytes
-  [^long numbytes]
-  (let [buffer (js/Int8Array. numbytes)]
-    (doseq [i (range numbytes)]
-      (aset buffer i (rand-int 10)))
-    buffer))
+     (defn equals?
+       [^bytes a ^bytes b]
+       (java.util.Arrays/equals a b)))
 
-#+clj
-(defn equals?
-  "Check if two byte arrays are equals."
-  [^bytes a ^bytes b]
-  (java.util.Arrays/equals a b))
+   :cljs
+   (do
+     (defn random-bytes
+       [^long numbytes]
+       (let [buffer (js/Int8Array. numbytes)]
+         (doseq [i (range numbytes)]
+           (aset buffer i (rand-int 10)))
+         buffer))
 
-#+cljs
-(defn equals?
-  [^bytes a ^bytes b]
-  (if (not= (.-length a) (.-length b))
-    false
-    (reduce (fn [acc i]
-              (if (not= (aget a i) (aget b i))
-                (reduced false)
-                true))
-            true
-            (range (.-length a)))))
+     (defn equals?
+       [^bytes a ^bytes b]
+       (if (not= (.-length a) (.-length b))
+         false
+         (reduce (fn [acc i]
+                   (if (not= (aget a i) (aget b i))
+                     (reduced false)
+                     true))
+                 true
+                 (range (.-length a)))))))
 
-#+clj
-(t/deftest allocate-heap-nio-buffer
-  (let [buffer (buf/allocate 16)]
-    (t/is (not (.isDirect buffer)))
-    (t/is (instance? ByteBuffer buffer))))
 
-#+clj
-(t/deftest allocate-direct-nio-buffer
-  (let [buffer (buf/allocate 16 {:type :direct})]
-    (t/is (.isDirect buffer))
-    (t/is (instance? ByteBuffer buffer))))
+#?(:clj
+   (t/deftest allocate-heap-nio-buffer
+     (let [buffer (buf/allocate 16)]
+       (t/is (not (.isDirect buffer)))
+       (t/is (instance? ByteBuffer buffer)))))
 
-#+clj
-(t/deftest allocate-heap-netty-buffer
-  (let [buffer (buf/allocate 16 {:type :heap :impl :netty})]
-    (t/is (not (.isDirect buffer)))
-    (t/is (instance? ByteBuf buffer))))
+#?(:clj
+   (t/deftest allocate-direct-nio-buffer
+     (let [buffer (buf/allocate 16 {:type :direct})]
+       (t/is (.isDirect buffer))
+       (t/is (instance? ByteBuffer buffer)))))
 
-#+clj
-(t/deftest allocate-direct-netty-buffer
-  (let [buffer (buf/allocate 16 {:type :direct :impl :netty})]
-    (t/is (.isDirect buffer))
-    (t/is (instance? ByteBuf buffer))))
+#?(:clj
+   (t/deftest allocate-heap-netty-buffer
+     (let [buffer (buf/allocate 16 {:type :heap :impl :netty})]
+       (t/is (not (.isDirect buffer)))
+       (t/is (instance? ByteBuf buffer)))))
 
-#+cljs
-(t/deftest allocate-direct-es6-buffer
-  (let [buffer (buf/allocate 16 {:impl :es6})]
-    (t/is (instance? js/DataView buffer))))
+#?(:clj
+   (t/deftest allocate-direct-netty-buffer
+     (let [buffer (buf/allocate 16 {:type :direct :impl :netty})]
+       (t/is (.isDirect buffer))
+       (t/is (instance? ByteBuf buffer)))))
+#?(:clj
+   (t/deftest indexed-specs-write-with-offset
+     (let [spec (buf/spec (buf/int32))
+           buffer (buf/allocate 12)
+           data [500]]
+       (t/is (= (buf/write! buffer data spec {:offset 3}) 4))
+       (t/is (= (.getInt buffer 3) 500)))))
+
+#?(:cljs
+   (t/deftest allocate-direct-es6-buffer
+     (let [buffer (buf/allocate 16 {:impl :es6})]
+       (t/is (instance? js/DataView buffer)))))
 
 (t/deftest spec-constructor
   (let [spec (buf/spec :field1 (buf/int32)
@@ -112,12 +118,13 @@
   (let [spec (buf/spec :field1 (buf/int32))
         buffer (buf/allocate 2)
         data {:field1 1}]
-    #+clj
-    (t/is (thrown? java.lang.IndexOutOfBoundsException
-                   (buf/write! buffer data spec) 12))
-    #+cljs
-    (t/is (thrown? js/Error
-                   (buf/write! buffer data spec) 12))))
+
+    #?(:clj
+       (t/is (thrown? java.lang.IndexOutOfBoundsException
+                      (buf/write! buffer data spec) 12))
+       :cljs
+       (t/is (thrown? js/Error
+                      (buf/write! buffer data spec) 12)))))
 
 (t/deftest associative-specs-read
   (let [spec (buf/spec :field1 (buf/int32)
@@ -145,25 +152,17 @@
     (t/is (= (impl/read-int buffer 0) 1))
     (t/is (= (impl/read-short buffer 4) 4))))
 
-#+clj
-(t/deftest indexed-specs-write-with-offset
-  (let [spec (buf/spec (buf/int32))
-        buffer (buf/allocate 12)
-        data [500]]
-    (t/is (= (buf/write! buffer data spec {:offset 3}) 4))
-    (t/is (= (.getInt buffer 3) 500))))
-
-
 (t/deftest indexed-specs-write-wrong-buffer
   (let [spec (buf/spec (buf/int32))
         buffer (buf/allocate 2)
         data [1]]
-    #+clj
-    (t/is (thrown? java.lang.IndexOutOfBoundsException
-                   (buf/write! buffer data spec) 12))
-    #+cljs
-    (t/is (thrown? js/Error
-                   (buf/write! buffer data spec) 12))))
+
+    #?(:clj
+       (t/is (thrown? java.lang.IndexOutOfBoundsException
+                      (buf/write! buffer data spec) 12))
+       :cljs
+       (t/is (thrown? js/Error
+                      (buf/write! buffer data spec) 12)))))
 
 (t/deftest indexed-specs-read
   (let [spec (buf/spec (buf/int32) (buf/int16))
@@ -182,59 +181,57 @@
       (t/is (= readed 4))
       (t/is (= data [1000])))))
 
-#+clj
-(t/deftest spec-data-types
-  (let [data [(buf/string 5) "12345"
-              (buf/short)    100
-              (buf/long)     1002
-              (buf/integer)  1001
-              (buf/bool)     false
-              (buf/uint16)   55000
-              (buf/uint32)   4294967295
-              (buf/ubyte)    (short 255)
-              (buf/double)   (double 4.3)
-              (buf/float)    (float 3.2)
-              (buf/uint64)    18446744073709551615N
-              (buf/byte)     (byte 32)]]
-              ;; (buf/bytes 5)  (bytes/random-bytes 5)]]
-    (doseq [[spec data] (partition 2 data)]
-      (let [buffers [(buf/allocate (buf/size spec) {:type :heap :impl :nio})
-                     (buf/allocate (buf/size spec) {:type :direct :impl :nio})
-                     (buf/allocate (buf/size spec) {:type :heap :impl :netty})
-                     (buf/allocate (buf/size spec) {:type :direct :impl :netty})]]
-        (doseq [buffer buffers]
-          (let [written (buf/write! buffer data spec)]
-            (t/is (= written (buf/size spec)))
-            (let [[readed data'] (buf/read* buffer spec)]
-              (t/is (= readed (buf/size spec)))
-              (t/is (= data data')))))))))
-
-#+cljs
-(t/deftest spec-data-types
-  (let [data [(buf/string 5) "äåéëþ"
-              (buf/short)    100
-              (buf/integer)  1001
-              (buf/uint16)   55000
-              (buf/uint32)   4294967295
-              (buf/ubyte)    (byte 255)
-              (buf/bool)     false
-              (buf/double)   (double 4.3)
-              (buf/float)    (float 3.5)
+#?(:clj
+   (t/deftest spec-data-types
+     (let [data [(buf/string 5) "12345"
+                 (buf/short)    100
+                 (buf/long)     1002
+                 (buf/integer)  1001
+                 (buf/bool)     false
+                 (buf/uint16)   55000
+                 (buf/uint32)   4294967295
+                 (buf/ubyte)    (short 255)
+                 (buf/double)   (double 4.3)
+                 (buf/float)    (float 3.2)
+                 (buf/uint64)    18446744073709551615N
+                 (buf/byte)     (byte 32)]]
+       ;; (buf/bytes 5)  (bytes/random-bytes 5)]]
+       (doseq [[spec data] (partition 2 data)]
+         (let [buffers [(buf/allocate (buf/size spec) {:type :heap :impl :nio})
+                        (buf/allocate (buf/size spec) {:type :direct :impl :nio})
+                        (buf/allocate (buf/size spec) {:type :heap :impl :netty})
+                        (buf/allocate (buf/size spec) {:type :direct :impl :netty})]]
+           (doseq [buffer buffers]
+             (let [written (buf/write! buffer data spec)]
+               (t/is (= written (buf/size spec)))
+               (let [[readed data'] (buf/read* buffer spec)]
+                 (t/is (= readed (buf/size spec)))
+                 (t/is (= data data')))))))))
+   :cljs
+   (t/deftest spec-data-types
+     (let [data [(buf/string 5) "äåéëþ"
+                 (buf/short)    100
+                 (buf/integer)  1001
+                 (buf/uint16)   55000
+                 (buf/uint32)   4294967295
+                 (buf/ubyte)    (byte 255)
+                 (buf/bool)     false
+                 (buf/double)   (double 4.3)
+                 (buf/float)    (float 3.5)
               (buf/byte)     (byte 32)
-              (buf/bytes 5)  (random-bytes 5)]]
-    (doseq [[spec data] (partition 2 data)]
-      (let [buffers [(buf/allocate (buf/size spec) {:impl :es6})]]
-        (doseq [buffer buffers]
-          (let [written (buf/write! buffer data spec)]
-            (t/is (= written (buf/size spec)))
-            (let [[readed data'] (buf/read* buffer spec)]
-              (t/is (= readed (buf/size spec)))
-              (cond
-                (instance? js/Int8Array data')
-                (t/is (equals? data data'))
-
-                :else
-                (t/is (= data data'))))))))))
+                 (buf/bytes 5)  (random-bytes 5)]]
+       (doseq [[spec data] (partition 2 data)]
+         (let [buffers [(buf/allocate (buf/size spec) {:impl :es6})]]
+           (doseq [buffer buffers]
+             (let [written (buf/write! buffer data spec)]
+               (t/is (= written (buf/size spec)))
+               (let [[readed data'] (buf/read* buffer spec)]
+                 (t/is (= readed (buf/size spec)))
+                 (cond
+                   (instance? js/Int8Array data')
+                   (t/is (equals? data data'))
+                   :else
+                   (t/is (= data data')))))))))))
 
 (t/deftest spec-data-with-dynamic-types-single
   (let [spec (buf/spec (buf/string*))
@@ -309,4 +306,15 @@
       (t/is (= readed 24))
       (t/is (= data [1 2 3 4 5])))))
 
-#+cljs (set! *main-cli-fn* #(node/run-tests))
+#?(:cljs
+   (do
+     (enable-console-print!)
+     (set! *main-cli-fn* #(t/run-tests))))
+
+#?(:cljs
+   (defmethod t/report [:cljs.test/default :end-run-tests]
+     [m]
+     (if (t/successful? m)
+       (set! (.-exitCode js/process) 0)
+       (set! (.-exitCode js/process) 1))))
+

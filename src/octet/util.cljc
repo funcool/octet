@@ -1,6 +1,5 @@
 (ns octet.util)
 
-#+clj
 (defmacro defalias
   [sym sym2]
   `(do

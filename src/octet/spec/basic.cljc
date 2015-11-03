@@ -10,15 +10,12 @@
 (defn primitive-spec
   [size readfn writefn]
   (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
+    #?@(:clj
+        [clojure.lang.IFn
+         (invoke [s] s)]
+        :cljs
+        [cljs.core/IFn
+         (-invoke [s] s)])
 
     spec/ISpecSize
     (size [_] size)
@@ -35,15 +32,12 @@
 (def ^{:doc "Boolean type spec."}
   bool
   (reify
-    #+clj
-    clojure.lang.IFn
-    #+clj
-    (invoke [s] s)
-
-    #+cljs
-    IFn
-    #+cljs
-    (-invoke [s] s)
+    #?@(:clj
+        [clojure.lang.IFn
+         (invoke [s] s)]
+        :cljs
+        [cljs.core/IFn
+         (-invoke [s] s)])
 
     spec/ISpecSize
     (size [_#] 1)
