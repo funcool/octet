@@ -12,6 +12,9 @@ Date: unreleased
 - Add `repeat` composition type spec.
 - Add dynamic `vector*` type spec.
 - Add unsigned version of primitives typespecs: uint16, uint32 uint64, ubyte.
+- Convert to conditional readers (clojure 1.7 is not the minimum clojure
+  version required).
+- Add proper externs for enable advanced compilation.
 
 
 ## Version 0.1.0 ##
