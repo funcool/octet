@@ -8,9 +8,9 @@ pom.xml.asc
 *.swp
 /.lein-*
 /.nrepl-port
-doc/index.html
 \#*\#
 *~
 .\#*
 /out
 /*-init.clj
+/doc/dist/

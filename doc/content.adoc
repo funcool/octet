@@ -1,6 +1,6 @@
-= octet - A library for working with ByteBuffer's
-Andrey Antukh, <niwi@niwi.nz>
-0.1.0
+= octet - a library for working with byte buffers
+funcool.org
+0.2.0
 :toc: left
 :numbered:
 :source-highlighter: pygments
@@ -9,79 +9,65 @@ Andrey Antukh, <niwi@niwi.nz>
 
 == Introduction
 
-Working with raw bytes is tedious, and sometimes the language abstractions for working
-with bytes is not very pleasant. _octet_ library offers a simple api for clojure (jvm)
-and clojurescript (js) that makes working with bytebuffer painless.
+Working with raw bytes is tedious, and sometimes the language abstractions for
+working with bytes is not very pleasant. _octet_ library offers a simple api for
+clojure (jvm) and clojurescript (js) that makes working with bytebuffer painless.
 
 This is a short list of project goals:
 
 - Not to be intrusive (no bytebuffer wrapping).
 - Provide host independent abstraction (in most possible way).
-- Partial deserialization (TODO).
 - Composability.
 
 
-== Project Maturity
+=== Project Maturity
 
 Since _octet_ is a young project there can be some API breakage.
 
 
-== Install
+=== Install
 
 This section covers the _octet_ library installing process and its requirements.
 
 
 === Requirements
 
-_octet_ is tested with these platforms:
 
-- jdk7
-- jdk8
-- node 0.12
-- iojs 1.4.1
+The simplest way to use _octet_ in a clojure project, is by including it in the
+dependency vector on your *_project.clj_* file:
 
-
-=== Leiningen
-
-The simplest way to use _suricatta_ in a clojure project, is by including it in the dependency
-vector on your *_project.clj_* file:
-
-._on project.clj_
 [source,clojure]
 ----
-[funcool/octet "0.1.0"]
+[funcool/octet "0.2.0"]
 ----
 
-=== Get the Code
-
-_octet_ is open source and can be found on link:https://github.com/funcool/octet[github].
-
-You can clone the public repository with this command:
-
-[source,text]
-----
-git clone https://github.com/funcool/octet
-----
+And the library works with the following platforms: *jdk7*, *jdk8*, *node* (0.12.7, 4.2.0,
+5.0.0).
 
 
 == Getting started
 
-The main goal of _octet_ is provide, multiplatform abstraction for work with bytebuffer's. For it
-offers a ligweight api for define message types in a declarative way and use them for read or
-write to bytebuffers.
+The main goal of _octet_ is provide, multiplatform abstraction for work with
+byte buffer's. Offering a ligweight api for define message types in a declarative
+way and use them for read or write to bytebuffers.
 
-As previously said, _octet_  works with both most used clojure implementations: clojure & clojurescript. Each platform has own bytebuffer like types. _octet_ library offers implementations for link:http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[NIO ByteBuffer] and link:http://netty.io/4.1/api/io/netty/buffer/ByteBuf.html[Netty ByteBuf] in clojure and link:https://developer.mozilla.org/en/docs/Web/JavaScript/Typed_arrays[es6 typed arrays] in clojurescript.
+As previously said, _octet_  works with both most used clojure implementations:
+clojure & clojurescript. Each platform has its own byte buffer abstraction:
+
+- link:http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[NIO ByteBuffer (clojure)]
+- link:http://netty.io/4.1/api/io/netty/buffer/ByteBuf.html[Netty ByteBuf (clojure)]
+- link:https://developer.mozilla.org/en/docs/Web/JavaScript/Typed_arrays[Typed Arrays ES6 (clojurescript)]
 
 
 === Define a spec
 
-A spec in _octet_ glossary represents a type definition or a composition of types. Two most common
-composition types are: associative and indexed.
+A spec in _octet_ glossary represents a type definition or a composition of types.
+Two most common composition types are: associative and indexed.
 
-The difference of indexed and associative compositions is the input and output. In associative
-composition the expected input and output is a map like object. And in indexed composition,
-the expected input and input is a vector like objects. Internally them represents the same value in
-bytes.
+The difference of indexed and associative compositions is the input and output. In
+associative composition the expected input and output is a map. And in indexed
+composition, the expected input and input is a vector. Internally them represents
+the same value in bytes.
 
 Let start defining one:
 
@@ -97,8 +83,8 @@ Let start defining one:
                         :field2 buf/bool))
 ----
 
-You can check that the spec size (in bytes) and number of types internally is the same
-for both defined specs:
+You can check that the spec size (in bytes) and number of types internally is the
+same for both:
 
 [source, clojure]
 ----
@@ -115,30 +101,40 @@ for both defined specs:
 ;; => 2
 ----
 
-The `spec` is a polimorphic constructor for type specs compostion, that dependently of specified
-arguments, creates a indexed composition instance or associatieve.
-
 
 === Creating buffer
 
-The next piece in the puzzle is a way to create (or allocate) new byte buffers. This operation is
-almost platform independent if the defaults satisfies you.
+The next piece in the puzzle is a way to create (or allocate) new byte buffers.
+This operation is almost platform independent if the library defaults satisfies you.
 
-.Example allocating a 24 bytes size byte buffer with *default* implementation:
+It there is an example allocating a 24 bytes size byte buffer with *default*
+implementation:
+
 [source, clojure]
 ----
 ;; Allocate bytebuffer with 24 bytes of size
 (def buffer (buf/allocate 24))
 ----
 
-.Example allocating a 24 bytes size byte buffer of *heap* type using *NIO* implementation:
+The buffer allocation is parametrizable so you can specify the concrete
+implementation to use and the type of buffer:
+
 [source, clojure]
 ----
 ;; This is a default if you are using clojure
 (def buffer (buf/allocate 24 {:impl :nio :type :heap}))
 ----
 
-.Example allocating a 24 bytes size byte buffer of *heap* type using *es6 typed arrays* implementation:
+It there are two types of buffers: `:heap` and `:direct`. The `:heap` type of buffer
+uses the jdk/node heap for store the data and the `:direct` buffer type stores
+the data out of the virtual machine heap. The main advantage of use `:direct`
+buffers is that they are not affect the GC and may enable have less GC pauses.
+
+The `:direct` type of buffers are only available on JDK.
+
+It there is an other example allocating a 24 bytes size byte buffer using *es6
+typed arrays* implementation:
+
 [source, clojure]
 ----
 ;; This is a default if you are using clojurescript
@@ -147,16 +143,21 @@ almost platform independent if the defaults satisfies you.
 
 You can see all supported options <<supported-bytebuffers,here>>
 
-The return value of `allocate` depens on implementation used. Is a plain instance without additional
-wrapping. If you want access to its internals, you can do it with native host platform api.
+[NOTE]
+====
+The return value of `allocate` depens on implementation used. Is a plain instance
+without additional wrapping. If you want access to its internals, you can do it
+with native host platform api.
+====
 
 
 === Read and write data
 
-It's time to see how we can write data to buffers and read data from them. Specs are simple schema
-on how the data should be read or write to the buffer.
+It's time to see how we can write data to buffers and read data from them using
+specs. Specs are simple schema on how the data should be read or write to the buffer.
 
-.Example writing data into buffer using indexed composed schema
+Example writing data into buffer using indexed composed schema:
+
 [source, clojure]
 ----
 ;; The indexed composed spec exptects a vector as input
@@ -166,21 +167,21 @@ on how the data should be read or write to the buffer.
 
 The `write!` function  returns a number of bytes are written into buffer.
 
-As, previously mentioned, indexed and associative specs with same fields (in same order) represents
-the identical byte layout. Knowing that, we also can do the same operation but using the associative
-spec defined previously:
+As, previously mentioned, indexed and associative specs with same fields (in same
+order) represents the identical layout. Knowing that, we also can do the same
+operation but using the associative spec defined previously:
 
-.Example writing data into buffer using a map as input
+Example writing data into buffer using a map as input:
+
 [source, clojure]
 ----
 (buf/write! buffer {:field1 22 :field2 true} my-spec2)
 ;; => 5
 ----
 
-Secondly, the read operation is mostly similar to write one. It reads from buffer following the
-spec data definition and return corresponding data structure or plain value.
+Secondly, the read operation is mostly similar to write one. It reads from buffer
+following the spec and return corresponding data structure:
 
-.Example reading data using indexed spec.
 [source, clojure]
 ----
 (buf/read buffer my-spec1)
@@ -189,21 +190,22 @@ spec data definition and return corresponding data structure or plain value.
 
 Also, you can perform the same operation, but using a associative spec:
 
-.Example reading data using associative spec.
 [source, clojure]
 ----
 (buf/read buffer my-spec2)
 ;; => {:field1 22 :field2 true}
 ----
 
-NOTE: This works idependently of implementation used for allocate the buffer. Some implementations
-has little limitations, es6 (cljs) as example, des not support `int64` typespec due to platform
-limitations.
+[NOTE]
+====
+This works idependently of implementation used for allocate the buffer. Some
+implementations has little limitations, es6 (cljs) as example, des not support
+`int64` typespec due to platform limitations.
+====
 
-Composed type specs and plain value type specs implements the same abstraction and both can be used
-directly in read and write operations.
+Composed type specs and plain value type specs implements the same abstraction and
+both can be used directly in read and write operations:
 
-.Use *int16* as spec for read from buffer.
 [source, clojure]
 ----
 (buf/read buffer (buf/int16))
@@ -215,8 +217,8 @@ directly in read and write operations.
 
 === Read & Write with offset.
 
-If you know that the data what you want read is located in a specific position in a buffer, you
-can specify it in a read or write operation:
+If you know that the data what you want read is located in a specific position in
+a buffer, you can specify it in a read or write operation:
 
 .Example writing data in specific offset
 [source, clojure]
@@ -232,11 +234,13 @@ can specify it in a read or write operation:
 ;; => [0 false]
 ----
 
+
 === Show readed bytes.
 
-The default `read` function returns readed data but not returns a amount of readed bytes. For it,
-_octet_ exposes a convenience function `read*` that instead of return only readed data, returns
-a vector with amount of bytes readed and the readed data:
+The default `read` function returns readed data but not returns a amount of readed
+bytes. For it, _octet_ exposes a convenience function `read*` that instead of
+return only readed data, returns a vector with amount of bytes readed and the
+readed data:
 
 .Example using `read*` function
 [source, clojure]
@@ -245,10 +249,11 @@ a vector with amount of bytes readed and the readed data:
 ;; => [5 {:field1 22 :field2 true}]
 ----
 
+
 === Read & Write repeatedly
 
-At this moment, _octet_ does not incluedes facilities for create repeated compositions, but it can
-be solved using normal clojure primitives for it.
+At this moment, _octet_ does not incluedes facilities for create repeated
+compositions, but it can be solved using normal clojure primitives for it.
 
 .Example repeatedly write data into buffer using the same spec.
 [source, clojure]
@@ -279,11 +284,10 @@ create repeated compositions.
 
 === Using arbitrary size type specs
 
-Until now, we have seen examples alway using fixed size compositions. Fixed size compositions
-are easy understand, the size of the spec can be know in any time. But in some circumstances
-we want store arbitrary length types.
-
-Arbitrary lenght strings is a clear example:
+Until now, we have seen examples alway using fixed size compositions. Fixed size
+compositions are easy understand, the size of the spec can be know in any time.
+But in some circumstances we want store arbitrary length. Strings are one great
+example:
 
 .Example writing arbitrary length string into buffer
 [source, clojure]
@@ -299,11 +303,13 @@ Arbitrary lenght strings is a clear example:
 ;; => "hello world"
 ----
 
-But, how it works? Type specs like that, is a composition of two typespecs: *int32* and
-fixed length *string*. On write phase, it calculates the size of string, writes firstly the size
-as `int32` following of fixed size string. The read phase is like write but in backward direction.
+But, how it works? Type specs like that, is a composition of two typespecs: *int32*
+and fixed length *string*. On write phase, it calculates the size of string,
+writes firstly the size as `int32` following of fixed size string. The read phase
+is like write but in backward direction.
 
-Also, the size of that type spec depends on data and can not be known outsize of read/write phase:
+Also, the size of that type spec depends on data and can not be known outsize of
+read/write phase:
 
 .Example how obtain a size of specific type spec
 [source, clojure]
@@ -318,10 +324,9 @@ Also, the size of that type spec depends on data and can not be known outsize of
 
 === Put data into new buffer
 
-This is a some kind of helper, that allows easy create a buffer with exactly size for concrete spec
-and concrete data. It works perfectly with static size specs and arbitrary size specs.
-
-Let see how you can use it:
+This is a some kind of helper, that allows easy create a buffer with exactly size
+for concrete spec and concrete data. It works perfectly with static size specs and
+arbitrary size specs.
 
 .Example using `octet.core/into` function (semantically similar to clojure's `into`)
 [source, clojure]
@@ -339,10 +344,10 @@ Let see how you can use it:
 
 === Read and write spec to multiple byte buffers
 
-In some circumstances (specially when we working with streams) the buffers are splitted. The simplest
-but not very efficient approach will be copy all data in one unique byte buffer and read a spec
-from it. Octet comes with facilities for read a spec from a vector of buffers that prevents unnecesary
-copy action.
+In some circumstances (specially when we working with streams) the buffers are
+splitted. The simplest but not very efficient approach will be copy all data in one
+unique byte buffer and read a spec from it. Octet comes with facilities for read a
+spec from a vector of buffers that prevents unnecesary copy action.
 
 .Example reading and writing data to a vector of buffers
 [source, clojure]
@@ -368,11 +373,12 @@ copy action.
 
 === Define own type spec
 
-In some circumstances, you probably need define own typespec for solve concrete situations. _octet_
-is build around abstractions and define new type spec is not very complicated job.
+In some circumstances, you probably need define own typespec for solve concrete
+situations. _octet_ is build around abstractions and define new type spec is not
+very complicated job.
 
-An typespec consists mainly in `ISpec` protocol that has two methods: `read` and `write`. Let
-see an example defining a typespec for point of coordenades:
+An typespec consists mainly in `ISpec` protocol that has two methods: `read` and
+`write`. Let see an example defining a typespec for point of coordenades:
 
 .Example definition of type spec that represents a point
 [source, clojure]
@@ -415,9 +421,9 @@ see an example defining a typespec for point of coordenades:
 ;; => [8 #user.Point{:x 1, :y 2}]
 ----
 
-Moreover, knowing how it can be done in low level way, you can simplify this concrete step
-using *compose* function. The compose function is a type spec constructor that helps map an indexed
-type spec to specific user defined type.
+Moreover, knowing how it can be done in low level way, you can simplify this
+concrete step using *compose* function. The compose function is a type spec
+constructor that helps map an indexed type spec to specific user defined type.
 
 Let see how the previous code can be simplified in much less boilerplate code:
 
@@ -442,7 +448,8 @@ Let see how the previous code can be simplified in much less boilerplate code:
 [[supported-bytebuffers]]
 === Supported byte buffers
 
-This is a complete table of supported byte buffer implementations and type of byte buffers:
+This is a complete table of supported byte buffer implementations and type of
+byte buffers:
 
 [cols="1,2,2", options="header"]
 |=========================================
@@ -473,7 +480,6 @@ This is a complete list of supported plain value type spec:
 | String  | `buf/string*` | 4+N             | Arbitrary length string
 |====================================================================
 
-
 Independently if a spec is a value spec or a composition of value specs, all them
 implements the same abstraction and can be used in read or write operations.
 
@@ -490,20 +496,27 @@ implements the same abstraction and can be used in read or write operations.
 
 *What is the difference with _clojurewerkz/buffy_?*
 
-*Buffy* is a excelent library, and I have used it in some circumstances, but is has some things that I personally don't like:
+*Buffy* is a excelent library, and I have used it in some circumstances, but is has
+some things that I personally don't like:
 
-- It works only with netty bytebuf and I need an abstraction for work with different implementations, including in clojurescript.
-- It has slightly strange and not uniform api when dynamic frames (arbitrary length size types) are used. _octet_ offers unified api for both type of specs.
-- It wraps bytebuf in a self defined type. _octet_ is a lightweight abstraction that works over host implementations, without wrapping them.
+- It works only with netty bytebuf and I need an abstraction for work with 
+  different implementations, including in clojurescript.
+- It has slightly strange and not uniform api when dynamic frames (arbitrary 
+  length size types) are used. _octet_ offers unified api for both type of specs.
+- It wraps bytebuf in a self defined type. _octet_ is a lightweight abstraction 
+  that works over host implementations, without wrapping them.
 - It not has support for ClojureScript
 
 
 *What is the difference with _ztellman/gloss_?*
 
-Gloss is also similiar project, and has similar purposes, but it has several differeces:
+Gloss is also similiar project, and has similar purposes, but it has several 
+differeces:
 
-- It has a limited set of types. Octet has an extensible abstraction for build own arbitrary type specs.
-- It only works with nio as buffer implementations. Octet exposes an extensible abstraction and support few differents out of the box.
+- It has a limited set of types. Octet has an extensible abstraction for build own 
+  arbitrary type specs.
+- It only works with nio as buffer implementations. Octet exposes an extensible 
+  abstraction and support few differents out of the box.
 - In my opinion it has slightly ugly and unclear api.
 - Seems not very maintained (has issues from 2013).
 - It not has support for ClojureScript.
@@ -524,50 +537,71 @@ Five most important rules:
 All contributions to _octet_ should keep these important rules in mind.
 
 
-=== Procedure
 
-**octet** unlike Clojure and other Clojure contrib libs, does not have many
-restrictions for contributions. Just follow the following steps depending on the
-situation:
+=== Contributing
 
-**Bugfix**:
+Unlike Clojure and other Clojure contributed libraries _octet_ does not have many
+restrictions for contributions. Just open an issue or pull request.
 
-- Fork the GitHub repo.
-- Fix a bug/typo on a new branch.
-- Make a pull-request to master.
 
-**New feature**:
 
-- Open new issue with the new feature proposal.
-- If it is accepted, follow the same steps as "bugfix".
+=== Source Code
+
+_octet_ is open source and can be found on
+link:https://github.com/funcool/octet[github].
+
+You can clone the public repository with this command:
+
+[source,text]
+----
+git clone https://github.com/funcool/octet
+----
+
+=== Run tests
+
+For running tests just execute this (for clojure):
+
+[source, text]
+----
+lein test
+----
+
+And this for for clojurescript:
+
+[source, text]
+----
+./scripts/build
+node ./out/tests.js
+----
+
 
 === License
 
-_octet_ library is licensed under BSD (2-Clause) license:
+_octet_ is under public domain:
 
 ----
-Copyright (c) 2015 Andrey Antukh <niwi@niwi.be>
+This is free and unencumbered software released into the public domain.
 
-All rights reserved.
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
 
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
 
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+For more information, please refer to <http://unlicense.org/>
 ----
