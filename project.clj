@@ -14,7 +14,7 @@
   :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store|user.clj"]
 
   :codeina {:sources ["src"]
-            :reader :clojurescript
+            :reader :clojure
             :exclude [octet.spec.basic
                       octet.spec.string
                       octet.spec.collections]
