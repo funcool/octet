@@ -2,10 +2,11 @@
 
 ## Version 0.2.0 ##
 
-Date: unreleased
+Date: 2015-11-04
 
 - Add `into` helper that has similar semantics with clojure into. Given a spec and
-  appropiate data it creates the buffer of exact size for the spec and writes the data to it.
+  appropiate data it creates the buffer of exact size for the spec and writes the
+  data to it.
 - Add platform independent way se the buffer capacity.
 - Fix cljs compatibility issues in string specs.
 - Add support to write and read from a collection of bytebuffers.
