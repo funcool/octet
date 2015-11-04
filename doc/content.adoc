@@ -41,8 +41,8 @@ dependency vector on your *_project.clj_* file:
 [funcool/octet "0.2.0"]
 ----
 
-And the library works with the following platforms: *jdk7*, *jdk8*, *node* (0.12.7, 4.2.0,
-5.0.0).
+And the library works with the following platforms: *jdk7*, *jdk8*, *node* (0.12.7,
+4.2.0, 5.0.0).
 
 
 == Getting started
@@ -86,6 +86,7 @@ Let start defining one:
 You can check that the spec size (in bytes) and number of types internally is the
 same for both:
 
+.Example using `size` and `count` functions on specs
 [source, clojure]
 ----
 (buf/size my-spec1)
@@ -107,9 +108,7 @@ same for both:
 The next piece in the puzzle is a way to create (or allocate) new byte buffers.
 This operation is almost platform independent if the library defaults satisfies you.
 
-It there is an example allocating a 24 bytes size byte buffer with *default*
-implementation:
-
+.Example allocating a 24 bytes size byte buffer with *default* implementation
 [source, clojure]
 ----
 ;; Allocate bytebuffer with 24 bytes of size
@@ -119,6 +118,7 @@ implementation:
 The buffer allocation is parametrizable so you can specify the concrete
 implementation to use and the type of buffer:
 
+.Example allocation 24 bytes size buffer with nio buffer implementation
 [source, clojure]
 ----
 ;; This is a default if you are using clojure
@@ -132,9 +132,7 @@ buffers is that they are not affect the GC and may enable have less GC pauses.
 
 The `:direct` type of buffers are only available on JDK.
 
-It there is an other example allocating a 24 bytes size byte buffer using *es6
-typed arrays* implementation:
-
+Example allocating a 24 bytes size byte buffer using *es6typed arrays* implementation
 [source, clojure]
 ----
 ;; This is a default if you are using clojurescript
@@ -156,8 +154,7 @@ with native host platform api.
 It's time to see how we can write data to buffers and read data from them using
 specs. Specs are simple schema on how the data should be read or write to the buffer.
 
-Example writing data into buffer using indexed composed schema:
-
+.Example writing data into buffer using indexed composed schema
 [source, clojure]
 ----
 ;; The indexed composed spec exptects a vector as input
@@ -171,8 +168,7 @@ As, previously mentioned, indexed and associative specs with same fields (in sam
 order) represents the identical layout. Knowing that, we also can do the same
 operation but using the associative spec defined previously:
 
-Example writing data into buffer using a map as input:
-
+.Example writing data into buffer using a map as input
 [source, clojure]
 ----
 (buf/write! buffer {:field1 22 :field2 true} my-spec2)
@@ -182,6 +178,7 @@ Example writing data into buffer using a map as input:
 Secondly, the read operation is mostly similar to write one. It reads from buffer
 following the spec and return corresponding data structure:
 
+.Example reading from buffer using indexed spec
 [source, clojure]
 ----
 (buf/read buffer my-spec1)
@@ -190,6 +187,7 @@ following the spec and return corresponding data structure:
 
 Also, you can perform the same operation, but using a associative spec:
 
+.Example reading from buffer using associative spec
 [source, clojure]
 ----
 (buf/read buffer my-spec2)
@@ -206,6 +204,7 @@ implementations has little limitations, es6 (cljs) as example, des not support
 Composed type specs and plain value type specs implements the same abstraction and
 both can be used directly in read and write operations:
 
+.Example using plain specs for read data from buffers
 [source, clojure]
 ----
 (buf/read buffer (buf/int16))
@@ -252,34 +251,19 @@ readed data:
 
 === Read & Write repeatedly
 
-At this moment, _octet_ does not incluedes facilities for create repeated
-compositions, but it can be solved using normal clojure primitives for it.
+Sometimes you will want read some spec repeatedly, for that purpose _octet_ comes
+with `repeat` composition function:
 
-.Example repeatedly write data into buffer using the same spec.
+.Example for read and write using repeat composed spec
 [source, clojure]
 ----
-(def spec (buf/spec buf/int16 buf/int16))
+(def spec (buf/repeat 5 buf/int32))
+(buf/write buffer [1 2 3 4 5] spec)
+;; => 20
 
-(reduce (fn [offset data]
-          (let [written (buf/write! buffer data spec {:offset offset})]
-            (+ offset written)))
-        0
-        [[1 2] [3 4] [5 6]])
-;; => 12
+(buf/read buffer spec)
+;; => [1 2 3 4 5]
 ----
-
-.Example read three times from buffer using the same spec
-[source, clojure]
-----
-(reduce (fn [acc offset]
-          (conj acc (buf/read buffer spec {:offset offset})))
-        []
-        (range 0 10 4))
-;; => [[1 2] [3 4] [5 6]]
-----
-
-In future versions, this surelly will be improved providing facilities for
-create repeated compositions.
 
 
 === Using arbitrary size type specs
@@ -340,6 +324,31 @@ arbitrary size specs.
 (buf/read buffer myspec)
 ;; => ["hello", "world!"]
 ----
+
+
+=== Vectors
+
+This is a very similar abstraction to the previously explained repeating pattern.
+The main difference with it is that this one represents an rabitrary size repetition
+of one spec and allows store an array like datastructures.
+
+.Example storing two arrays in a buffer
+[source, clojure]
+----
+(def spec (buf/spec
+            (buf/vector* buf/int32)
+            (buf/vector* buf/int32)))
+(def buffer (buf/into spec [[1 2 3] [4 5 6 7 8]])
+
+(buf/get-capacity buffer)
+;; => 40
+
+(buf/read buffer spec)
+[[1 2 3] [4 5 6 7 8]]
+----
+
+Behind the scenes, an vector is represented with as `int32 + type*N`, that means
+that it has always an overhead of 4 bytes for store the length of the vector.
 
 
 === Read and write spec to multiple byte buffers
