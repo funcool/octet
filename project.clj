@@ -1,4 +1,4 @@
-(defproject funcool/octet "0.2.0-SNAPSHOT"
+(defproject funcool/octet "0.2.0"
   :description "A clojure(script) library for work with binary data."
   :url "https://github.com/funcool/octet"
   :license {:name "BSD (2 Clause)"
