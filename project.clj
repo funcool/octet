@@ -1,9 +1,8 @@
 (defproject funcool/octet "0.2.0"
   :description "A clojure(script) library for work with binary data."
   :url "https://github.com/funcool/octet"
-  :license {:name "BSD (2 Clause)"
-            :url "http://opensource.org/licenses/BSD-2-Clause"}
-
+  :license {:name "Public Domain"
+            :url "http://unlicense.org/"}
   :dependencies [[org.clojure/clojure "1.7.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.145" :scope "provided"]
                  [io.netty/netty-buffer "4.1.0.Beta7"]]
