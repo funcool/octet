@@ -26,7 +26,9 @@
   (:refer-clojure :exclude [read byte float double short long bytes into repeat])
   (:require [octet.spec :as spec]
             #?(:cljs
-               [octet.util :as util :include-macros true])
+               [octet.util :as util :include-macros true]
+               :clj
+               [octet.util :as util])
             [octet.spec.basic :as basic-spec]
             [octet.spec.string :as string-spec]
             [octet.spec.collections :as coll-spec]
