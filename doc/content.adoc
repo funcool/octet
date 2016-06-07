@@ -1,6 +1,6 @@
 = octet - a library for working with byte buffers
 funcool.org
-0.2.0
+0.3.0
 :toc: left
 :numbered:
 :source-highlighter: pygments
@@ -27,18 +27,12 @@ Since _octet_ is a young project there can be some API breakage.
 
 === Install
 
-This section covers the _octet_ library installing process and its requirements.
-
-
-=== Requirements
-
-
 The simplest way to use _octet_ in a clojure project, is by including it in the
 dependency vector on your *_project.clj_* file:
 
 [source,clojure]
 ----
-[funcool/octet "0.2.0"]
+[funcool/octet "0.3.0"]
 ----
 
 And the library works with the following platforms: *jdk7*, *jdk8*, *node* (0.12.7,
