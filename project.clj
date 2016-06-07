@@ -3,9 +3,9 @@
   :url "https://github.com/funcool/octet"
   :license {:name "Public Domain"
             :url "http://unlicense.org/"}
-  :dependencies [[org.clojure/clojure "1.7.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.7.145" :scope "provided"]
-                 [io.netty/netty-buffer "4.1.0.Beta7"]]
+  :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
+                 [org.clojure/clojurescript "1.9.36" :scope "provided"]
+                 [io.netty/netty-buffer "4.1.0.Final"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
@@ -21,5 +21,5 @@
             :src-uri "http://github.com/funcool/beicon/blob/master/"
             :src-uri-prefix "#L"}
 
-  :plugins [[funcool/codeina "0.3.0"]])
+  :plugins [[funcool/codeina "0.4.0"]])
 
