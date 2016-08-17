@@ -1,5 +1,13 @@
 # Changelog #
 
+## Version 0.4.0 ##
+
+Date: 2016-08-17
+
+- Update netty-buffer to 4.1.4.Final
+- Update default cljs compiler to 1.9.216
+
+
 ## Version 0.3.0 ##
 
 Date: 2016-06-07
