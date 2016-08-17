@@ -4,8 +4,8 @@
   :license {:name "Public Domain"
             :url "http://unlicense.org/"}
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.9.36" :scope "provided"]
-                 [io.netty/netty-buffer "4.1.0.Final"]]
+                 [org.clojure/clojurescript "1.9.216" :scope "provided"]
+                 [io.netty/netty-buffer "4.1.4.Final"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
@@ -21,5 +21,5 @@
             :src-uri "http://github.com/funcool/beicon/blob/master/"
             :src-uri-prefix "#L"}
 
-  :plugins [[funcool/codeina "0.4.0"]])
+  :plugins [[funcool/codeina "0.5.0"]])
 
