@@ -193,7 +193,7 @@
                  (buf/ubyte)    (short 255)
                  (buf/double)   (double 4.3)
                  (buf/float)    (float 3.2)
-                 (buf/uint64)    18446744073709551615N
+                 (buf/uint64)   18446744073709551615N
                  (buf/byte)     (byte 32)]]
        ;; (buf/bytes 5)  (bytes/random-bytes 5)]]
        (doseq [[spec data] (partition 2 data)]
@@ -218,7 +218,7 @@
                  (buf/bool)     false
                  (buf/double)   (double 4.3)
                  (buf/float)    (float 3.5)
-              (buf/byte)     (byte 32)
+                 (buf/byte)     (byte 32)
                  (buf/bytes 5)  (random-bytes 5)]]
        (doseq [[spec data] (partition 2 data)]
          (let [buffers [(buf/allocate (buf/size spec) {:impl :es6})]]
@@ -263,10 +263,20 @@
   (let [spec (buf/spec buf/int32 buf/int32)
         result (buf/into spec [1 3])]
     (t/is (= (impl/get-capacity result) 8)))
-
   (let [spec (buf/spec buf/string* buf/string*)
         result (buf/into spec ["hello" "world!"])]
     (t/is (= (impl/get-capacity result) 19))))
+
+(t/deftest endianness
+  (let [spec (buf/spec buf/int32 buf/int32)
+        buff (buf/with-byte-order :little-endian
+               (buf/into spec [1 3]))
+        res1 (buf/read buff spec)
+        res2 (buf/with-byte-order :little-endian
+               (buf/read buff spec))]
+    (t/is (= res1 [16777216 50331648]))
+    (t/is (= res2 [1 3]))))
+
 
 (t/deftest vector-buffer
   (let [spec (buf/spec buf/short buf/int32)
