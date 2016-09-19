@@ -101,3 +101,9 @@
          buffer (buffer/allocate size opts)]
      (write! buffer data spec opts)
      buffer)))
+
+#?(:clj
+   (defmacro with-byte-order
+     [byteorder & body]
+     `(binding [buffer/*byte-order* ~byteorder]
+        ~@body)))
