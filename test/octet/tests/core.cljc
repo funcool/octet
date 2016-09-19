@@ -78,6 +78,7 @@
      (let [buffer (buf/allocate 16 {:type :direct :impl :netty})]
        (t/is (.isDirect buffer))
        (t/is (instance? ByteBuf buffer)))))
+
 #?(:clj
    (t/deftest indexed-specs-write-with-offset
      (let [spec (buf/spec (buf/int32))
