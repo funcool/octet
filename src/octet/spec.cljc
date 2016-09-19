@@ -33,9 +33,7 @@
   (:refer-clojure :exclude [type read float double long short byte bytes repeat])
   (:require [octet.buffer :as buffer]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Abstraction definition
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; --- Protocols
 
 (defprotocol ISpec
   "Basic abstraction for something that can be work like a Spec."
@@ -50,9 +48,7 @@
   "Abstraction for calculate size for dynamic specs."
   (size* [_ data] "Calculate the size in bytes of the object having a data."))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Composed Spec Types
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; --- Composed Spec Types
 
 (deftype AssociativeSpec [data dict types]
   #?@(:clj
@@ -140,11 +136,20 @@
      (alter-meta! #'->AssociativeSpec assoc :private true)
      (alter-meta! #'->IndexedSpec assoc :private true)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Spec Constructors
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; --- Spec Constructors
 
-(defmulti spec
+(defn- associative-spec
+  [& params]
+  (let [data (mapv vec (partition 2 params))
+        dict (into {} data)
+        types (map second data)]
+    (AssociativeSpec. data dict types)))
+
+(defn- indexed-spec
+  [& types]
+  (IndexedSpec. types))
+
+(defn spec
   "Polymorphic constructor for Spec instances.
 
   Spec is a some kind of composition of arbitrary
@@ -171,27 +176,19 @@
 
   The same rules applies for writing data into a
   buffer."
-  (fn [& params]
-    (let [numparams (count params)]
-      (cond
-        (every? #(satisfies? ISpec %) params)
-        :indexed
-
-        (and (even? numparams)
-             (keyword? (first params))
-             (satisfies? ISpec (second params)))
-        :associative))))
-
-(defmethod spec :associative
   [& params]
-  (let [data (mapv vec (partition 2 params))
-        dict (into {} data)
-        types (map second data)]
-    (AssociativeSpec. data dict types)))
+  (let [numparams (count params)]
+    (cond
+      (every? #(satisfies? ISpec %) params)
+      (apply indexed-spec params)
 
-(defmethod spec :indexed
-  [& types]
-  (IndexedSpec. types))
+      (and (even? numparams)
+           (keyword? (first params))
+           (satisfies? ISpec (second params)))
+      (apply associative-spec params)
+
+      :else
+      (throw (ex-info "Invalid arguments" {})))))
 
 (defn repeat
   "Creare a composed typespec that repeats `n` times
