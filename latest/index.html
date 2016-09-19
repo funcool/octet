@@ -80,7 +80,7 @@
 <h1>octet - a library for working with byte buffers</h1>
 <div class="details">
 <span id="author" class="author">funcool.org</span><br>
-<span id="revdate">0.4.0</span>
+<span id="revdate">1.0.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -114,7 +114,7 @@
 <ul class="sectlevel2">
 <li><a href="#supported-bytebuffers">4.1. Supported byte buffers</a></li>
 <li><a href="#_supported_typespecs">4.2. Supported typespecs</a></li>
-<li><a href="#_coming_features">4.3. Coming features</a></li>
+<li><a href="#_byte_order">4.3. Byte order</a></li>
 </ul>
 </li>
 <li><a href="#_faq">5. FAQ</a></li>
@@ -169,7 +169,7 @@ dependency vector on your <strong><em>project.clj</em></strong> file:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/octet</span> <span class="tok-s">&quot;0.4.0&quot;</span><span class="tok-p">]</span></code></pre>
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/octet</span> <span class="tok-s">&quot;1.0.0&quot;</span><span class="tok-p">]</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -520,7 +520,7 @@ arbitrary size specs.</p>
 <h3 id="_vectors"><a class="link" href="#_vectors">3.6. Vectors</a></h3>
 <div class="paragraph">
 <p>This is a very similar abstraction to the previously explained repeating pattern.
-The main difference with it is that this one represents an rabitrary size repetition
+The main difference with it is that this one represents an arbitrary size repetition
 of one spec and allows store an array like datastructures.</p>
 </div>
 <div class="listingblock">
@@ -785,20 +785,35 @@ implements the same abstraction and can be used in read or write operations.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_coming_features"><a class="link" href="#_coming_features">4.3. Coming features</a></h3>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>memoryviews</strong>: abstraction for random read/write access to buffer without parsing
-all spec related data.</p>
-</li>
-<li>
-<p>nodejs/iojs buffer support.</p>
-</li>
-<li>
-<p>more function for create compositions like repeated type, or key value pairs.</p>
-</li>
-</ul>
+<h3 id="_byte_order"><a class="link" href="#_byte_order">4.3. Byte order</a></h3>
+<div class="paragraph">
+<p>All the builtin implementations uses the <code>:big-endian</code> as default byte order. That
+value can be canched at any time using the provided <code><strong>byteorder</strong></code> dynamic var on
+the <code>octet.buffer</code> namespace.</p>
+</div>
+<div class="paragraph">
+<p>Let see a little example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">octet.buffer</span><span class="tok-p">])</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">myspec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span> <span class="tok-nv">buf/string*</span> <span class="tok-nv">buf/string*</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">buffer</span>
+  <span class="tok-p">(</span><span class="tok-nf">buf/with-byte-order</span> <span class="tok-ss">:little-endian</span>
+    <span class="tok-p">(</span><span class="tok-nf">buf/into</span> <span class="tok-nv">myspec</span> <span class="tok-p">[</span><span class="tok-s">&quot;hello&quot;</span> <span class="tok-s">&quot;world!&quot;</span><span class="tok-p">])))</span>
+
+<span class="tok-p">(</span><span class="tok-nf">buf/get-capacity</span> <span class="tok-nv">buffer</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 19</span>
+
+<span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">myspec</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; BufferUnderflowException (because of incorect byte order)</span>
+
+<span class="tok-p">(</span><span class="tok-nf">buf/with-byte-order</span> <span class="tok-ss">:little-endian</span>
+  <span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">myspec</span><span class="tok-p">))</span>
+<span class="tok-c1">;; =&gt; [&quot;hello&quot;, &quot;world!&quot;]</span></code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -938,34 +953,33 @@ node ./out/tests.js</code></pre>
 <div class="sect2">
 <h3 id="_license"><a class="link" href="#_license">6.5. License</a></h3>
 <div class="paragraph">
-<p><em>octet</em> is under public domain:</p>
+<p><em>octet</em> is licensed under BSD (2-Clause) license:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>This is free and unencumbered software released into the public domain.
+<pre>Copyright (c) 2015-2016 Andrey Antukh &lt;niwi@niwi.nz&gt;
+All rights reserved.
 
-Anyone is free to copy, modify, publish, use, compile, sell, or
-distribute this software, either in source code form or as a compiled
-binary, for any purpose, commercial or non-commercial, and by any
-means.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-In jurisdictions that recognize copyright laws, the author or authors
-of this software dedicate any and all copyright interest in the
-software to the public domain. We make this dedication for the benefit
-of the public at large and to the detriment of our heirs and
-successors. We intend this dedication to be an overt act of
-relinquishment in perpetuity of all present and future rights to this
-software under copyright law.
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
 </div>
 </div>
 </div>
@@ -974,7 +988,7 @@ For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-08-17 19:47:28 EEST
+Last updated 2016-09-19 11:11:49 EEST
 </div>
 </div>
 </body>
