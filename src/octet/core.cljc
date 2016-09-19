@@ -54,6 +54,7 @@
 (util/defalias bytes basic-spec/bytes)
 (util/defalias bool basic-spec/bool)
 (util/defalias allocate buffer/allocate)
+(util/defalias get-capacity buffer/get-capacity)
 (util/defalias short int16)
 (util/defalias integer int32)
 (util/defalias long int64)
