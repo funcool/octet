@@ -1,5 +1,15 @@
 # Changelog #
 
+## Version 1.0.0 ##
+
+Date: 2016-09-19
+
+- Update netty-buffer to 4.1.5.Final
+- Add support for dynamicaly set byte order.
+  (May be a BREAKING CHANGE because now octed does not respects the
+  buffer byteorder and always set the default or dynamicaly set one).
+
+
 ## Version 0.4.0 ##
 
 Date: 2016-08-17
