@@ -38,7 +38,7 @@
               io.netty.buffer.ByteBuf
               io.netty.buffer.ByteBufAllocator)))
 
-(def ^:dynamic *byteorder*
+(def ^:dynamic *byte-order*
   "Defines the default byte order used for the write and read
   operations on the byte buffers."
   :big-endian)
@@ -86,9 +86,9 @@
 
 ;; ---- NIO & Netty Buffer implementations
 
-(defn- set-current-bytebuffer-byteorder!
+(defn- set-current-bytebuffer-byte-order!
   [buff]
-  (case *byteorder*
+  (case *byte-order*
     :big-endian (.order buff ByteOrder/BIG_ENDIAN)
     :little-endian (.order buff ByteOrder/LITTLE_ENDIAN)))
 
@@ -96,82 +96,82 @@
    (extend-type ByteBuffer
      IBufferShort
      (read-short [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.getShort buff pos))
      (write-short [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.putShort buff pos value))
      (read-ushort [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [val (.getShort buff pos)]
          (bit-and 0xFFFF (Integer. (int val)))))
      (write-ushort [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [value (.shortValue (Integer. (int value)))]
          (.putShort buff pos value)))
 
      IBufferInt
      (read-int [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.getInt buff pos))
      (write-int [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.putInt buff pos value))
      (read-uint [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [val (.getInt buff pos)]
          (bit-and 0xFFFFFFFF (Long. (long val)))))
      (write-uint [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [value (.intValue (Long. (long value)))]
          (.putInt buff pos value)))
 
      IBufferLong
      (read-long [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.getLong buff pos))
      (write-long [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.putLong buff pos value))
      (read-ulong [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [val (.getLong buff pos)
              ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
          (bigint (BigInteger. 1 magnitude))))
      (write-ulong [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [value (.longValue (bigint value))]
          (.putLong buff pos value)))
 
      IBufferFloat
      (read-float [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.getFloat buff pos))
      (write-float [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.putFloat buff pos value))
 
      IBufferDouble
      (read-double [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.getDouble buff pos))
      (write-double [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.putDouble buff pos value))
 
      IBufferByte
      (read-byte [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.get buff pos))
      (write-byte [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (.put buff pos value))
      (read-ubyte [buff pos]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [val (.get buff pos)]
          (bit-and 0xFF (short val))))
      (write-ubyte [buff pos value]
-       (set-current-bytebuffer-byteorder! buff)
+       (set-current-bytebuffer-byte-order! buff)
        (let [value (.byteValue (Short. (short value)))]
          (.put buff pos value)))
 
@@ -197,11 +197,11 @@
    (extend-type ByteBuf
      IBufferShort
      (read-short [buff pos]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.getShortLE buff pos)
          (.getShort buff pos)))
      (write-short [buff pos value]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.setShortLE buff pos value)
          (.setShort buff pos value)))
      (read-ushort [buff pos]
@@ -213,11 +213,11 @@
 
      IBufferInt
      (read-int [buff pos]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.getIntLE buff pos)
          (.getInt buff pos)))
      (write-int [buff pos value]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.setIntLE buff pos value)
          (.setInt buff pos value)))
      (read-uint [buff pos]
@@ -229,11 +229,11 @@
 
      IBufferLong
      (read-long [buff pos]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.getLongLE buff pos)
          (.getLong buff pos)))
      (write-long [buff pos value]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.setLongLE buff pos value)
          (.setLong buff pos value)))
      (read-ulong [buff pos]
@@ -246,21 +246,21 @@
 
      IBufferFloat
      (read-float [buff pos]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.getFloatLE buff pos)
          (.getFloat buff pos)))
      (write-float [buff pos value]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.setFloatLE buff pos value)
          (.setFloat buff pos value)))
 
      IBufferDouble
      (read-double [buff pos]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.getDoubleLE buff pos)
          (.getDouble buff pos)))
      (write-double [buff pos value]
-       (if (= *byteorder* :little-endian)
+       (if (= *byte-order* :little-endian)
          (.setDoubleLE buff pos value)
          (.setDouble buff pos value)))
 
@@ -391,35 +391,35 @@
    (extend-type js/DataView
      IBufferShort
      (read-short [buff pos]
-       (.getInt16 buff pos (= *byteorder* :little-endian)))
+       (.getInt16 buff pos (= *byte-order* :little-endian)))
      (write-short [buff pos value]
-       (.setInt16 buff pos value (= *byteorder* :little-endian)))
+       (.setInt16 buff pos value (= *byte-order* :little-endian)))
      (read-ushort [buff pos]
-       (.getUint16 buff pos (= *byteorder* :little-endian)))
+       (.getUint16 buff pos (= *byte-order* :little-endian)))
      (write-ushort [buff pos value]
-       (.setUint16 buff pos value (= *byteorder* :little-endian)))
+       (.setUint16 buff pos value (= *byte-order* :little-endian)))
 
      IBufferInt
      (read-int [buff pos]
-       (.getInt32 buff pos (= *byteorder* :little-endian)))
+       (.getInt32 buff pos (= *byte-order* :little-endian)))
      (write-int [buff pos value]
-       (.setInt32 buff pos value (= *byteorder* :little-endian)))
+       (.setInt32 buff pos value (= *byte-order* :little-endian)))
      (read-uint [buff pos]
-       (.getUint32 buff pos (= *byteorder* :little-endian)))
+       (.getUint32 buff pos (= *byte-order* :little-endian)))
      (write-uint [buff pos value]
-       (.setUint32 buff pos value (= *byteorder* :little-endian)))
+       (.setUint32 buff pos value (= *byte-order* :little-endian)))
 
      IBufferFloat
      (read-float [buff pos]
-       (.getFloat32 buff pos (= *byteorder* :little-endian)))
+       (.getFloat32 buff pos (= *byte-order* :little-endian)))
      (write-float [buff pos value]
-       (.setFloat32 buff pos value (= *byteorder* :little-endian)))
+       (.setFloat32 buff pos value (= *byte-order* :little-endian)))
 
      IBufferDouble
      (read-double [buff pos]
-       (.getFloat64 buff pos (= *byteorder* :little-endian)))
+       (.getFloat64 buff pos (= *byte-order* :little-endian)))
      (write-double [buff pos value]
-       (.setFloat64 buff pos value (= *byteorder* :little-endian)))
+       (.setFloat64 buff pos value (= *byte-order* :little-endian)))
 
      IBufferByte
      (read-byte [buff pos]
