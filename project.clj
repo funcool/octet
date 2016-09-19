@@ -18,8 +18,10 @@
                       octet.spec.string
                       octet.spec.collections]
             :target "doc/dist/latest/api"
-            :src-uri "http://github.com/funcool/beicon/blob/master/"
+            :src-uri "http://github.com/funcool/codeina/blob/master/"
             :src-uri-prefix "#L"}
 
-  :plugins [[funcool/codeina "0.5.0"]])
+  :plugins [[funcool/codeina "0.5.0"]
+            [lein-ancient "0.6.10"]])
+
 
