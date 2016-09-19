@@ -502,7 +502,7 @@ Let see a little example:
 (def myspec (buf/spec buf/string* buf/string*))
 
 (def buffer
-  (binding [octet.buffer/*byteorder* :little-endian]
+  (buf/with-byte-order :little-endian
     (buf/into myspec ["hello" "world!"])))
 
 (buf/get-capacity buffer)
@@ -511,7 +511,7 @@ Let see a little example:
 (buf/read buffer myspec)
 ;; => BufferUnderflowException (because of incorect byte order)
 
-(binding [octet.buffer/*byteorder* :little-endian]
+(buf/with-byte-order :little-endian
   (buf/read buffer myspec))
 ;; => ["hello", "world!"]
 ----
