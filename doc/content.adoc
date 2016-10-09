@@ -420,7 +420,7 @@ An typespec consists mainly in `ISpec` protocol that has two methods: `read` and
 (buf/write! buffer mypoint point-spec)
 ;; => 8
 
-(buf/read* buffer (point))
+(buf/read* buffer point-spec)
 ;; => [8 #user.Point{:x 1, :y 2}]
 ----
 
@@ -441,7 +441,7 @@ Let see how the previous code can be simplified in much less boilerplate code:
 (buf/write! buffer mypoint point-spec)
 ;; => 8
 
-(buf/read* buffer (point))
+(buf/read* buffer point-spec)
 ;; => [8 #user.Point{:x 1, :y 2}]
 ----
 
