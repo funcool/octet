@@ -169,6 +169,12 @@ operation but using the associative spec defined previously:
 ;; => 5
 ----
 
+[NOTE]
+====
+Some buffer implementations (nio is an example) has the concept of read or
+write position. _octet_ doesn't touch that.
+====
+
 Secondly, the read operation is mostly similar to write one. It reads from buffer
 following the spec and return corresponding data structure:
 
