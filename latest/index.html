@@ -343,6 +343,21 @@ operation but using the associative spec defined previously:</p>
 <span class="tok-c1">;; =&gt; 5</span></code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Some buffer implementations (nio is an example) has the concept of read or
+write position. <em>octet</em> doesn&#8217;t touch that.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>Secondly, the read operation is mostly similar to write one. It reads from buffer
 following the spec and return corresponding data structure:</p>
@@ -621,7 +636,7 @@ very complicated job.</p>
 <span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-nv">mypoint</span> <span class="tok-nv">point-spec</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 8</span>
 
-<span class="tok-p">(</span><span class="tok-nf">buf/read*</span> <span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">point</span><span class="tok-p">))</span>
+<span class="tok-p">(</span><span class="tok-nf">buf/read*</span> <span class="tok-nv">buffer</span> <span class="tok-nv">point-spec</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; [8 #user.Point{:x 1, :y 2}]</span></code></pre>
 </div>
 </div>
@@ -644,7 +659,7 @@ constructor that helps map an indexed type spec to specific user defined type.</
 <span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-nv">mypoint</span> <span class="tok-nv">point-spec</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 8</span>
 
-<span class="tok-p">(</span><span class="tok-nf">buf/read*</span> <span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">point</span><span class="tok-p">))</span>
+<span class="tok-p">(</span><span class="tok-nf">buf/read*</span> <span class="tok-nv">buffer</span> <span class="tok-nv">point-spec</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; [8 #user.Point{:x 1, :y 2}]</span></code></pre>
 </div>
 </div>
@@ -988,7 +1003,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-09-19 11:11:49 EEST
+Last updated 2016-10-23 15:57:11 CEST
 </div>
 </div>
 </body>
