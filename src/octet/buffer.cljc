@@ -86,11 +86,12 @@
 
 ;; ---- NIO & Netty Buffer implementations
 
-(defn- set-current-bytebuffer-byte-order!
-  [buff]
-  (case *byte-order*
-    :big-endian (.order buff ByteOrder/BIG_ENDIAN)
-    :little-endian (.order buff ByteOrder/LITTLE_ENDIAN)))
+#?(:clj
+   (defn- set-current-bytebuffer-byte-order!
+     [buff]
+     (case *byte-order*
+       :big-endian (.order buff ByteOrder/BIG_ENDIAN)
+       :little-endian (.order buff ByteOrder/LITTLE_ENDIAN))))
 
 #?(:clj
    (extend-type ByteBuffer
