@@ -1,6 +1,6 @@
 = octet - a library for working with byte buffers
 funcool.org
-1.0.0
+1.0.1
 :toc: left
 :numbered:
 :source-highlighter: pygments
@@ -32,11 +32,10 @@ dependency vector on your *_project.clj_* file:
 
 [source,clojure]
 ----
-[funcool/octet "1.0.0"]
+[funcool/octet "1.0.1"]
 ----
 
-And the library works with the following platforms: *jdk7*, *jdk8*, *node* (0.12.7,
-4.2.0, 5.0.0, 6.4.0).
+And the library works with the following platforms: *jdk7*, *jdk8*, *node-lts*.
 
 
 == Getting started
