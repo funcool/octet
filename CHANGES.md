@@ -1,5 +1,12 @@
 # Changelog #
 
+## Version 1.0.1 ##
+
+Date: 2016-11-15
+
+- Fix cljs compiler warnings about undeclared vars (thanks to @skrat)
+
+
 ## Version 1.0.0 ##
 
 Date: 2016-09-19
