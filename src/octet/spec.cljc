@@ -31,7 +31,8 @@
 
   For more examples see the `spec` function docstring."
   (:refer-clojure :exclude [type read float double long short byte bytes repeat])
-  (:require [octet.buffer :as buffer]))
+  (:require [octet.buffer :as buffer]
+            [octet.util :refer [assoc-ordered]]))
 
 ;; --- Protocols
 
@@ -47,6 +48,12 @@
 (defprotocol ISpecDynamicSize
   "Abstraction for calculate size for dynamic specs."
   (size* [_ data] "Calculate the size in bytes of the object having a data."))
+
+(defprotocol ISpecWithRef
+  "Abstraction to support specs having references to other
+   specs within an AssociativeSpec or an IndexedSpec"
+  (read* [_ buff start data] "Read data from buffer, use data to calculate length etc")
+  (write* [_ buff start value types data] "Write data from buffer, use data to store length etc"))
 
 ;; --- Composed Spec Types
 
@@ -74,20 +81,26 @@
 
   ISpec
   (read [_ buff pos]
-    (loop [index pos result {} pairs data]
+    (loop [index pos result (array-map) pairs data]
       (if-let [[fieldname type] (first pairs)]
-        (let [[readedbytes readeddata] (read type buff index)]
+        (let [[readedbytes readeddata]
+              (if (satisfies? ISpecWithRef type)
+                (read* type buff index result)
+                (read type buff index))]
           (recur (+ index readedbytes)
-                 (assoc result fieldname readeddata)
+                 (assoc-ordered result fieldname readeddata)
                  (rest pairs)))
-        [(- index pos) result])))
+          [(- index pos) result])))
 
   (write [_ buff pos data']
-    (let [written (reduce (fn [index [fieldname type]]
-                            (let [value (get data' fieldname nil)
-                                  written (write type buff index value)]
-                              (+ index written)))
-                          pos data)]
+    (let [written
+          (reduce (fn [index [fieldname type]]
+                    (let [value (get data' fieldname nil)
+                          written (if (satisfies? ISpecWithRef type)
+                                    (write* type buff index value dict data')
+                                    (write type buff index value))]
+                      (+ index written)))
+                  pos data)]
       (- written pos))))
 
 (deftype IndexedSpec [types]
@@ -116,7 +129,10 @@
   (read [_ buff pos]
     (loop [index pos result [] types types]
       (if-let [type (first types)]
-        (let [[readedbytes readeddata] (read type buff index)]
+        (let [[readedbytes readeddata]
+              (if (satisfies? ISpecWithRef type)
+                (read* type buff index result)
+                (read type buff index))]
           (recur (+ index readedbytes)
                  (conj result readeddata)
                  (rest types)))
@@ -126,7 +142,9 @@
     (let [indexedtypes (map-indexed vector types)
           written (reduce (fn [pos [index type]]
                             (let [value (nth data' index nil)
-                                  written (write type buff pos value)]
+                                  written (if (satisfies? ISpecWithRef type)
+                                            (write* type buff pos value types data')
+                                            (write type buff pos value))]
                               (+ pos written)))
                           pos indexedtypes)]
       (- written pos))))
@@ -138,10 +156,14 @@
 
 ;; --- Spec Constructors
 
+(defn- spec? [s]
+  (or (satisfies? ISpecWithRef s)
+      (satisfies? ISpec s)))
+
 (defn- associative-spec
   [& params]
   (let [data (mapv vec (partition 2 params))
-        dict (into {} data)
+        dict (apply array-map params)
         types (map second data)]
     (AssociativeSpec. data dict types)))
 
@@ -179,12 +201,12 @@
   [& params]
   (let [numparams (count params)]
     (cond
-      (every? #(satisfies? ISpec %) params)
+      (every? spec? params)
       (apply indexed-spec params)
 
       (and (even? numparams)
            (keyword? (first params))
-           (satisfies? ISpec (second params)))
+           (spec? (second params)))
       (apply associative-spec params)
 
       :else
