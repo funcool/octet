@@ -50,7 +50,7 @@
 ;;
 
 
-(defn- bytes->hex [^bytes bytes]
+(defn bytes->hex [^bytes bytes]
   "converts a byte array to a hex string"
   (let [[f & r] bytes
         fh (fn [_ b]
@@ -58,7 +58,7 @@
                (if (<= 0 b 15) (str "0" h) h)))]
     (join (reductions fh (fh 0 f) r))))
 
-(defn- byte->ascii [byte]
+(defn byte->ascii [byte]
   "convert a byte to 'printable' ascii where possible, otherwise ."
   (if (<= 32 (bit-and byte 0xFF) 127) (char byte) \.))
 
