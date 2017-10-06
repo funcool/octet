@@ -1,5 +1,13 @@
 # Changelog #
 
+## Version 1.1.0 ##
+
+Date: unreleased
+
+- Add for reference specs (allows to have dynamic specs where the
+  length is stored in another spec).
+  
+
 ## Version 1.0.1 ##
 
 Date: 2016-11-15
