@@ -1,4 +1,4 @@
-;; Copyright (c) 2015-2016 Andrey Antukh <niwi@niwi.nz>
+;; Copyright (c) 2015-2018 Andrey Antukh <niwi@niwi.nz>
 ;; All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
@@ -23,8 +23,10 @@
 ;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (ns octet.util
-  (:require [clojure.string :as str :refer [join ]])
-  (:import [java.util.Arrays]))
+  (:require [clojure.string :as str :refer [join]]
+            [octet.buffer :as bfr])
+
+  #?(:clj (:import [java.util.Arrays])))
 
 (defmacro defalias
   [sym sym2]
@@ -41,72 +43,78 @@
     (if rest
       (if (next rest)
         (recur ret (first rest) (second rest) (nnext rest))
-        (throw (IllegalArgumentException.
-                 "assoc-ordered expects even number of arguments after map/vector, found odd number")))
+        (throw (ex-info "assoc-ordered expects even number of arguments after map/vector, found odd number" {})))
       ret)))
+;; --- Hexdumps
 
-;;
-;; Hexdumps
-;;
-
-
-(defn bytes->hex [^bytes bytes]
-  "converts a byte array to a hex string"
-  (let [[f & r] bytes
-        fh (fn [_ b]
+#?(:clj
+   (defn bytes->hex
+     "converts a byte array to a hex string"
+     [^bytes bytes]
+     (let [[f & r] bytes
+           fh (fn [_ b]
              (let [h (Integer/toHexString (bit-and b 0xFF))]
                (if (<= 0 b 15) (str "0" h) h)))]
-    (join (reductions fh (fh 0 f) r))))
+       (join (reductions fh (fh 0 f) r)))))
 
-(defn byte->ascii [byte]
-  "convert a byte to 'printable' ascii where possible, otherwise ."
-  (if (<= 32 (bit-and byte 0xFF) 127) (char byte) \.))
+#?(:clj
+   (defn byte->ascii
+     "convert a byte to 'printable' ascii where possible, otherwise ."
+     [byte]
+     (if (<= 32 (bit-and byte 0xFF) 127) (char byte) \.)))
 
-(defn- bytes->ascii [^bytes bytes]
-  "returns a 16-per-line printable ascii view of the bytes"
-  (->> bytes
-       (map byte->ascii)
-       (partition 16 16 "                ")
-       (map join)))
+#?(:clj
+   (defn- bytes->ascii [^bytes bytes]
+     "returns a 16-per-line printable ascii view of the bytes"
+     (->> bytes
+          (map byte->ascii)
+          (partition 16 16 "                ")
+          (map join))))
 
-(defn- format-hex-line [^String hex-line]
-  "formats a 'line' (32 hex chars) of hex output"
-  (->> hex-line
-       (partition-all 4)
-       (map join)
-       (split-at 4)
-       (map #(join " " %))
-       (join "  ")))
+#?(:clj
+   (defn- format-hex-line [^String hex-line]
+     "formats a 'line' (32 hex chars) of hex output"
+     (->> hex-line
+          (partition-all 4)
+          (map join)
+          (split-at 4)
+          (map #(join " " %))
+          (join "  "))))
 
-(defn- bytes->hexdump [^bytes bytes]
-  "formats a byte array to a sequence of formatted hex lines"
-  (->> bytes
-       bytes->hex
-       (partition 32 32 (join (repeat 32 " ")))
-       (map format-hex-line)))
+#?(:clj
+   (defn- bytes->hexdump [^bytes bytes]
+     "formats a byte array to a sequence of formatted hex lines"
+     (->> bytes
+          bytes->hex
+          (partition 32 32 (join (repeat 32 " ")))
+          (map format-hex-line))))
 
-(defn- copy-bytes [bytes offset size]
-  "utility function - copy bytes, return new byte array"
-  (let [size (if (nil? size) (alength bytes) size)]
-    (if (and (= 0 offset) (= (alength bytes) size))
-      bytes                                                 ; short circuit
-      (java.util.Arrays/copyOfRange bytes
-                                    offset
-                                  (+ offset size)))))
+#?(:clj
+   (defn- copy-bytes [bytes offset size]
+     "utility function - copy bytes, return new byte array"
+     (let [size (if (nil? size) (alength bytes) size)]
+       (if (and (= 0 offset) (= (alength bytes) size))
+         bytes                                                 ; short circuit
+         (java.util.Arrays/copyOfRange bytes
+                                       offset
+                                       (+ offset size))))))
 
-(defn get-dump-bytes [x offset size]
-  "utility function - return byte array from offset offset and with
-  size size for nio ByteBuffer, netty ByteBuf, byte array, and String"
-  (cond (and (satisfies? octet.buffer/IBufferBytes x)
-             (satisfies? octet.buffer/IBufferLimit x))
-        (let [size (if (nil? size) (octet.buffer/get-capacity x) size)]
-          (octet.buffer/read-bytes x offset size))
+#?(:clj
+   (defn get-dump-bytes
+     "utility function - return byte array from offset offset and with
+     size size for nio ByteBuffer, netty ByteBuf, byte array, and String"
+     [x offset size]
+     (cond
+       (and (satisfies? octet.buffer/IBufferBytes x)
+            (satisfies? octet.buffer/IBufferLimit x))
+       (let [size (if (nil? size) (octet.buffer/get-capacity x) size)]
+         (octet.buffer/read-bytes x offset size))
 
-        (instance? (type (byte-array 0)) x)
-        (copy-bytes x offset size)
+       (instance? (type (byte-array 0)) x)
+       (copy-bytes x offset size)
 
-        (instance? String x)
-        (copy-bytes (.getBytes x) offset size)))
+       (instance? String x)
+       (copy-bytes (.getBytes x) offset size))))
 
 
 ; Example usage of hex-dump
@@ -128,28 +136,29 @@
 ;|000000c0: c0c1 c2c3 c4c5 c6c7                       ........        |
 ; --------------------------------------------------------------------
 
-(defn hex-dump
-  "Create hex dump. Accepts byte array, java.nio.ByteBuffer,
-  io.netty.buffer.ByteBuf, or String as first argument. Offset will
-  start the dump from an offset in the byte array, size will limit
-  the number of bytes dumped, and frames will print a frame around
-  the dump if true. Set print to true to print the dump on stdout
-  (default) or false to return it as a string. Example call:
-  (hex-dump (byte-array (range 200)) :print false)"
-  [x & {:keys [offset size print frame]
-                   :or   {offset 0
-                          print  true
-                          frame true}}]
-  {:pre [(not (nil? x))]}
-  (let [bytes (get-dump-bytes x offset size)
-        size (if (nil? size) (alength bytes) size)
-        dump (bytes->hexdump bytes)
-        ascii (bytes->ascii bytes)
-        offs (map #(format "%08x" %)
-                  (range offset (+ offset size 16) 16))
-        header (str " " (join (repeat 68 "-")))
-        border (if frame "|" "")
-        lines (map #(str border %1 ": " %2 "  " %3 border) offs dump ascii)
-        lines (if frame (concat [header] lines [header]) lines)
-        result (join \newline lines)]
-    (if print (println result) result)))
+#?(:clj
+   (defn hex-dump
+     "Create hex dump. Accepts byte array, java.nio.ByteBuffer,
+     io.netty.buffer.ByteBuf, or String as first argument. Offset will
+     start the dump from an offset in the byte array, size will limit
+     the number of bytes dumped, and frames will print a frame around
+     the dump if true. Set print to true to print the dump on stdout
+     (default) or false to return it as a string. Example call:
+     (hex-dump (byte-array (range 200)) :print false)"
+     [x & {:keys [offset size print frame]
+           :or   {offset 0
+                  print  true
+                  frame true}}]
+     {:pre [(not (nil? x))]}
+     (let [bytes (get-dump-bytes x offset size)
+           size (if (nil? size) (alength bytes) size)
+           dump (bytes->hexdump bytes)
+           ascii (bytes->ascii bytes)
+           offs (map #(format "%08x" %)
+                     (range offset (+ offset size 16) 16))
+           header (str " " (join (repeat 68 "-")))
+           border (if frame "|" "")
+           lines (map #(str border %1 ": " %2 "  " %3 border) offs dump ascii)
+           lines (if frame (concat [header] lines [header]) lines)
+           result (join \newline lines)]
+       (if print (println result) result))))

@@ -27,9 +27,7 @@
   (:require [octet.buffer :as buffer]
             [octet.spec :as spec]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Types implementation
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; --- Types implementation
 
 (defn primitive-spec
   [size readfn writefn]
@@ -115,9 +113,7 @@
       (buffer/write-bytes buff pos size value)
       size)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Unsigned Primitives
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; --- Unsigned Primitives
 
 (def ^{:doc "Unsinged int16 type spec."}
   uint16 (primitive-spec 2 buffer/read-ushort buffer/write-ushort))

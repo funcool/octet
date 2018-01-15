@@ -1,4 +1,4 @@
-;; Copyright 2015 Andrey Antukh <niwi@niwi.be>
+;; Copyright 2015-2018 Andrey Antukh <niwi@niwi.nz>
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License")
 ;; you may not use this file except in compliance with the License.
@@ -268,31 +268,30 @@
   (let [spec (buf/spec (buf/int32)
                        (buf/int32)
                        (buf/int32)
-                       (buf/ref-string* 1))
-        buffer (buf/allocate 15)]
-    (buf/write! buffer [1 3 1 "123"] spec)
+                       (buf/ref-string 1))
+        buffer (buf/allocate 17)
+        result (buf/write! buffer [1 0 1 "12345"] spec)]
     (let [[readed data] (buf/read* buffer spec)]
-      (t/is (= readed 15))
-      (t/is (= data  [1 3 1 "123"])))))
+      (t/is (= readed 17))
+      (t/is (= data  [1 5 1 "12345"])))))
 
 (t/deftest spec-data-with-indexed-ref-string-lengths
   (let [lens [0 1 10 100 1000]
         spec (buf/spec (buf/int32)
                        (buf/int32)
                        (buf/int32)
-                       (buf/ref-string* 1))]
+                       (buf/ref-string 1))]
     (doseq [len lens]
       (let [str    (clojure.string/join (repeat len \x))
             total (+ 12 len)
             buffer (buf/allocate total)]
-        (buf/write! buffer [1 len 1 str] spec)
+        (buf/write! buffer [1 0 1 str] spec)
         (let [[readed data] (buf/read* buffer spec)]
           (t/is (= readed total))
           (t/is (= data [1 len 1 str])))))))
 
 (t/deftest spec-data-with-indexed-ref-string-interleaved
-  ;                 0 1 2 3 4     5 6
-  (let [datas [[22 [0 1 0 3 "a",, 0 "xyz"]] 
+  (let [datas [[22 [0 1 0 3 "a",, 0 "xyz"]]
                [24 [9 3 7 3 "abc" 5 "xyz"]]
                [18 [0 0 0 0 "",,, 0 ""]]
                [20 [1 1 1 1 "a",, 1 "x"]]
@@ -302,9 +301,9 @@
                         (buf/int32)                         ;1
                         (buf/int32)                         ;2
                         (buf/int32)                         ;3
-                        (buf/ref-string* 1)                 ;4
+                        (buf/ref-string 1)                  ;4
                         (buf/int16)                         ;5
-                        (buf/ref-string* 3))]               ;6
+                        (buf/ref-string 3))]                ;6
     (doseq [[count data] datas]
       (let [buffer (buf/allocate count)]
         (buf/write! buffer data spec)
@@ -316,7 +315,7 @@
   (let [spec (buf/spec :bogus1 (buf/int32)
                        :length (buf/int32)
                        :bogus2 (buf/int32)
-                       :varchar (buf/ref-string* :length))
+                       :varchar (buf/ref-string :length))
         buffer (buf/allocate 15)]
     (buf/write! buffer {:bogus1 1
                         :length 3
@@ -334,9 +333,9 @@
                        :length1 (buf/int32)
                        :bogus2  (buf/int32)
                        :length2 (buf/int32)
-                       :varchar1 (buf/ref-string* :length1)
+                       :varchar1 (buf/ref-string :length1)
                        :bogus3  (buf/int16)
-                       :varchar2 (buf/ref-string* :length2))
+                       :varchar2 (buf/ref-string :length2))
         buffer (buf/allocate 24)]
     (buf/write! buffer {:bogus1 12
                         :length1 3
@@ -356,11 +355,11 @@
                       :varchar2 "abc"})))))
 
 (t/deftest spec-data-with-assoc-ref-bytes-single
-  (let [barr (byte-array [7 13 17])
+  (let [barr (random-bytes 3)
         spec (buf/spec :bogus1 (buf/int32)
                        :length (buf/int32)
                        :bogus2 (buf/int32)
-                       :varbytes (buf/ref-bytes* :length))
+                       :varbytes (buf/ref-bytes :length))
         buffer (buf/allocate 15)]
     (buf/write! buffer {:bogus1   1
                         :length   3
@@ -368,22 +367,21 @@
                         :varbytes barr} spec)
     (let [[readed data] (buf/read* buffer spec)]
       (t/is (= readed 15))
-      (t/is (= (bytes->vecs data)
-               (bytes->vecs {:bogus1   1
-                             :length   3
-                             :bogus2   1
-                             :varbytes barr}))))))
+      (t/is (:bogus1 data) 1)
+      (t/is (:length data) 3)
+      (t/is (:bogus2 data) 1)
+      (t/is (equals? (:varbytes data) barr)))))
 
 (t/deftest spec-data-with-assoc-ref-bytes-interleaved
-  (let [barr1 (byte-array [7 13 17])
-        barr2 (byte-array [19 23 29])
+  (let [barr1 (random-bytes 3)
+        barr2 (random-bytes 3)
         spec (buf/spec :bogus1 (buf/int32)
                        :length1 (buf/int32)
                        :bogus2 (buf/int32)
                        :length2 (buf/int32)
-                       :varbytes1 (buf/ref-bytes* :length1)
+                       :varbytes1 (buf/ref-bytes :length1)
                        :bogus3 (buf/int16)
-                       :varbytes2 (buf/ref-bytes* :length2))
+                       :varbytes2 (buf/ref-bytes :length2))
         buffer (buf/allocate 24)]
     (buf/write! buffer {:bogus1    12
                         :length1   3
@@ -394,14 +392,12 @@
                         :varbytes2 barr2} spec)
     (let [[readed data] (buf/read* buffer spec)]
       (t/is (= readed 24))
-      (t/is (= (bytes->vecs data)
-               (bytes->vecs {:bogus1    12
-                             :length1   3
-                             :bogus2    23
-                             :length2   3
-                             :varbytes1 barr1
-                             :bogus3    34
-                             :varbytes2 barr2}))))))
+      (t/is (:bogus1 data) 12)
+      (t/is (:length1 data) 3)
+      (t/is (:bogus2 data) 23)
+      (t/is (:length2 data) 3)
+      (t/is (equals? (:varbytes1 data) barr1))
+      (t/is (equals? (:varbytes2 data) barr2)))))
 
 (t/deftest spec-composition
   (let [spec (buf/spec (buf/spec (buf/int32) (buf/int32))
@@ -421,16 +417,16 @@
         result (buf/into spec ["hello" "world!"])]
     (t/is (= (impl/get-capacity result) 19))))
 
-(t/deftest endianness
-  (let [spec (buf/spec buf/int32 buf/int32)
-        buff (buf/with-byte-order :little-endian
-               (buf/into spec [1 3]))
-        res1 (buf/read buff spec)
-        res2 (buf/with-byte-order :little-endian
-               (buf/read buff spec))]
-    (t/is (= res1 [16777216 50331648]))
-    (t/is (= res2 [1 3]))))
-
+#?(:clj
+   (t/deftest endianness
+     (let [spec (buf/spec buf/int32 buf/int32)
+           buff (buf/with-byte-order :little-endian
+                  (buf/into spec [1 3]))
+           res1 (buf/read buff spec)
+           res2 (buf/with-byte-order :little-endian
+                  (buf/read buff spec))]
+       (t/is (= res1 [16777216 50331648]))
+       (t/is (= res2 [1 3])))))
 
 (t/deftest vector-buffer
   (let [spec (buf/spec buf/short buf/int32)

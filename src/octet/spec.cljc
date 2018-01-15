@@ -41,6 +41,12 @@
   (read [_ buff start] "Read all data from buffer.")
   (write [_ buff start data] "Read all data from buffer."))
 
+(defprotocol ISpecWithRef
+  "Abstraction to support specs having references to other
+   specs within an AssociativeSpec or an IndexedSpec"
+  (read* [_ buff start data] "Read data from buffer, use data to calculate length etc")
+  (write* [_ buff start value types data] "Write data from buffer, use data to store length etc"))
+
 (defprotocol ISpecSize
   "Abstraction for calculate size of static specs."
   (size [_] "Calculate the size in bytes of the object."))
@@ -48,12 +54,6 @@
 (defprotocol ISpecDynamicSize
   "Abstraction for calculate size for dynamic specs."
   (size* [_ data] "Calculate the size in bytes of the object having a data."))
-
-(defprotocol ISpecWithRef
-  "Abstraction to support specs having references to other
-   specs within an AssociativeSpec or an IndexedSpec"
-  (read* [_ buff start data] "Read data from buffer, use data to calculate length etc")
-  (write* [_ buff start value types data] "Write data from buffer, use data to store length etc"))
 
 ;; --- Composed Spec Types
 
