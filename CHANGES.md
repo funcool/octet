@@ -2,11 +2,11 @@
 
 ## Version 1.1.0 ##
 
-Date: unreleased
+Date: 2018-01-15
 
 - Add for reference specs (allows to have dynamic specs where the
   length is stored in another spec).
-  
+
 
 ## Version 1.0.1 ##
 
