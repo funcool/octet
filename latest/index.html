@@ -4,18 +4,20 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.4">
+<meta name="generator" content="Asciidoctor 1.5.6.1">
 <meta name="author" content="funcool.org">
 <title>octet - a library for working with byte buffers</title>
 <style>
 .listingblock .pygments .hll { background-color: #ffffcc }
-.listingblock .pygments  { background: #f0f0f0; }
+.listingblock .pygments, .listingblock .pygments code { background: #f0f0f0; }
 .listingblock .pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
 .listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
 .listingblock .pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
 .listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
 .listingblock .pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
 .listingblock .pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+.listingblock .pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
 .listingblock .pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
 .listingblock .pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
 .listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
@@ -55,8 +57,10 @@
 .listingblock .pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
 .listingblock .pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
 .listingblock .pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
 .listingblock .pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
 .listingblock .pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+.listingblock .pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
 .listingblock .pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
 .listingblock .pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
 .listingblock .pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
@@ -67,9 +71,11 @@
 .listingblock .pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
 .listingblock .pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
 .listingblock .pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
 .listingblock .pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
 .listingblock .pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
 .listingblock .pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+.listingblock .pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
 .listingblock .pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Liberation+Mono:400|Roboto+Slab:400,700"/>
@@ -80,7 +86,7 @@
 <h1>octet - a library for working with byte buffers</h1>
 <div class="details">
 <span id="author" class="author">funcool.org</span><br>
-<span id="revdate">1.0.1</span>
+<span id="revdate">1.1.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -169,7 +175,7 @@ dependency vector on your <strong><em>project.clj</em></strong> file:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/octet</span> <span class="tok-s">&quot;1.0.1&quot;</span><span class="tok-p">]</span></code></pre>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">[</span><span class="tok-nv">funcool/octet</span> <span class="tok-s">&quot;1.1.0&quot;</span><span class="tok-p">]</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -220,7 +226,7 @@ the same value in bytes.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">octet.core</span> <span class="tok-ss">:as</span> <span class="tok-nv">buf</span><span class="tok-p">])</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">octet.core</span> <span class="tok-ss">:as</span> <span class="tok-nv">buf</span><span class="tok-p">])</span>
 
 <span class="tok-c1">;; Indexed composition</span>
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">my-spec1</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span> <span class="tok-nv">buf/int32</span> <span class="tok-nv">buf/bool</span><span class="tok-p">))</span>
@@ -237,7 +243,7 @@ same for both:</p>
 <div class="listingblock">
 <div class="title">Example using <code>size</code> and <code>count</code> functions on specs</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/size</span> <span class="tok-nv">my-spec1</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/size</span> <span class="tok-nv">my-spec1</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 5</span>
 
 <span class="tok-p">(</span><span class="tok-nb">count </span><span class="tok-nv">my-spec1</span><span class="tok-p">)</span>
@@ -260,7 +266,7 @@ This operation is almost platform independent if the library defaults satisfies 
 <div class="listingblock">
 <div class="title">Example allocating a 24 bytes size byte buffer with <strong>default</strong> implementation</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-c1">;; Allocate bytebuffer with 24 bytes of size</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-c1">;; Allocate bytebuffer with 24 bytes of size</span>
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/allocate</span> <span class="tok-mi">24</span><span class="tok-p">))</span></code></pre>
 </div>
 </div>
@@ -271,7 +277,7 @@ implementation to use and the type of buffer:</p>
 <div class="listingblock">
 <div class="title">Example allocation 24 bytes size buffer with nio buffer implementation</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-c1">;; This is a default if you are using clojure</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-c1">;; This is a default if you are using clojure</span>
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/allocate</span> <span class="tok-mi">24</span> <span class="tok-p">{</span><span class="tok-ss">:impl</span> <span class="tok-ss">:nio</span> <span class="tok-ss">:type</span> <span class="tok-ss">:heap</span><span class="tok-p">}))</span></code></pre>
 </div>
 </div>
@@ -289,7 +295,7 @@ buffers is that they are not affect the GC and may enable have less GC pauses.</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-c1">;; This is a default if you are using clojurescript</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-c1">;; This is a default if you are using clojurescript</span>
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/allocate</span> <span class="tok-mi">24</span> <span class="tok-p">{</span><span class="tok-ss">:impl</span> <span class="tok-ss">:es6</span> <span class="tok-ss">:type</span> <span class="tok-ss">:heap</span><span class="tok-p">}))</span></code></pre>
 </div>
 </div>
@@ -322,7 +328,7 @@ specs. Specs are simple schema on how the data should be read or write to the bu
 <div class="listingblock">
 <div class="title">Example writing data into buffer using indexed composed schema</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-c1">;; The indexed composed spec exptects a vector as input</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-c1">;; The indexed composed spec exptects a vector as input</span>
 <span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-p">[</span><span class="tok-mi">22</span> <span class="tok-nv">true</span><span class="tok-p">]</span> <span class="tok-nv">my-spec1</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 5</span></code></pre>
 </div>
@@ -338,7 +344,7 @@ operation but using the associative spec defined previously:</p>
 <div class="listingblock">
 <div class="title">Example writing data into buffer using a map as input</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-p">{</span><span class="tok-ss">:field1</span> <span class="tok-mi">22</span> <span class="tok-ss">:field2</span> <span class="tok-nv">true</span><span class="tok-p">}</span> <span class="tok-nv">my-spec2</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-p">{</span><span class="tok-ss">:field1</span> <span class="tok-mi">22</span> <span class="tok-ss">:field2</span> <span class="tok-nv">true</span><span class="tok-p">}</span> <span class="tok-nv">my-spec2</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 5</span></code></pre>
 </div>
 </div>
@@ -364,7 +370,7 @@ following the spec and return corresponding data structure:</p>
 <div class="listingblock">
 <div class="title">Example reading from buffer using indexed spec</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec1</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec1</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; [22 true]</span></code></pre>
 </div>
 </div>
@@ -374,7 +380,7 @@ following the spec and return corresponding data structure:</p>
 <div class="listingblock">
 <div class="title">Example reading from buffer using associative spec</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec2</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec2</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; {:field1 22 :field2 true}</span></code></pre>
 </div>
 </div>
@@ -401,7 +407,7 @@ both can be used directly in read and write operations:</p>
 <div class="listingblock">
 <div class="title">Example using plain specs for read data from buffers</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/int16</span><span class="tok-p">))</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/int16</span><span class="tok-p">))</span>
 <span class="tok-c1">;; =&gt; 22</span></code></pre>
 </div>
 </div>
@@ -420,14 +426,14 @@ a buffer, you can specify it in a read or write operation:</p>
 <div class="listingblock">
 <div class="title">Example writing data in specific offset</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/write</span> <span class="tok-nv">buffer</span> <span class="tok-p">[</span><span class="tok-mi">0</span> <span class="tok-nv">false</span><span class="tok-p">]</span> <span class="tok-nv">my-spec1</span> <span class="tok-p">{</span><span class="tok-ss">:offset</span> <span class="tok-mi">20</span><span class="tok-p">})</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/write</span> <span class="tok-nv">buffer</span> <span class="tok-p">[</span><span class="tok-mi">0</span> <span class="tok-nv">false</span><span class="tok-p">]</span> <span class="tok-nv">my-spec1</span> <span class="tok-p">{</span><span class="tok-ss">:offset</span> <span class="tok-mi">20</span><span class="tok-p">})</span>
 <span class="tok-c1">;; =&gt; [0 false]</span></code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="title">Example read data from specific offset.</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec1</span> <span class="tok-p">{</span><span class="tok-ss">:offset</span> <span class="tok-mi">20</span><span class="tok-p">})</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec1</span> <span class="tok-p">{</span><span class="tok-ss">:offset</span> <span class="tok-mi">20</span><span class="tok-p">})</span>
 <span class="tok-c1">;; =&gt; [0 false]</span></code></pre>
 </div>
 </div>
@@ -443,7 +449,7 @@ readed data:</p>
 <div class="listingblock">
 <div class="title">Example using <code>read*</code> function</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/read*</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec2</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/read*</span> <span class="tok-nv">buffer</span> <span class="tok-nv">my-spec2</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; [5 {:field1 22 :field2 true}]</span></code></pre>
 </div>
 </div>
@@ -457,7 +463,7 @@ with <code>repeat</code> composition function:</p>
 <div class="listingblock">
 <div class="title">Example for read and write using repeat composed spec</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">spec</span> <span class="tok-p">(</span><span class="tok-nf">buf/repeat</span> <span class="tok-mi">5</span> <span class="tok-nv">buf/int32</span><span class="tok-p">))</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">spec</span> <span class="tok-p">(</span><span class="tok-nf">buf/repeat</span> <span class="tok-mi">5</span> <span class="tok-nv">buf/int32</span><span class="tok-p">))</span>
 <span class="tok-p">(</span><span class="tok-nf">buf/write</span> <span class="tok-nv">buffer</span> <span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span> <span class="tok-mi">4</span> <span class="tok-mi">5</span><span class="tok-p">]</span> <span class="tok-nv">spec</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 20</span>
 
@@ -477,14 +483,14 @@ example:</p>
 <div class="listingblock">
 <div class="title">Example writing arbitrary length string into buffer</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-s">&quot;hello world&quot;</span> <span class="tok-nv">buf/string*</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-s">&quot;hello world&quot;</span> <span class="tok-nv">buf/string*</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 15</span></code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="title">Example reading arbitrary length string from buffer</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/string*</span><span class="tok-p">))</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/read</span> <span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/string*</span><span class="tok-p">))</span>
 <span class="tok-c1">;; =&gt; &quot;hello world&quot;</span></code></pre>
 </div>
 </div>
@@ -501,7 +507,7 @@ read/write phase:</p>
 <div class="listingblock">
 <div class="title">Example how obtain a size of specific type spec</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">buf/size</span> <span class="tok-nv">buf/int16</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">buf/size</span> <span class="tok-nv">buf/int16</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 2</span>
 
 <span class="tok-p">(</span><span class="tok-nf">buf/size</span> <span class="tok-nv">buf/string*</span><span class="tok-p">)</span>
@@ -519,7 +525,7 @@ arbitrary size specs.</p>
 <div class="listingblock">
 <div class="title">Example using <code>octet.core/into</code> function (semantically similar to clojure&#8217;s <code>into</code>)</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">myspec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span> <span class="tok-nv">buf/string*</span> <span class="tok-nv">buf/string*</span><span class="tok-p">))</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">myspec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span> <span class="tok-nv">buf/string*</span> <span class="tok-nv">buf/string*</span><span class="tok-p">))</span>
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/into</span> <span class="tok-nv">myspec</span> <span class="tok-p">[</span><span class="tok-s">&quot;hello&quot;</span> <span class="tok-s">&quot;world!&quot;</span><span class="tok-p">]))</span>
 
 <span class="tok-p">(</span><span class="tok-nf">buf/get-capacity</span> <span class="tok-nv">buffer</span><span class="tok-p">)</span>
@@ -540,7 +546,7 @@ of one spec and allows store an array like datastructures.</p>
 <div class="listingblock">
 <div class="title">Example storing two arrays in a buffer</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">spec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">spec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span>
             <span class="tok-p">(</span><span class="tok-nf">buf/vector*</span> <span class="tok-nv">buf/int32</span><span class="tok-p">)</span>
             <span class="tok-p">(</span><span class="tok-nf">buf/vector*</span> <span class="tok-nv">buf/int32</span><span class="tok-p">)))</span>
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">buffer</span> <span class="tok-p">(</span><span class="tok-nf">buf/into</span> <span class="tok-nv">spec</span> <span class="tok-p">[[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">]</span> <span class="tok-p">[</span><span class="tok-mi">4</span> <span class="tok-mi">5</span> <span class="tok-mi">6</span> <span class="tok-mi">7</span> <span class="tok-mi">8</span><span class="tok-p">]])</span>
@@ -568,7 +574,7 @@ spec from a vector of buffers that prevents unnecesary copy action.</p>
 <div class="listingblock">
 <div class="title">Example reading and writing data to a vector of buffers</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">myspec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span> <span class="tok-nv">buf/short</span> <span class="tok-nv">buf/int32</span><span class="tok-p">))</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">myspec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span> <span class="tok-nv">buf/short</span> <span class="tok-nv">buf/int32</span><span class="tok-p">))</span>
 
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">buffers</span> <span class="tok-p">[(</span><span class="tok-nf">buf/allocate</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
               <span class="tok-p">(</span><span class="tok-nf">buf/allocate</span> <span class="tok-mi">4</span><span class="tok-p">)])</span>
@@ -601,7 +607,7 @@ very complicated job.</p>
 <div class="listingblock">
 <div class="title">Example definition of type spec that represents a point</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">octet.spec</span> <span class="tok-ss">:as</span> <span class="tok-nv">spec</span><span class="tok-p">])</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">octet.spec</span> <span class="tok-ss">:as</span> <span class="tok-nv">spec</span><span class="tok-p">])</span>
 
 <span class="tok-c1">;; Imagine you have a type Point defined like this:</span>
 <span class="tok-p">(</span><span class="tok-kd">defrecord </span><span class="tok-nv">Point</span> <span class="tok-p">[</span><span class="tok-nv">x</span> <span class="tok-nv">y</span><span class="tok-p">])</span>
@@ -631,7 +637,7 @@ very complicated job.</p>
 <div class="listingblock">
 <div class="title">Example using the previously defined typespec</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">mypoint</span> <span class="tok-p">(</span><span class="tok-nf">Point.</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span><span class="tok-p">))</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">mypoint</span> <span class="tok-p">(</span><span class="tok-nf">Point.</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span><span class="tok-p">))</span>
 <span class="tok-p">(</span><span class="tok-nf">buf/write!</span> <span class="tok-nv">buffer</span> <span class="tok-nv">mypoint</span> <span class="tok-nv">point-spec</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; 8</span>
 
@@ -650,7 +656,7 @@ constructor that helps map an indexed type spec to specific user defined type.</
 <div class="listingblock">
 <div class="title">Example using <strong>compose</strong> function.</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-kd">defrecord </span><span class="tok-nv">Point</span> <span class="tok-p">[</span><span class="tok-nv">x</span> <span class="tok-nv">y</span><span class="tok-p">])</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-kd">defrecord </span><span class="tok-nv">Point</span> <span class="tok-p">[</span><span class="tok-nv">x</span> <span class="tok-nv">y</span><span class="tok-p">])</span>
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">mypoint</span> <span class="tok-p">(</span><span class="tok-nf">Point.</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span><span class="tok-p">))</span>
 
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">point-spec</span> <span class="tok-p">(</span><span class="tok-nf">buf/compose</span> <span class="tok-nv">-&gt;Point</span> <span class="tok-p">[</span><span class="tok-nv">buf/int32</span> <span class="tok-nv">buf/int32</span><span class="tok-p">]))</span>
@@ -810,7 +816,7 @@ the <code>octet.buffer</code> namespace.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">octet.buffer</span><span class="tok-p">])</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span></span><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">octet.buffer</span><span class="tok-p">])</span>
 
 <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">myspec</span> <span class="tok-p">(</span><span class="tok-nf">buf/spec</span> <span class="tok-nv">buf/string*</span> <span class="tok-nv">buf/string*</span><span class="tok-p">))</span>
 
@@ -940,7 +946,7 @@ restrictions for contributions. Just open an issue or pull request.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="text">git clone https://github.com/funcool/octet</code></pre>
+<pre class="pygments highlight"><code data-lang="text"><span></span>git clone https://github.com/funcool/octet</code></pre>
 </div>
 </div>
 </div>
@@ -951,7 +957,7 @@ restrictions for contributions. Just open an issue or pull request.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="text">lein test</code></pre>
+<pre class="pygments highlight"><code data-lang="text"><span></span>lein test</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -959,7 +965,7 @@ restrictions for contributions. Just open an issue or pull request.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="text">./scripts/build
+<pre class="pygments highlight"><code data-lang="text"><span></span>./scripts/build
 node ./out/tests.js</code></pre>
 </div>
 </div>
@@ -1002,7 +1008,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-11-15 16:49:44 CET
+Last updated 2017-10-06 15:52:15 CEST
 </div>
 </div>
 </body>
