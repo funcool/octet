@@ -1,5 +1,12 @@
 # Changelog #
 
+## Version 1.1.1 ##
+
+Date: 2018-04-24
+
+- Update netty and fix warnings on jdk9.
+
+
 ## Version 1.1.0 ##
 
 Date: 2018-01-15
