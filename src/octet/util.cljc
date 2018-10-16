@@ -26,7 +26,7 @@
   (:require [clojure.string :as str :refer [join]]
             [octet.buffer :as bfr])
 
-  #?(:clj (:import [java.util.Arrays])))
+  #?(:clj (:import java.util.Arrays)))
 
 (defmacro defalias
   [sym sym2]
