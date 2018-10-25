@@ -1,5 +1,13 @@
 # Changelog #
 
+## Version 1.1.2 ##
+
+Date: 2018-10-25
+
+- Upgrade netty.
+- Fix compatibility issues with clojure 1.10
+
+
 ## Version 1.1.1 ##
 
 Date: 2018-04-24
