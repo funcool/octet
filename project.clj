@@ -4,8 +4,8 @@
   :license {:name "Public Domain"
             :url "http://unlicense.org/"}
   :dependencies [[org.clojure/clojure "1.9.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.9.946" :scope "provided"]
-                 [io.netty/netty-buffer "4.1.24.Final"]]
+                 [org.clojure/clojurescript "1.10.339" :scope "provided"]
+                 [io.netty/netty-buffer "4.1.30.Final"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
