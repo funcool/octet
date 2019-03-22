@@ -466,6 +466,16 @@
       (t/is (= readed 24))
       (t/is (= data [1 2 3 4 5])))))
 
+(t/deftest spec-associative-nested-dynamic
+  (let [spec (buf/spec :outer (buf/spec :inner (buf/vector* buf/int32)))
+        buffer (buf/into (buf/spec :outer (buf/spec :inner (buf/vector* buf/int32))) {:outer {:inner [1]}})
+        written (impl/get-capacity buffer)]
+    (t/is (= written 8))
+
+    (let [[readed data] (buf/read* buffer spec)]
+      (t/is (= readed 8)
+        (t/is (= data {:outer {:inner [1]}}))))))
+
 #?(:cljs
    (do
      (enable-console-print!)
