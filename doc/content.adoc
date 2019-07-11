@@ -41,7 +41,7 @@ And the library works with the following platforms: *jdk7*, *jdk8*, *node-lts*.
 == Getting started
 
 The main goal of _octet_ is provide, multiplatform abstraction for work with
-byte buffer's. Offering a ligweight api for define message types in a declarative
+byte buffers. Offering a lightweight api for define message types in a declarative
 way and use them for read or write to bytebuffers.
 
 As previously said, _octet_  works with both most used clojure implementations:
@@ -59,7 +59,7 @@ Two most common composition types are: associative and indexed.
 
 The difference of indexed and associative compositions is the input and output. In
 associative composition the expected input and output is a map. And in indexed
-composition, the expected input and input is a vector. Internally them represents
+composition, the expected input and input is a vector. Internally it represents
 the same value in bytes.
 
 Let start defining one:
@@ -108,7 +108,7 @@ This operation is almost platform independent if the library defaults satisfies 
 (def buffer (buf/allocate 24))
 ----
 
-The buffer allocation is parametrizable so you can specify the concrete
+The buffer allocation is parameterisable so you can specify the concrete
 implementation to use and the type of buffer:
 
 .Example allocation 24 bytes size buffer with nio buffer implementation
@@ -136,7 +136,7 @@ You can see all supported options <<supported-bytebuffers,here>>
 
 [NOTE]
 ====
-The return value of `allocate` depens on implementation used. Is a plain instance
+The return value of `allocate` depends on the implementation used. Is a plain instance
 without additional wrapping. If you want access to its internals, you can do it
 with native host platform api.
 ====
@@ -150,7 +150,7 @@ specs. Specs are simple schema on how the data should be read or write to the bu
 .Example writing data into buffer using indexed composed schema
 [source, clojure]
 ----
-;; The indexed composed spec exptects a vector as input
+;; The indexed composed spec expects a vector as input
 (buf/write! buffer [22 true] my-spec1)
 ;; => 5
 ----
@@ -195,8 +195,8 @@ Also, you can perform the same operation, but using a associative spec:
 
 [NOTE]
 ====
-This works idependently of implementation used for allocate the buffer. Some
-implementations has little limitations, es6 (cljs) as example, des not support
+This works independently of implementation used for allocate the buffer. Some
+implementations have a few limitations; es6 (cljs) as example, does not support
 `int64` typespec due to platform limitations.
 ====
 
@@ -267,7 +267,7 @@ with `repeat` composition function:
 
 === Using arbitrary size type specs
 
-Until now, we have seen examples alway using fixed size compositions. Fixed size
+Until now, we have seen examples always using fixed size compositions. Fixed size
 compositions are easy understand, the size of the spec can be know in any time.
 But in some circumstances we want store arbitrary length. Strings are one great
 example:
@@ -353,9 +353,9 @@ that it has always an overhead of 4 bytes for store the length of the vector.
 === Read and write spec to multiple byte buffers
 
 In some circumstances (specially when we working with streams) the buffers are
-splitted. The simplest but not very efficient approach will be copy all data in one
+split. The simplest but not very efficient approach will be copy all data in one
 unique byte buffer and read a spec from it. Octet comes with facilities for read a
-spec from a vector of buffers that prevents unnecesary copy action.
+spec from a vector of buffers that prevents unnecessary copy action.
 
 .Example reading and writing data to a vector of buffers
 [source, clojure]
@@ -386,7 +386,7 @@ situations. _octet_ is build around abstractions and define new type spec is not
 very complicated job.
 
 An typespec consists mainly in `ISpec` protocol that has two methods: `read` and
-`write`. Let see an example defining a typespec for point of coordenades:
+`write`. Let see an example defining a typespec for point of coordinades:
 
 .Example definition of type spec that represents a point
 [source, clojure]
@@ -401,7 +401,7 @@ An typespec consists mainly in `ISpec` protocol that has two methods: `read` and
   (reify
     spec/ISpecSize
     (size [_]
-      ;; we kwno that is datatype has fixed size in bytes
+      ;; we know that is datatype has fixed size in bytes
       ;; that represents two int32.
       8)
 
@@ -495,7 +495,7 @@ implements the same abstraction and can be used in read or write operations.
 === Byte order
 
 All the builtin implementations uses the `:big-endian` as default byte order. That
-value can be canched at any time using the provided `*byteorder*` dynamic var on
+value can be cached at any time using the provided `*byteorder*` dynamic var on
 the `octet.buffer` namespace.
 
 Let see a little example:
@@ -514,7 +514,7 @@ Let see a little example:
 ;; => 19
 
 (buf/read buffer myspec)
-;; => BufferUnderflowException (because of incorect byte order)
+;; => BufferUnderflowException (because of incorrect byte order)
 
 (buf/with-byte-order :little-endian
   (buf/read buffer myspec))
@@ -526,7 +526,7 @@ Let see a little example:
 
 *What is the difference with _clojurewerkz/buffy_?*
 
-*Buffy* is a excelent library, and I have used it in some circumstances, but is has
+*Buffy* is a excellent library, and I have used it in some circumstances, but is has
 some things that I personally don't like:
 
 - It works only with netty bytebuf and I need an abstraction for work with
@@ -540,13 +540,13 @@ some things that I personally don't like:
 
 *What is the difference with _ztellman/gloss_?*
 
-Gloss is also similiar project, and has similar purposes, but it has several
-differeces:
+Gloss is also similar project, and has similar purposes, but it has several
+differences:
 
 - It has a limited set of types. Octet has an extensible abstraction for build own
   arbitrary type specs.
 - It only works with nio as buffer implementations. Octet exposes an extensible
-  abstraction and support few differents out of the box.
+  abstraction and supports a few different implementations out of the box.
 - In my opinion it has slightly ugly and unclear api.
 - Seems not very maintained (has issues from 2013).
 - It not has support for ClojureScript.
