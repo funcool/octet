@@ -119,9 +119,9 @@
   (size* [_ data]
     (reduce (fn [acc [index data]]
               (let [type (nth types index)]
-                (if (satisfies? ISpecSize type)
-                  (+ acc (size type))
-                  (+ acc (size* type data)))))
+                (if (satisfies? ISpecDynamicSize type)
+                  (+ acc (size* type data))
+                  (+ acc (size type)))))
             0
             (map-indexed vector data)))
 

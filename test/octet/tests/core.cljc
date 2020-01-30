@@ -196,6 +196,11 @@
       (t/is (= readed 4))
       (t/is (= data [1000])))))
 
+(t/deftest mult-indexed-specs-with-dynamic
+  (let [spec (buf/spec (buf/spec (buf/vector* buf/byte)))
+        result (buf/into spec [[[123]]])]
+    (t/is (= (buf/get-capacity result) 5))))
+
 #?(:clj
    (t/deftest spec-data-types
      (let [data [(buf/string 5) "12345"
@@ -487,4 +492,3 @@
      (if (t/successful? m)
        (set! (.-exitCode js/process) 0)
        (set! (.-exitCode js/process) 1))))
-
