@@ -36,7 +36,7 @@
   [input]
   (let [mark (byte 0)]
     (reduce (fn [sum index]
-              (let [value (aget input index)]
+              (let [value (aget ^bytes input index)]
                 (if (= value mark)
                   (inc sum)
                   (reduced sum))))
