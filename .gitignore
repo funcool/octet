@@ -14,3 +14,7 @@ pom.xml.asc
 /out
 /*-init.clj
 /doc/dist/
+.cpcache/
+/cljs-test-runner-out/
+.calva/
+.clj-kondo/

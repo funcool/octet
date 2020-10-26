@@ -33,7 +33,8 @@
   with support for nio bytebuffers, netty41 bytebuffers and
   es6 typed arrays (from javascript environments)."
   #?(:clj
-     (:import java.nio.ByteBuffer
+     (:import java.nio.Buffer
+              java.nio.ByteBuffer
               java.nio.ByteOrder
               io.netty.buffer.ByteBuf
               io.netty.buffer.ByteBufAllocator)))
@@ -90,8 +91,8 @@
    (defn- set-current-bytebuffer-byte-order!
      [buff]
      (case *byte-order*
-       :big-endian (.order buff ByteOrder/BIG_ENDIAN)
-       :little-endian (.order buff ByteOrder/LITTLE_ENDIAN))))
+       :big-endian (.order ^ByteBuffer buff ByteOrder/BIG_ENDIAN)
+       :little-endian (.order ^ByteBuffer buff ByteOrder/LITTLE_ENDIAN))))
 
 #?(:clj
    (extend-type ByteBuffer
@@ -163,13 +164,13 @@
      IBufferByte
      (read-byte [buff pos]
        (set-current-bytebuffer-byte-order! buff)
-       (.get buff pos))
+       (.get buff ^Long pos))
      (write-byte [buff pos value]
        (set-current-bytebuffer-byte-order! buff)
        (.put buff pos value))
      (read-ubyte [buff pos]
        (set-current-bytebuffer-byte-order! buff)
-       (let [val (.get buff pos)]
+       (let [val (.get ^Long buff pos)]
          (bit-and 0xFF (short val))))
      (write-ubyte [buff pos value]
        (set-current-bytebuffer-byte-order! buff)
@@ -180,15 +181,15 @@
      (read-bytes [buff pos size]
        (let [tmpbuf (byte-array size)
              oldpos (.position buff)]
-         (.position buff pos)
+         (.position ^Buffer buff ^Long pos)
          (.get buff tmpbuf)
-         (.position buff oldpos)
+         (.position ^Buffer buff oldpos)
          tmpbuf))
      (write-bytes [buff pos size data]
-       (let [oldpos (.position buff)]
-         (.position buff pos)
+       (let [oldpos (.position ^Buffer buff)]
+         (.position ^Buffer buff ^Long pos)
          (.put buff data 0 size)
-         (.position buff oldpos)))
+         (.position ^Buffer buff oldpos)))
 
      IBufferLimit
      (get-capacity [buff]
@@ -280,10 +281,10 @@
      IBufferBytes
      (read-bytes [buff pos size]
        (let [tmpbuf (byte-array size)]
-         (.getBytes buff pos tmpbuf)
+         (.getBytes buff ^Long pos tmpbuf)
          tmpbuf))
      (write-bytes [buff pos size data]
-       (.setBytes buff pos data 0 size))
+       (.setBytes buff ^Long pos data 0 ^Long size))
 
      IBufferLimit
      (get-capacity [buff]
