@@ -10,19 +10,19 @@ funcool.org
 == Introduction
 
 Working with raw bytes is tedious, and sometimes the language abstractions for
-working with bytes is not very pleasant. _octet_ library offers a simple api for
-clojure (jvm) and clojurescript (js) that makes working with bytebuffer painless.
+working with bytes is not very pleasant. _octet_ library offers a simple API for
+clojure (jvm) and clojurescript (js) that makes working with a bytebuffer painless.
 
 This is a short list of project goals:
 
 - Not to be intrusive (no bytebuffer wrapping).
-- Provide host independent abstraction (in most possible way).
+- Provide host independent abstraction (as much as possible).
 - Composability.
 
 
 === Project Maturity
 
-Since _octet_ is a young project there can be some API breakage.
+Since _octet_ is a young project, expect some API breakage.
 
 
 === Install
@@ -40,29 +40,29 @@ And the library works with the following platforms: *jdk7*, *jdk8*, *node-lts*.
 
 == Getting started
 
-The main goal of _octet_ is provide, multiplatform abstraction for work with
-byte buffers. Offering a lightweight api for define message types in a declarative
-way and use them for read or write to bytebuffers.
+The main goal of _octet_ is to provide a multiplatform abstraction for working with
+byte buffers - offering a lightweight API for defining message types declaratively,
+and using them for reading and/or writing to bytebuffers.
 
-As previously said, _octet_  works with both most used clojure implementations:
-clojure & clojurescript. Each platform has its own byte buffer abstraction:
+_octet_  works for both Clojure and Clojurescript, with the native buffer abstractions
+appropriate bytebuffer abstractions for the specific platform:
 
 - link:http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html[NIO ByteBuffer (clojure)]
 - link:http://netty.io/4.1/api/io/netty/buffer/ByteBuf.html[Netty ByteBuf (clojure)]
 - link:https://developer.mozilla.org/en/docs/Web/JavaScript/Typed_arrays[Typed Arrays ES6 (clojurescript)]
 
 
-=== Define a spec
+=== Defining a spec
 
-A spec in _octet_ glossary represents a type definition or a composition of types.
+A spec, in _octet_ parlance, represents a type definition or a composition of types.
 Two most common composition types are: associative and indexed.
 
 The difference of indexed and associative compositions is the input and output. In
 associative composition the expected input and output is a map. And in indexed
-composition, the expected input and input is a vector. Internally it represents
-the same value in bytes.
+composition, the expected input and input is a vector. The bytebuffer representation
+is the same regardless.
 
-Let start defining one:
+Let start by defining one:
 
 [source, clojure]
 ----
@@ -76,7 +76,7 @@ Let start defining one:
                         :field2 buf/bool))
 ----
 
-You can check that the spec size (in bytes) and number of types internally is the
+You can verify that the spec size (in bytes) and number of types internally is the
 same for both:
 
 .Example using `size` and `count` functions on specs
@@ -96,9 +96,9 @@ same for both:
 ----
 
 
-=== Creating buffer
+=== Creating a buffer
 
-The next piece in the puzzle is a way to create (or allocate) new byte buffers.
+The next piece of the puzzle is to create (allocate) a new bytebuffer.
 This operation is almost platform independent if the library defaults satisfies you.
 
 .Example allocating a 24 bytes size byte buffer with *default* implementation
@@ -136,16 +136,16 @@ You can see all supported options <<supported-bytebuffers,here>>
 
 [NOTE]
 ====
-The return value of `allocate` depends on the implementation used. Is a plain instance
-without additional wrapping. If you want access to its internals, you can do it
-with native host platform api.
+The return type of `allocate` depends on the implementation used. It is a plain
+(native) object instance without any additional wrapping, which allows direct
+manipulation via host interop.
 ====
 
 
-=== Read and write data
+=== Reading and writing data
 
 It's time to see how we can write data to buffers and read data from them using
-specs. Specs are simple schema on how the data should be read or write to the buffer.
+specs. Specs are a simple schema which describes how the data is read or written.
 
 .Example writing data into buffer using indexed composed schema
 [source, clojure]
@@ -157,7 +157,7 @@ specs. Specs are simple schema on how the data should be read or write to the bu
 
 The `write!` function  returns a number of bytes are written into buffer.
 
-As, previously mentioned, indexed and associative specs with same fields (in same
+As previously mentioned, indexed and associative specs with same fields (in same
 order) represents the identical layout. Knowing that, we also can do the same
 operation but using the associative spec defined previously:
 
@@ -171,11 +171,11 @@ operation but using the associative spec defined previously:
 [NOTE]
 ====
 Some buffer implementations (nio is an example) has the concept of read or
-write position. _octet_ doesn't touch that.
+write position. _octet_ doesn't utilize that.
 ====
 
-Secondly, the read operation is mostly similar to write one. It reads from buffer
-following the spec and return corresponding data structure:
+Secondly, the read operation is mostly similar to write. It reads from buffer
+following the spec and returns the corresponding data structure:
 
 .Example reading from buffer using indexed spec
 [source, clojure]
@@ -200,8 +200,8 @@ implementations have a few limitations; es6 (cljs) as example, does not support
 `int64` typespec due to platform limitations.
 ====
 
-Composed type specs and plain value type specs implements the same abstraction and
-both can be used directly in read and write operations:
+Composed type specs and plain value type specs implement the same abstraction, and
+either can be used directly in read and write operations:
 
 .Example using plain specs for read data from buffers
 [source, clojure]
@@ -215,8 +215,8 @@ both can be used directly in read and write operations:
 
 === Read & Write with offset.
 
-If you know that the data what you want read is located in a specific position in
-a buffer, you can specify it in a read or write operation:
+If you know that the data that you want to read is located at a specific location in
+a buffer, you can specify it for a read or write operation:
 
 .Example writing data in specific offset
 [source, clojure]
@@ -233,12 +233,12 @@ a buffer, you can specify it in a read or write operation:
 ----
 
 
-=== Show readed bytes.
+=== Show bytes read.
 
-The default `read` function returns readed data but not returns a amount of readed
-bytes. For it, _octet_ exposes a convenience function `read*` that instead of
-return only readed data, returns a vector with amount of bytes readed and the
-readed data:
+The default `read` function returns data read, but not the count of the bytes consumed.
+For than, _octet_ exposes a convenience function `read*` instead returns 
+a vector containing both the number of bytes read, and the data itself:
+:
 
 .Example using `read*` function
 [source, clojure]
@@ -250,8 +250,8 @@ readed data:
 
 === Read & Write repeatedly
 
-Sometimes you will want read some spec repeatedly, for that purpose _octet_ comes
-with `repeat` composition function:
+Sometimes you will want to read or write using a spec repeatedly, for that  _octet_
+provides the `repeat` composition function:
 
 .Example for read and write using repeat composed spec
 [source, clojure]
@@ -265,11 +265,11 @@ with `repeat` composition function:
 ----
 
 
-=== Using arbitrary size type specs
+=== Using arbitrarily sized type specs
 
 Until now, we have seen examples always using fixed size compositions. Fixed size
-compositions are easy understand, the size of the spec can be know in any time.
-But in some circumstances we want store arbitrary length. Strings are one great
+compositions are easy understand, and the size of the spec can be known at any time.
+But in some circumstances, we may want to store arbitrary length data. Strings are one great
 example:
 
 .Example writing arbitrary length string into buffer
@@ -286,13 +286,12 @@ example:
 ;; => "hello world"
 ----
 
-But, how it works? Type specs like that, is a composition of two typespecs: *int32*
-and fixed length *string*. On write phase, it calculates the size of string,
-writes firstly the size as `int32` following of fixed size string. The read phase
-is like write but in backward direction.
+This works because type specs like these are a implemented as a composition of two typespecs: *int32*
+and fixed length *string*.  When writing, the string size can be determined, and written as `int32`, 
+followed by the variable part of the string as `string`.  On read, the process is simply reveresed.
 
-Also, the size of that type spec depends on data and can not be known outsize of
-read/write phase:
+Note that the size of such type specs cannot be known ahead of time - because that is dependent 
+on the actual run-time data involved:
 
 .Example how obtain a size of specific type spec
 [source, clojure]
@@ -305,11 +304,10 @@ read/write phase:
 ----
 
 
-=== Put data into new buffer
-
-This is a some kind of helper, that allows easy create a buffer with exactly size
-for concrete spec and concrete data. It works perfectly with static size specs and
-arbitrary size specs.
+=== Creating a new buffer from data
+A helper function is provided to simplify the combination of operations required
+to compute the required buffer size (from combining runtime data with arbitrarily sized specs),
+allocating a buffer of the exact size required, and then populating it with the data.
 
 .Example using `octet.core/into` function (semantically similar to clojure's `into`)
 [source, clojure]
@@ -327,9 +325,8 @@ arbitrary size specs.
 
 === Vectors
 
-This is a very similar abstraction to the previously explained repeating pattern.
-The main difference with it is that this one represents an arbitrary size repetition
-of one spec and allows store an array like datastructures.
+Similar to the repeating pattern, the vector abstraction allows an arbitrarily
+sized repetion of a single spec, resulting in array-like data structures:
 
 .Example storing two arrays in a buffer
 [source, clojure]
@@ -346,8 +343,8 @@ of one spec and allows store an array like datastructures.
 [[1 2 3] [4 5 6 7 8]]
 ----
 
-Behind the scenes, an vector is represented with as `int32 + type*N`, that means
-that it has always an overhead of 4 bytes for store the length of the vector.
+Behind the scenes, a vector is represented as `int32 + type*N`, that means
+that it has always an overhead of 4 bytes to store the length of the vector.
 
 
 === Read and write spec to multiple byte buffers
@@ -355,7 +352,7 @@ that it has always an overhead of 4 bytes for store the length of the vector.
 In some circumstances (specially when we working with streams) the buffers are
 split. The simplest but not very efficient approach will be copy all data in one
 unique byte buffer and read a spec from it. Octet comes with facilities for read a
-spec from a vector of buffers that prevents unnecessary copy action.
+spec from a vector of buffers that forgoes the need for copying data.
 
 .Example reading and writing data to a vector of buffers
 [source, clojure]
@@ -379,14 +376,16 @@ spec from a vector of buffers that prevents unnecessary copy action.
 ----
 
 
-=== Define own type spec
+=== Defining your own type spec
 
-In some circumstances, you probably need define own typespec for solve concrete
-situations. _octet_ is build around abstractions and define new type spec is not
-very complicated job.
+In some circumstances, you may wish to define your own typespecs to 
+handle your concrete data structures.
+
+ _octet_ is built around abstractions and defining a new typespec is
+ a straightforward task.
 
 An typespec consists mainly in `ISpec` protocol that has two methods: `read` and
-`write`. Let see an example defining a typespec for point of coordinades:
+`write`. For example, let's take an example of defining a typespec for point of coordinates:
 
 .Example definition of type spec that represents a point
 [source, clojure]
@@ -429,8 +428,8 @@ An typespec consists mainly in `ISpec` protocol that has two methods: `read` and
 ;; => [8 #user.Point{:x 1, :y 2}]
 ----
 
-Moreover, knowing how it can be done in low level way, you can simplify this
-concrete step using *compose* function. The compose function is a type spec
+You can also simplify the implementation through composition of existing typespecs 
+using the *compose* function. The compose function is a type spec
 constructor that helps map an indexed type spec to specific user defined type.
 
 Let see how the previous code can be simplified in much less boilerplate code:
