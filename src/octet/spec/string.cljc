@@ -164,3 +164,32 @@
         (buffer/write-int buff pos length)
         (buffer/write-bytes buff (+ pos 4) length input)
         (+ length 4)))))
+
+(def ^{:doc "Arbitrary length cstring (null-terminated string) type spec."}
+  cstring
+  (reify
+    #?@(:clj
+        [clojure.lang.IFn
+         (invoke [s] s)]
+        :cljs
+        [cljs.core/IFn
+         (-invoke [s] s)])
+
+    spec/ISpecDynamicSize
+    (size* [_ data]
+      (let [data (string->bytes data)]
+        (+ 1 (count data))))
+
+    spec/ISpec
+    (read [_ buff pos]
+      (loop [index pos acc []]
+        (let [b (buffer/read-byte buff index)]
+          (if (zero? b)
+            [(inc (count acc)) (bytes->string (byte-array acc) (count acc))]
+            (recur (inc index) (conj acc b))))))
+
+    (write [_ buff pos value]
+      (let [input (string->bytes (str value "\0"))
+            length (count input)]
+        (buffer/write-bytes buff pos length input)
+        length))))
