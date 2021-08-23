@@ -250,11 +250,11 @@
 
 (t/deftest spec-data-with-cstring-single
   (let [spec (buf/spec (buf/cstring))
-        buffer (buf/allocate 13)]
-    (buf/write! buffer ["hello world!"] spec)
+        buffer (buf/allocate 11)]
+    (buf/write! buffer ["1234567890"] spec)
     (let [[readed data] (buf/read* buffer spec)]
-        (t/is (= readed 13))
-        (t/is (= data  ["hello world!"])))))
+        (t/is (= readed 11))
+        (t/is (= data  ["1234567890"])))))
 
 (t/deftest spec-data-with-dynamic-types-single
   (let [spec (buf/spec (buf/string*))
@@ -272,13 +272,37 @@
       (t/is (= readed 18))
       (t/is (= data ["1234567890" 1000])))))
 
-(t/deftest spec-data-with-cstring-and-dynamic-types-combined
+(t/deftest spec-data-with-cstring-and-other-types-combined
   (let [spec (buf/spec (buf/cstring) (buf/int32))
         buffer (buf/allocate 40)]
-    (buf/write! buffer ["hello world!" 1000] spec)
+    (buf/write! buffer ["1234567890" 1000] spec)
     (let [[readed data] (buf/read* buffer spec)]
-      (t/is (= readed 17))
-      (t/is (= data  ["hello world!" 1000])))))
+      (t/is (= readed 15))
+      (t/is (= data  ["1234567890" 1000])))))
+
+(t/deftest spec-data-with-multi-cstring
+  (let [spec (buf/spec buf/cstring buf/cstring)
+        buffer (buf/allocate 40)]
+    (buf/write! buffer ["1234567890" "1234567890"] spec)
+    (let [[readed data] (buf/read* buffer spec)]
+      (t/is (= readed 22))
+      (t/is (= data  ["1234567890" "1234567890"])))))
+
+(t/deftest spec-data-with-types-and-cstring-combined
+  (let [spec (buf/spec buf/cstring buf/int32 buf/byte buf/cstring)
+        buffer (buf/allocate 40)]
+    (buf/write! buffer ["1234567890" 1000  1 "1234567890"] spec)
+    (let [[readed data] (buf/read* buffer spec)]
+      (t/is (= readed 27))
+      (t/is (= data  ["1234567890" 1000  1 "1234567890"])))))
+
+(t/deftest spec-data-with-multi-cstring-and-dynamic-types-combined
+  (let [spec (buf/spec (buf/int32) (buf/cstring) (buf/cstring) (buf/int32))
+        buffer (buf/allocate 40)]
+    (buf/write! buffer [9999 "12345" "67890" 1000] spec)
+    (let [[readed data] (buf/read* buffer spec)]
+      (t/is (= readed 20))
+      (t/is (= data  [9999 "12345" "67890" 1000])))))
 
 (t/deftest spec-data-with-indexed-ref-string-single
   (let [spec (buf/spec (buf/int32)

@@ -185,7 +185,7 @@
       (loop [index pos acc []]
         (let [b (buffer/read-byte buff index)]
           (if (zero? b)
-            [(+ index 1) (bytes->string (byte-array acc) index)]
+            [(inc (count acc)) (bytes->string (byte-array acc) (count acc))]
             (recur (inc index) (conj acc b))))))
 
     (write [_ buff pos value]
