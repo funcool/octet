@@ -248,6 +248,14 @@
                    :else
                    (t/is (= data data')))))))))))
 
+(t/deftest spec-data-with-cstring-single
+  (let [spec (buf/spec (buf/cstring))
+        buffer (buf/allocate 13)]
+    (buf/write! buffer ["hello world!"] spec)
+    (let [[readed data] (buf/read* buffer spec)]
+        (t/is (= readed 13))
+        (t/is (= data  ["hello world!"])))))
+
 (t/deftest spec-data-with-dynamic-types-single
   (let [spec (buf/spec (buf/string*))
         buffer (buf/allocate 20)]
@@ -263,6 +271,14 @@
     (let [[readed data] (buf/read* buffer spec)]
       (t/is (= readed 18))
       (t/is (= data ["1234567890" 1000])))))
+
+(t/deftest spec-data-with-cstring-and-dynamic-types-combined
+  (let [spec (buf/spec (buf/cstring) (buf/int32))
+        buffer (buf/allocate 40)]
+    (buf/write! buffer ["hello world!" 1000] spec)
+    (let [[readed data] (buf/read* buffer spec)]
+      (t/is (= readed 17))
+      (t/is (= data  ["hello world!" 1000])))))
 
 (t/deftest spec-data-with-indexed-ref-string-single
   (let [spec (buf/spec (buf/int32)
