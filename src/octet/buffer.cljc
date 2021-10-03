@@ -166,7 +166,7 @@
        (.get buff pos))
      (write-byte [buff pos value]
        (set-current-bytebuffer-byte-order! buff)
-       (.put buff pos value))
+       (.put buff pos (byte value)))
      (read-ubyte [buff pos]
        (set-current-bytebuffer-byte-order! buff)
        (let [val (.get buff pos)]
