@@ -72,10 +72,12 @@
   ISpecDynamicSize
   (size* [_ data]
     (reduce (fn [acc [field data]]
-              (let [type (field dict)]
+              (if-let [type (field dict)]
                 (if (satisfies? ISpecDynamicSize type)
                   (+ acc (size* type data))
-                  (+ acc (size type)))))
+                  (+ acc (size type)))
+                ; ignore vals that are not in spec
+                acc))
             0
             (into [] data)))
 
