@@ -137,7 +137,7 @@
      (read-ulong [buff pos]
        (set-current-bytebuffer-byte-order! buff)
        (let [val (.getLong buff pos)
-             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) (.array))]
          (bigint (BigInteger. 1 magnitude))))
      (write-ulong [buff pos value]
        (set-current-bytebuffer-byte-order! buff)
@@ -239,7 +239,7 @@
          (.setLong buff pos value)))
      (read-ulong [buff pos]
        (let [val (read-long buff pos)
-             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) (.array))]
          (bigint (BigInteger. 1 magnitude))))
      (write-ulong [buff pos value]
        (let [value (.longValue (bigint value))]
@@ -437,7 +437,7 @@
        (let [offset (.-byteOffset buff)
              buffer (.-buffer buff)]
          (js/Int8Array. buffer (+ offset pos) size)))
-     (write-bytes [buff pos size data]
+     (write-bytes [buff pos _size data]
        (doseq [i (range (.-length data))]
          (.setInt8 buff (+ pos i) (aget data i))))
 
@@ -471,8 +471,8 @@
   This function is defined as multimethod and you can
   extend it with your own bytebuffer implementations
   if you want or need it."
-  (fn [size & [{:keys [type impl] :or {type :heap
-                                       impl #?(:clj :nio :cljs :es6)}}]]
+  (fn [_size & [{:keys [type impl] :or {type :heap
+                                         impl #?(:clj :nio :cljs :es6)}}]]
     [type impl]))
 
 #?(:clj

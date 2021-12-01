@@ -89,7 +89,7 @@
          (js/Int8Array. buff)))
 
      (defn arraycopy
-       [^bytes input ^bytes output ^long length]
+       [^bytes input ^bytes output ^long _length]
        (reduce (fn [_ i]
                  (aset output i (aget input i)))
                nil

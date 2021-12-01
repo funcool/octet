@@ -23,8 +23,8 @@
 ;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 (ns octet.util
-  (:require [clojure.string :as str :refer [join]]
-            [octet.buffer :as bfr])
+  #?(:clj (:require [clojure.string :as str]
+                    [octet.buffer :as buffer]))
 
   #?(:clj (:import java.util.Arrays)))
 
@@ -34,9 +34,10 @@
      (def ~sym ~sym2)
      (alter-meta! (var ~sym) merge (dissoc (meta (var ~sym2)) :name))))
 
-(defn assoc-ordered [a-map key val & rest]
+(defn assoc-ordered
   "assoc into an array-map, keeping insertion order. The normal clojure
   assoc function switches to hash maps on maps > size 10 and loses insertion order"
+  [a-map key val & rest]
   (let [kvs (interleave (concat (keys a-map) (list key))
                         (concat (vals a-map) (list val)))
         ret (apply array-map kvs)]
@@ -55,7 +56,7 @@
            fh (fn [_ b]
              (let [h (Integer/toHexString (bit-and b 0xFF))]
                (if (<= 0 b 15) (str "0" h) h)))]
-       (join (reductions fh (fh 0 f) r)))))
+       (str/join (reductions fh (fh 0 f) r)))))
 
 #?(:clj
    (defn byte->ascii
@@ -64,40 +65,44 @@
      (if (<= 32 (bit-and byte 0xFF) 127) (char byte) \.)))
 
 #?(:clj
-   (defn- bytes->ascii [^bytes bytes]
+   (defn- bytes->ascii
      "returns a 16-per-line printable ascii view of the bytes"
+     [^bytes bytes]
      (->> bytes
           (map byte->ascii)
           (partition 16 16 "                ")
-          (map join))))
+          (map str/join))))
 
 #?(:clj
-   (defn- format-hex-line [^String hex-line]
+   (defn- format-hex-line
      "formats a 'line' (32 hex chars) of hex output"
+     [^String hex-line]
      (->> hex-line
           (partition-all 4)
-          (map join)
+          (map str/join)
           (split-at 4)
-          (map #(join " " %))
-          (join "  "))))
+          (map #(str/join " " %))
+          (str/join "  "))))
 
 #?(:clj
-   (defn- bytes->hexdump [^bytes bytes]
+   (defn- bytes->hexdump
      "formats a byte array to a sequence of formatted hex lines"
+     [^bytes bytes]
      (->> bytes
-          bytes->hex
-          (partition 32 32 (join (repeat 32 " ")))
+          (bytes->hex)
+          (partition 32 32 (str/join (repeat 32 " ")))
           (map format-hex-line))))
 
 #?(:clj
-   (defn- copy-bytes [bytes offset size]
+   (defn- copy-bytes
      "utility function - copy bytes, return new byte array"
+     [bytes offset size]
      (let [size (if (nil? size) (alength bytes) size)]
        (if (and (= 0 offset) (= (alength bytes) size))
          bytes                                                 ; short circuit
-         (java.util.Arrays/copyOfRange bytes
-                                       offset
-                                       (+ offset size))))))
+         (Arrays/copyOfRange bytes
+                             offset
+                             (+ offset size))))))
 
 #?(:clj
    (defn get-dump-bytes
@@ -105,10 +110,10 @@
      size size for nio ByteBuffer, netty ByteBuf, byte array, and String"
      [x offset size]
      (cond
-       (and (satisfies? octet.buffer/IBufferBytes x)
-            (satisfies? octet.buffer/IBufferLimit x))
-       (let [size (if (nil? size) (octet.buffer/get-capacity x) size)]
-         (octet.buffer/read-bytes x offset size))
+       (and (satisfies? buffer/IBufferBytes x)
+            (satisfies? buffer/IBufferLimit x))
+       (let [size (if (nil? size) (buffer/get-capacity x) size)]
+         (buffer/read-bytes x offset size))
 
        (instance? (type (byte-array 0)) x)
        (copy-bytes x offset size)
@@ -156,9 +161,9 @@
            ascii (bytes->ascii bytes)
            offs (map #(format "%08x" %)
                      (range offset (+ offset size 16) 16))
-           header (str " " (join (repeat 68 "-")))
+           header (str " " (str/join (repeat 68 "-")))
            border (if frame "|" "")
            lines (map #(str border %1 ": " %2 "  " %3 border) offs dump ascii)
            lines (if frame (concat [header] lines [header]) lines)
-           result (join \newline lines)]
+           result (str/join \newline lines)]
        (if print (println result) result))))
