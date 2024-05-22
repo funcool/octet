@@ -96,18 +96,20 @@
 #?(:clj
    (defn- copy-bytes
      "utility function - copy bytes, return new byte array"
-     [bytes offset size]
+     ^bytes
+     [^bytes bytes ^long offset ^long size]
      (let [size (if (nil? size) (alength bytes) size)]
        (if (and (= 0 offset) (= (alength bytes) size))
          bytes                                                 ; short circuit
          (Arrays/copyOfRange bytes
                              offset
-                             (+ offset size))))))
+                             ^long (+ offset size))))))
 
 #?(:clj
    (defn get-dump-bytes
      "utility function - return byte array from offset offset and with
      size size for nio ByteBuffer, netty ByteBuf, byte array, and String"
+     ^bytes
      [x offset size]
      (cond
        (and (satisfies? buffer/IBufferBytes x)
@@ -119,7 +121,7 @@
        (copy-bytes x offset size)
 
        (instance? String x)
-       (copy-bytes (.getBytes x) offset size))))
+       (copy-bytes (.getBytes ^String x) offset size))))
 
 
 ; Example usage of hex-dump

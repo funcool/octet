@@ -33,7 +33,7 @@
 (defn zeropad-count
   "Given a byte array, returns a number of bytes
   allocated with zero padding (zero byte)."
-  [input]
+  [^bytes input]
   (let [mark (byte 0)]
     (reduce (fn [sum index]
               (let [value (aget input index)]
