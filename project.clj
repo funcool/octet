@@ -24,7 +24,7 @@
   :profiles
   {:dev {:dependencies [[org.clojure/tools.namespace "0.2.11"]]
          :aliases {"test-all" ["with-profile" "dev,1.8:dev,1.7:dev" "test"]}
-         :global-vars {*warn-on-reflection* false}
+         :global-vars {*warn-on-reflection* true}
          :plugins [[funcool/codeina "0.5.0"]
                    [lein-ancient "0.6.15"]]}
    :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
