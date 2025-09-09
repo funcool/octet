@@ -39,6 +39,7 @@
 (util/defalias spec spec/spec)
 (util/defalias size spec/size)
 (util/defalias repeat spec/repeat)
+(util/defalias cstring string-spec/cstring)
 (util/defalias string string-spec/string)
 (util/defalias string* string-spec/string*)
 (util/defalias vector* coll-spec/vector*)
