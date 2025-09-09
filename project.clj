@@ -3,9 +3,9 @@
   :url "https://github.com/funcool/octet"
   :license {:name "Public Domain"
             :url "http://unlicense.org/"}
-  :dependencies [[org.clojure/clojure "1.9.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.10.773" :scope "provided"]
-                 [io.netty/netty-buffer "4.1.52.Final"]]
+  :dependencies [[org.clojure/clojure "1.12.2" :scope "provided"]
+                 [org.clojure/clojurescript "1.12.42" :scope "provided"]
+                 [io.netty/netty-buffer "4.2.6.Final"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
@@ -29,5 +29,3 @@
                    [lein-ancient "0.6.15"]]}
    :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
    :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}})
-
-
