@@ -33,7 +33,7 @@
 (defn zeropad-count
   "Given a byte array, returns a number of bytes
   allocated with zero padding (zero byte)."
-  [input]
+  [^bytes input]
   (let [mark (byte 0)]
     (reduce (fn [sum index]
               (let [value (aget input index)]
@@ -89,7 +89,7 @@
          (js/Int8Array. buff)))
 
      (defn arraycopy
-       [^bytes input ^bytes output ^long length]
+       [^bytes input ^bytes output ^long _length]
        (reduce (fn [_ i]
                  (aset output i (aget input i)))
                nil

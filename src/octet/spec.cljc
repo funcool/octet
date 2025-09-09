@@ -31,8 +31,7 @@
 
   For more examples see the `spec` function docstring."
   (:refer-clojure :exclude [type read float double long short byte bytes repeat])
-  (:require [octet.buffer :as buffer]
-            [octet.util :refer [assoc-ordered]]))
+  (:require [octet.util :refer [assoc-ordered]]))
 
 ;; --- Protocols
 
@@ -72,10 +71,12 @@
   ISpecDynamicSize
   (size* [_ data]
     (reduce (fn [acc [field data]]
-              (let [type (field dict)]
+              (if-let [type (field dict)]
                 (if (satisfies? ISpecDynamicSize type)
                   (+ acc (size* type data))
-                  (+ acc (size type)))))
+                  (+ acc (size type)))
+                ; ignore vals that are not in spec
+                acc))
             0
             (into [] data)))
 
@@ -240,7 +241,7 @@
 
     ISpecDynamicSize
     (size* [_ data]
-      (reduce (fn [acc [index data]]
+      (reduce (fn [acc [_index data]]
                 (if (satisfies? ISpecSize type)
                   (+ acc (size type))
                   (+ acc (size* type data))))

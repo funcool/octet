@@ -72,25 +72,25 @@
 #?(:clj
    (t/deftest allocate-heap-nio-buffer
      (let [buffer (buf/allocate 16)]
-       (t/is (not (.isDirect buffer)))
+       (t/is (not (.isDirect ^ByteBuffer buffer)))
        (t/is (instance? ByteBuffer buffer)))))
 
 #?(:clj
    (t/deftest allocate-direct-nio-buffer
      (let [buffer (buf/allocate 16 {:type :direct})]
-       (t/is (.isDirect buffer))
+       (t/is (.isDirect ^ByteBuffer buffer))
        (t/is (instance? ByteBuffer buffer)))))
 
 #?(:clj
    (t/deftest allocate-heap-netty-buffer
      (let [buffer (buf/allocate 16 {:type :heap :impl :netty})]
-       (t/is (not (.isDirect buffer)))
+       (t/is (not (.isDirect ^ByteBuf buffer)))
        (t/is (instance? ByteBuf buffer)))))
 
 #?(:clj
    (t/deftest allocate-direct-netty-buffer
      (let [buffer (buf/allocate 16 {:type :direct :impl :netty})]
-       (t/is (.isDirect buffer))
+       (t/is (.isDirect ^ByteBuf buffer))
        (t/is (instance? ByteBuf buffer)))))
 
 #?(:clj
@@ -99,7 +99,7 @@
            buffer (buf/allocate 12)
            data [500]]
        (t/is (= (buf/write! buffer data spec {:offset 3}) 4))
-       (t/is (= (.getInt buffer 3) 500)))))
+       (t/is (= (.getInt ^ByteBuffer buffer 3) 500)))))
 
 #?(:cljs
    (t/deftest allocate-direct-es6-buffer

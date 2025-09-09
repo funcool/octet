@@ -88,7 +88,7 @@
 
 #?(:clj
    (defn- set-current-bytebuffer-byte-order!
-     [buff]
+     [^ByteBuffer buff]
      (case *byte-order*
        :big-endian (.order buff ByteOrder/BIG_ENDIAN)
        :little-endian (.order buff ByteOrder/LITTLE_ENDIAN))))
@@ -137,7 +137,7 @@
      (read-ulong [buff pos]
        (set-current-bytebuffer-byte-order! buff)
        (let [val (.getLong buff pos)
-             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) (.array))]
          (bigint (BigInteger. 1 magnitude))))
      (write-ulong [buff pos value]
        (set-current-bytebuffer-byte-order! buff)
@@ -163,30 +163,30 @@
      IBufferByte
      (read-byte [buff pos]
        (set-current-bytebuffer-byte-order! buff)
-       (.get buff pos))
+       (.get buff ^int pos))
      (write-byte [buff pos value]
        (set-current-bytebuffer-byte-order! buff)
-       (.put buff pos value))
+       (.put buff ^int pos (byte value)))
      (read-ubyte [buff pos]
        (set-current-bytebuffer-byte-order! buff)
-       (let [val (.get buff pos)]
+       (let [val (.get buff ^int pos)]
          (bit-and 0xFF (short val))))
      (write-ubyte [buff pos value]
        (set-current-bytebuffer-byte-order! buff)
        (let [value (.byteValue (Short. (short value)))]
-         (.put buff pos value)))
+         (.put buff ^int pos value)))
 
      IBufferBytes
      (read-bytes [buff pos size]
        (let [tmpbuf (byte-array size)
              oldpos (.position buff)]
-         (.position buff pos)
+         (.position buff ^int pos)
          (.get buff tmpbuf)
          (.position buff oldpos)
          tmpbuf))
      (write-bytes [buff pos size data]
        (let [oldpos (.position buff)]
-         (.position buff pos)
+         (.position buff ^int pos)
          (.put buff data 0 size)
          (.position buff oldpos)))
 
@@ -239,7 +239,7 @@
          (.setLong buff pos value)))
      (read-ulong [buff pos]
        (let [val (read-long buff pos)
-             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) .array)]
+             ^bytes magnitude (-> (ByteBuffer/allocate 8) (.putLong val) (.array))]
          (bigint (BigInteger. 1 magnitude))))
      (write-ulong [buff pos value]
        (let [value (.longValue (bigint value))]
@@ -280,10 +280,10 @@
      IBufferBytes
      (read-bytes [buff pos size]
        (let [tmpbuf (byte-array size)]
-         (.getBytes buff pos tmpbuf)
+         (.getBytes buff ^int pos tmpbuf)
          tmpbuf))
      (write-bytes [buff pos size data]
-       (.setBytes buff pos data 0 size))
+       (.setBytes buff ^int pos ^bytes data 0 ^int size))
 
      IBufferLimit
      (get-capacity [buff]
@@ -437,7 +437,7 @@
        (let [offset (.-byteOffset buff)
              buffer (.-buffer buff)]
          (js/Int8Array. buffer (+ offset pos) size)))
-     (write-bytes [buff pos size data]
+     (write-bytes [buff pos _size data]
        (doseq [i (range (.-length data))]
          (.setInt8 buff (+ pos i) (aget data i))))
 
@@ -471,8 +471,8 @@
   This function is defined as multimethod and you can
   extend it with your own bytebuffer implementations
   if you want or need it."
-  (fn [size & [{:keys [type impl] :or {type :heap
-                                       impl #?(:clj :nio :cljs :es6)}}]]
+  (fn [_size & [{:keys [type impl] :or {type :heap
+                                         impl #?(:clj :nio :cljs :es6)}}]]
     [type impl]))
 
 #?(:clj
@@ -488,12 +488,12 @@
 #?(:clj
    (defmethod allocate [:heap :netty]
      [size & _]
-     (.heapBuffer allocator size)))
+     (.heapBuffer ^ByteBufAllocator allocator size)))
 
 #?(:clj
    (defmethod allocate [:direct :netty]
      [size & _]
-     (.directBuffer allocator size)))
+     (.directBuffer ^ByteBufAllocator allocator size)))
 
 #?(:cljs
    (defmethod allocate [:heap :es6]

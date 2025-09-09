@@ -24,16 +24,16 @@
 
 (ns octet.core
   (:refer-clojure :exclude [read byte float double short long bytes into repeat])
-  (:require [octet.spec :as spec]
+  (:require [octet.buffer :as buffer]
+            [octet.spec :as spec]
+            [octet.spec.basic :as basic-spec]
+            [octet.spec.collections :as coll-spec]
+            [octet.spec.reference :as ref-spec]
+            [octet.spec.string :as string-spec]
             #?(:cljs
                [octet.util :as util :include-macros true]
                :clj
-               [octet.util :as util])
-            [octet.spec.basic :as basic-spec]
-            [octet.spec.string :as string-spec]
-            [octet.spec.collections :as coll-spec]
-            [octet.spec.reference :as ref-spec]
-            [octet.buffer :as buffer]))
+               [octet.util :as util])))
 
 (util/defalias compose spec/compose)
 (util/defalias spec spec/spec)
