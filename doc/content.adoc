@@ -59,7 +59,7 @@ Two most common composition types are: associative and indexed.
 
 The difference of indexed and associative compositions is the input and output. In
 associative composition the expected input and output is a map. And in indexed
-composition, the expected input and input is a vector. Internally it represents
+composition, the expected input and output is a vector. Internally it represents
 the same value in bytes.
 
 Let start defining one:
